@@ -1001,6 +1001,117 @@
       ]
     },
     {
+      "name": "outline",
+      "verbs": [
+        {
+          "name": "add",
+          "description": "Add a line below the node (where: below, above, child) and edit it; written at once",
+          "kind": "application",
+          "params": {
+            "where": {
+              "type": "string",
+              "enum": [
+                "below",
+                "above",
+                "child"
+              ]
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "collapse",
+          "description": "Collapse the node, or step onto its parent when it is closed",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "delete",
+          "description": "Delete the node and its children; u brings them back",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "edit",
+          "description": "Edit the node's line; typing is written after a pause and when the line is left",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "expand",
+          "description": "Expand the node, or step onto its first child when it is open",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "fold",
+          "description": "Expand or collapse the node",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "indent",
+          "description": "Nest the node under the node above it",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "leave",
+          "description": "Leave the line: it is written, never discarded",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "move",
+          "description": "Swap the node with its next (delta 1) or previous (-1) sibling",
+          "kind": "application",
+          "params": {
+            "delta": {
+              "type": "integer",
+              "required": true
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "next",
+          "description": "Write the line and start a new one below it",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "outdent",
+          "description": "Move the node out to follow its parent",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "paste",
+          "description": "Add pasted lines below the node, nested by their indent",
+          "kind": "application",
+          "params": {
+            "text": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "redo",
+          "description": "Redo the last undone change",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "undo",
+          "description": "Undo the last change; the undo is written like any change",
+          "kind": "application",
+          "result": "JSON value"
+        }
+      ]
+    },
+    {
       "name": "page",
       "verbs": [
         {
@@ -2673,6 +2784,54 @@
       "when": "input"
     },
     {
+      "noun": "outline-line",
+      "mode": "insert",
+      "pattern": "paste",
+      "request": {
+        "verb": "paste",
+        "noun": "outline"
+      },
+      "from": {
+        "text": "text"
+      }
+    },
+    {
+      "noun": "outline-line",
+      "mode": "insert",
+      "keys": "enter",
+      "request": {
+        "verb": "next",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline-line",
+      "mode": "insert",
+      "keys": "esc",
+      "request": {
+        "verb": "leave",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline-line",
+      "mode": "insert",
+      "keys": "shift+tab",
+      "request": {
+        "verb": "outdent",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline-line",
+      "mode": "insert",
+      "keys": "tab",
+      "request": {
+        "verb": "indent",
+        "noun": "outline"
+      }
+    },
+    {
       "noun": "terminal",
       "mode": "leader_pending",
       "pattern": "paste",
@@ -3527,6 +3686,186 @@
       "request": {
         "verb": "pop",
         "noun": "modal"
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "pattern": "paste",
+      "request": {
+        "verb": "paste",
+        "noun": "outline"
+      },
+      "from": {
+        "text": "text"
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "J",
+      "request": {
+        "verb": "move",
+        "noun": "outline",
+        "args": {
+          "delta": 1
+        }
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "K",
+      "request": {
+        "verb": "move",
+        "noun": "outline",
+        "args": {
+          "delta": -1
+        }
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "O",
+      "request": {
+        "verb": "add",
+        "noun": "outline",
+        "args": {
+          "where": "above"
+        }
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "a",
+      "request": {
+        "verb": "add",
+        "noun": "outline",
+        "args": {
+          "where": "child"
+        }
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "ctrl+r",
+      "request": {
+        "verb": "redo",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "d d",
+      "request": {
+        "verb": "delete",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "d esc",
+      "request": {
+        "verb": "leave",
+        "noun": "mode"
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "h",
+      "request": {
+        "verb": "collapse",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "i",
+      "request": {
+        "verb": "edit",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "l",
+      "request": {
+        "verb": "expand",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "left",
+      "request": {
+        "verb": "collapse",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "o",
+      "request": {
+        "verb": "add",
+        "noun": "outline",
+        "args": {
+          "where": "below"
+        }
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "right",
+      "request": {
+        "verb": "expand",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "shift+tab",
+      "request": {
+        "verb": "outdent",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "tab",
+      "request": {
+        "verb": "indent",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline",
+      "mode": "normal",
+      "keys": "u",
+      "request": {
+        "verb": "undo",
+        "noun": "outline"
+      }
+    },
+    {
+      "noun": "outline-row",
+      "mode": "normal",
+      "keys": "enter",
+      "request": {
+        "verb": "fold",
+        "noun": "outline"
       }
     },
     {
