@@ -1,0 +1,3709 @@
+{
+  "schema": 1,
+  "name": "o-qbt",
+  "version": "0.1.0",
+  "state": "app.state",
+  "nouns": [
+    {
+      "name": "app",
+      "verbs": [
+        {
+          "name": "info",
+          "description": "the credentials test: log in once and read the version, Web API version, build, speeds and free disk; changes nothing",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "prefs",
+          "description": "selected preferences: save and temp paths, max active downloads/uploads/torrents, dl/up limits (bytes/s)",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "quit",
+          "description": "Exit the application",
+          "kind": "interaction",
+          "result": "boolean"
+        },
+        {
+          "name": "state",
+          "description": "every list's rows in one call, JSON Lines {noun, id, label} for torrent and category (the catalog's state)",
+          "kind": "application",
+          "result": "JSON value"
+        }
+      ]
+    },
+    {
+      "name": "bindings",
+      "verbs": [
+        {
+          "name": "help",
+          "description": "Open the keys the focus answers to, with the operation each runs and its description",
+          "kind": "interaction",
+          "result": "help row[]"
+        },
+        {
+          "name": "list",
+          "description": "List the rows the current stack and mode answer to, pending modes included",
+          "kind": "interaction",
+          "result": "binding[]"
+        },
+        {
+          "name": "load",
+          "description": "Install binding rows from a JSON file: [{noun|instance, mode, keys|pattern, request|null, from, when}]",
+          "kind": "interaction",
+          "params": {
+            "path": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "binding[]"
+        }
+      ]
+    },
+    {
+      "name": "category",
+      "verbs": [
+        {
+          "name": "list",
+          "description": "the category rows: {id: category/NAME, label: \"NAME  SAVE_PATH\", data: {name, savePath}}",
+          "kind": "application",
+          "result": "JSON value",
+          "rows": "category"
+        }
+      ]
+    },
+    {
+      "name": "config",
+      "verbs": [
+        {
+          "name": "init",
+          "description": "write the settings file (url, user admin, empty pass, volume, ssh), mode 600, unless it exists; prints its path",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "set",
+          "description": "set KEY to VALUE; pass is never taken from the command line: it prompts with echo off, or reads one line with --stdin",
+          "kind": "application",
+          "params": {
+            "key": {
+              "type": "string",
+              "required": true,
+              "description": "the setting",
+              "enum": [
+                "url",
+                "user",
+                "pass",
+                "volume",
+                "ssh"
+              ]
+            },
+            "stdin": {
+              "type": "boolean",
+              "description": "read the value from one line of stdin"
+            },
+            "value": {
+              "type": "string",
+              "description": "the new value (not for pass)"
+            }
+          },
+          "result": "JSON value",
+          "positional": [
+            "key",
+            "value"
+          ]
+        },
+        {
+          "name": "show",
+          "description": "the effective settings and the environment overrides; never the password, only whether one is set",
+          "kind": "application",
+          "result": "JSON value"
+        }
+      ]
+    },
+    {
+      "name": "confirm",
+      "verbs": [
+        {
+          "name": "accept",
+          "description": "Run the request the open confirm modal holds and close it",
+          "kind": "interaction",
+          "result": "JSON value"
+        },
+        {
+          "name": "set",
+          "description": "Add or remove the confirm prompt of an operation ({{id}}, {{noun}}, {{label}} and {{\u003carg\u003e}} expand; a label argument wins over the instance label); an empty prompt removes it",
+          "kind": "interaction",
+          "params": {
+            "operation": {
+              "type": "string",
+              "required": true,
+              "description": "noun.verb"
+            },
+            "prompt": {
+              "type": "string"
+            }
+          },
+          "result": "operation"
+        }
+      ]
+    },
+    {
+      "name": "context",
+      "verbs": [
+        {
+          "name": "select",
+          "description": "Focus an instance by id, or a nested path; omit input to leave text editing",
+          "kind": "interaction",
+          "params": {
+            "input": {
+              "type": "string"
+            },
+            "instance": {
+              "type": "string",
+              "description": "Instance ID: an input, list, row, page or modal body"
+            },
+            "path": {
+              "type": "string",
+              "description": "JSON array of instance IDs, outermost first, beginning with app (when instance is omitted)"
+            }
+          },
+          "result": "context"
+        }
+      ]
+    },
+    {
+      "name": "count",
+      "verbs": [
+        {
+          "name": "append",
+          "description": "Append a digit to the pending count",
+          "kind": "interaction",
+          "params": {
+            "digit": {
+              "type": "integer",
+              "required": true
+            }
+          },
+          "result": "count"
+        }
+      ]
+    },
+    {
+      "name": "focus",
+      "verbs": [
+        {
+          "name": "next",
+          "description": "Move the focus to the next focus stop (or region) in drawing order, wrapping, landing on its remembered child",
+          "kind": "interaction",
+          "params": {
+            "scope": {
+              "type": "string",
+              "description": "stop (default): component to component; region: panel to panel"
+            },
+            "steps": {
+              "type": "integer",
+              "description": "How many stops or regions to move (the count; default 1)"
+            }
+          },
+          "result": "context"
+        },
+        {
+          "name": "previous",
+          "description": "Move the focus to the previous focus stop (or region) in drawing order, wrapping, landing on its remembered child",
+          "kind": "interaction",
+          "params": {
+            "scope": {
+              "type": "string",
+              "description": "stop (default): component to component; region: panel to panel"
+            },
+            "steps": {
+              "type": "integer",
+              "description": "How many stops or regions to move (the count; default 1)"
+            }
+          },
+          "result": "context"
+        },
+        {
+          "name": "set",
+          "description": "Focus an instance; the one way handlers move focus",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "context"
+        }
+      ]
+    },
+    {
+      "name": "guard",
+      "verbs": [
+        {
+          "name": "check",
+          "description": "the monitor step: df the volume over ssh; pause every torrent once free space is more than --limit below the baseline, write the marker; one line to guard.log",
+          "kind": "application",
+          "params": {
+            "limit": {
+              "type": "string",
+              "description": "how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "install",
+          "description": "write ~/Library/LaunchAgents/com.unixsuperhero.o-qbt-guard.plist (o-qbt guard check every 300 s and at load), lint it, bootstrap it in gui/UID; idempotent",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "log",
+          "description": "the last --tail N lines of guard.log (default 20)",
+          "kind": "application",
+          "params": {
+            "tail": {
+              "type": "integer",
+              "description": "how many lines (default 20)"
+            }
+          },
+          "result": "JSON value",
+          "positional": [
+            "tail"
+          ]
+        },
+        {
+          "name": "rebase",
+          "description": "store the current free space as the baseline (or --bytes N) and clear the marker",
+          "kind": "application",
+          "params": {
+            "bytes": {
+              "type": "integer",
+              "description": "the baseline in bytes instead of the current free space"
+            },
+            "limit": {
+              "type": "string",
+              "description": "how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "resume",
+          "description": "resume every torrent and clear the marker",
+          "kind": "application",
+          "params": {
+            "limit": {
+              "type": "string",
+              "description": "how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "status",
+          "description": "the launchd agent, the last guard.log line, free space against the baseline and limit, the marker",
+          "kind": "application",
+          "params": {
+            "limit": {
+              "type": "string",
+              "description": "how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "uninstall",
+          "description": "bootout the agent and remove its plist; the baseline, marker and log stay",
+          "kind": "application",
+          "result": "JSON value"
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "verbs": [
+        {
+          "name": "list",
+          "description": "List the last executed requests, oldest first, with their context, source and result",
+          "kind": "interaction",
+          "params": {
+            "last": {
+              "type": "integer",
+              "description": "How many entries (default 50, 0 for all)"
+            }
+          },
+          "result": "history[]"
+        },
+        {
+          "name": "repeat",
+          "description": "Dot-repeat: run the last repeatable change again at the current focus, its arguments kept; steps replaces its count",
+          "kind": "interaction",
+          "params": {
+            "steps": {
+              "type": "integer",
+              "description": "Count replacing the recorded one; 0 keeps it"
+            }
+          },
+          "result": "JSON value"
+        }
+      ]
+    },
+    {
+      "name": "input",
+      "verbs": [
+        {
+          "name": "begin",
+          "description": "Enter insert mode at insert/append/first/end/below/above",
+          "kind": "interaction",
+          "params": {
+            "position": {
+              "type": "string"
+            }
+          },
+          "result": "input state"
+        },
+        {
+          "name": "cancel",
+          "description": "Cancel the pending count, operator, prefix or register of the focused instance; a visual selection returns to normal",
+          "kind": "interaction",
+          "result": "mode"
+        },
+        {
+          "name": "delete",
+          "description": "Delete forward/backward runes without crossing a normal-mode line",
+          "kind": "interaction",
+          "params": {
+            "direction": {
+              "type": "string"
+            },
+            "steps": {
+              "type": "integer"
+            }
+          },
+          "result": "input state",
+          "repeatable": true
+        },
+        {
+          "name": "focus",
+          "description": "Focus a registered input",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "context"
+        },
+        {
+          "name": "insert",
+          "description": "Insert literal text at the rune cursor",
+          "kind": "interaction",
+          "params": {
+            "text": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "input state",
+          "repeatable": true
+        },
+        {
+          "name": "kill",
+          "description": "Kill preceding WORD/path component or line into shared yank history",
+          "kind": "interaction",
+          "params": {
+            "motion": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "editor state",
+          "repeatable": true
+        },
+        {
+          "name": "move",
+          "description": "Move by left/right/up/down, Vim word-forward/backward/end, Readline word-next/previous, line-start/end, first-line/last-line",
+          "kind": "interaction",
+          "params": {
+            "line": {
+              "type": "integer"
+            },
+            "motion": {
+              "type": "string",
+              "required": true
+            },
+            "steps": {
+              "type": "integer"
+            }
+          },
+          "result": "input state"
+        },
+        {
+          "name": "operator",
+          "description": "Yank, delete, or change a selection, whole lines, or an existing motion",
+          "kind": "interaction",
+          "params": {
+            "line": {
+              "type": "integer"
+            },
+            "motion": {
+              "type": "string"
+            },
+            "operator": {
+              "type": "string",
+              "required": true
+            },
+            "register": {
+              "type": "string"
+            },
+            "steps": {
+              "type": "integer"
+            }
+          },
+          "result": "editor state",
+          "repeatable": true
+        },
+        {
+          "name": "paste",
+          "description": "Paste a shared register preserving its shape; literal inserts at cursor",
+          "kind": "interaction",
+          "params": {
+            "before": {
+              "type": "boolean"
+            },
+            "literal": {
+              "type": "boolean"
+            },
+            "register": {
+              "type": "string"
+            },
+            "steps": {
+              "type": "integer"
+            }
+          },
+          "result": "editor state",
+          "repeatable": true
+        },
+        {
+          "name": "redo",
+          "description": "Redo changes; branch is a zero-based child index for the first step",
+          "kind": "interaction",
+          "params": {
+            "branch": {
+              "type": "integer"
+            },
+            "steps": {
+              "type": "integer"
+            }
+          },
+          "result": "input state"
+        },
+        {
+          "name": "replace",
+          "description": "Replace a half-open rune range",
+          "kind": "interaction",
+          "params": {
+            "end": {
+              "type": "integer",
+              "required": true
+            },
+            "start": {
+              "type": "integer",
+              "required": true
+            },
+            "text": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "input state",
+          "repeatable": true
+        },
+        {
+          "name": "select",
+          "description": "Start or toggle character, line, or block visual selection",
+          "kind": "interaction",
+          "params": {
+            "shape": {
+              "type": "string"
+            }
+          },
+          "result": "editor state"
+        },
+        {
+          "name": "undo",
+          "description": "Undo changes in this input",
+          "kind": "interaction",
+          "params": {
+            "steps": {
+              "type": "integer"
+            }
+          },
+          "result": "input state"
+        },
+        {
+          "name": "yank",
+          "description": "Yank visual selection or whole current lines",
+          "kind": "interaction",
+          "params": {
+            "register": {
+              "type": "string"
+            },
+            "steps": {
+              "type": "integer"
+            }
+          },
+          "result": "editor state"
+        }
+      ]
+    },
+    {
+      "name": "instances",
+      "verbs": [
+        {
+          "name": "query",
+          "description": "List the instances matching every predicate, in tree order: where is [[name, arg], ...] with noun, id, kind, within, child-of, focusable, region, state, registered predicates, and [any|all|not, [...]]",
+          "kind": "interaction",
+          "params": {
+            "where": {
+              "type": "array",
+              "description": "Predicates, ANDed"
+            }
+          },
+          "result": "instance[]"
+        }
+      ]
+    },
+    {
+      "name": "jobs",
+      "verbs": [
+        {
+          "name": "list",
+          "description": "List off-loop jobs: running ones and those finished since the last read (done, failed or cancelled, with the error)",
+          "kind": "interaction",
+          "result": "job[]"
+        }
+      ]
+    },
+    {
+      "name": "key",
+      "verbs": [
+        {
+          "name": "dispatch",
+          "description": "Dispatch one key through the stack walk; mode \"shadow\" resolves it in the runtime's own mode beneath a macro recording, so the key is recorded once, and another mode name resolves it in that mode",
+          "kind": "interaction",
+          "params": {
+            "key": {
+              "type": "string",
+              "required": true,
+              "description": "Key name as bindings spell it; for a paste, the bracketed text"
+            },
+            "mode": {
+              "type": "string",
+              "description": "Empty for the live walk, \"shadow\" or a mode name"
+            },
+            "paste": {
+              "type": "boolean",
+              "description": "The key is pasted text"
+            }
+          },
+          "result": "boolean"
+        },
+        {
+          "name": "ignore",
+          "description": "Consume a key without effect; the row a noun binds to swallow keys",
+          "kind": "interaction",
+          "result": "null"
+        }
+      ]
+    },
+    {
+      "name": "list",
+      "verbs": [
+        {
+          "name": "apply",
+          "description": "Run \u003crow noun\u003e.verb for every marked row (the selected row when none is marked), skipping and reporting rows whose noun lacks the verb",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string"
+            },
+            "verb": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "list state"
+        },
+        {
+          "name": "focus",
+          "description": "Focus a list and its selected row",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "list state"
+        },
+        {
+          "name": "mark",
+          "description": "Toggle the mark on a row (the selected row by default) for fan-out verbs",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string"
+            },
+            "item": {
+              "type": "string"
+            }
+          },
+          "result": "list state"
+        },
+        {
+          "name": "move",
+          "description": "Move the selection; past the edge, on to the next stop on the page",
+          "kind": "interaction",
+          "params": {
+            "delta": {
+              "type": "integer",
+              "required": true
+            },
+            "id": {
+              "type": "string"
+            }
+          },
+          "result": "list state"
+        },
+        {
+          "name": "select",
+          "description": "Select a list item by stable ID without stealing focus",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string"
+            },
+            "item": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "list state"
+        }
+      ]
+    },
+    {
+      "name": "macro",
+      "verbs": [
+        {
+          "name": "append",
+          "description": "Append one key to the macro being recorded",
+          "kind": "interaction",
+          "params": {
+            "key": {
+              "type": "string",
+              "required": true,
+              "description": "Key name as bindings spell it; for a paste, the bracketed text"
+            },
+            "paste": {
+              "type": "boolean",
+              "description": "The key is pasted text"
+            }
+          },
+          "result": "macro state"
+        },
+        {
+          "name": "record",
+          "description": "Record one key: append it to the recording, then dispatch it in the shadowed mode (macro.append, then key.dispatch)",
+          "kind": "interaction",
+          "params": {
+            "key": {
+              "type": "string",
+              "required": true,
+              "description": "Key name as bindings spell it; for a paste, the bracketed text"
+            },
+            "paste": {
+              "type": "boolean",
+              "description": "The key is pasted text"
+            }
+          },
+          "result": "macro state"
+        },
+        {
+          "name": "replay",
+          "description": "Replay a register through application dispatch; @ repeats last macro",
+          "kind": "interaction",
+          "params": {
+            "register": {
+              "type": "string",
+              "required": true
+            },
+            "steps": {
+              "type": "integer"
+            }
+          },
+          "result": "macro state"
+        },
+        {
+          "name": "start",
+          "description": "Record application keys into a named register",
+          "kind": "interaction",
+          "params": {
+            "register": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "macro state"
+        },
+        {
+          "name": "stop",
+          "description": "Finish the current macro recording",
+          "kind": "interaction",
+          "result": "macro state"
+        }
+      ]
+    },
+    {
+      "name": "modal",
+      "verbs": [
+        {
+          "name": "pop",
+          "description": "Close the active modal and restore its parent",
+          "kind": "interaction",
+          "result": "context"
+        },
+        {
+          "name": "push",
+          "description": "Open a modal focused on a registered input",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "required": true
+            },
+            "input": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "context"
+        }
+      ]
+    },
+    {
+      "name": "mode",
+      "verbs": [
+        {
+          "name": "enter",
+          "description": "Enter a pending mode with a typed payload (op, count, opcount; prefix arms the sequence timer, request is what it runs)",
+          "kind": "interaction",
+          "params": {
+            "count": {
+              "type": "integer"
+            },
+            "mode": {
+              "type": "string",
+              "required": true
+            },
+            "op": {
+              "type": "string"
+            },
+            "opcount": {
+              "type": "integer"
+            },
+            "prefix": {
+              "type": "string",
+              "description": "Key sequence the mode holds; the timer runs request when no key follows"
+            },
+            "request": {
+              "type": "object",
+              "description": "Request run when the sequence times out"
+            }
+          },
+          "result": "mode"
+        },
+        {
+          "name": "leave",
+          "description": "Return from a pending mode to the mode it shadowed",
+          "kind": "interaction",
+          "result": "mode"
+        },
+        {
+          "name": "register",
+          "description": "Register an application-defined mode name; pending modes are exclusive and one-shot",
+          "kind": "interaction",
+          "params": {
+            "name": {
+              "type": "string",
+              "required": true
+            },
+            "pending": {
+              "type": "boolean"
+            }
+          },
+          "result": "mode"
+        },
+        {
+          "name": "set",
+          "description": "Set the global interaction mode (a registered mode) and clear any pending payload",
+          "kind": "interaction",
+          "params": {
+            "mode": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "mode"
+        }
+      ]
+    },
+    {
+      "name": "modes",
+      "verbs": [
+        {
+          "name": "list",
+          "description": "List registered interaction modes, pending modes included",
+          "kind": "interaction",
+          "result": "string[]"
+        }
+      ]
+    },
+    {
+      "name": "operations",
+      "verbs": [
+        {
+          "name": "list",
+          "description": "List registered verbs, nouns, kinds (interaction or application), confirm prompts and argument schemas",
+          "kind": "interaction",
+          "result": "operation[]"
+        }
+      ]
+    },
+    {
+      "name": "page",
+      "verbs": [
+        {
+          "name": "next",
+          "description": "Open the next page, wrapping in registration order",
+          "kind": "interaction",
+          "result": "context"
+        },
+        {
+          "name": "open",
+          "description": "Open a registered page",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "context"
+        },
+        {
+          "name": "previous",
+          "description": "Open the previous page, wrapping in registration order",
+          "kind": "interaction",
+          "result": "context"
+        }
+      ]
+    },
+    {
+      "name": "pages",
+      "verbs": [
+        {
+          "name": "list",
+          "description": "List pages in registration order",
+          "kind": "interaction",
+          "result": "page[]"
+        }
+      ]
+    },
+    {
+      "name": "register",
+      "verbs": [
+        {
+          "name": "get",
+          "description": "Inspect a shared register",
+          "kind": "interaction",
+          "params": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "result": "editor state"
+        },
+        {
+          "name": "select",
+          "description": "Select the register used by the next yank, delete, or paste",
+          "kind": "interaction",
+          "params": {
+            "name": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "editor state"
+        },
+        {
+          "name": "set",
+          "description": "Set a text register; uppercase appends, underscore discards",
+          "kind": "interaction",
+          "params": {
+            "name": {
+              "type": "string",
+              "required": true
+            },
+            "shape": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string",
+              "required": true
+            },
+            "width": {
+              "type": "integer"
+            }
+          },
+          "result": "editor state"
+        }
+      ]
+    },
+    {
+      "name": "request",
+      "verbs": [
+        {
+          "name": "run",
+          "description": "Execute the request stored in the mode payload",
+          "kind": "interaction",
+          "result": "JSON value"
+        }
+      ]
+    },
+    {
+      "name": "state",
+      "verbs": [
+        {
+          "name": "get",
+          "description": "Inspect public state using a JSON Pointer",
+          "kind": "interaction",
+          "params": {
+            "path": {
+              "type": "string"
+            }
+          },
+          "result": "JSON value"
+        }
+      ]
+    },
+    {
+      "name": "terminal",
+      "pin": "terminal",
+      "verbs": [
+        {
+          "name": "attach",
+          "description": "Focus a terminal: keys go to the pane until the leader detaches",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "description": "Terminal instance (defaults to the focused one)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "detach",
+          "description": "Return focus to the instance around the terminal; the pane keeps running (a CloseOnDetach terminal is removed, its stream released and the focus sent to its FocusOnClose target)",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "description": "Terminal instance (defaults to the focused one)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "paste",
+          "description": "Paste text into the pane, after forwarding any keys given (the leader, under it)",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "description": "Terminal instance (defaults to the focused one)"
+            },
+            "keys": {
+              "type": "string",
+              "description": "Space-separated key names forwarded before the text"
+            },
+            "text": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "send",
+          "description": "Forward key names, in order, to the pane",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "description": "Terminal instance (defaults to the focused one)"
+            },
+            "keys": {
+              "type": "string",
+              "required": true,
+              "description": "Space-separated key names, forwarded in order"
+            }
+          },
+          "result": "JSON value"
+        }
+      ]
+    },
+    {
+      "name": "torrent",
+      "verbs": [
+        {
+          "name": "delete",
+          "description": "remove --target HASH from qBittorrent; --files deletes its data too (asks first; --yes skips the question)",
+          "kind": "application",
+          "params": {
+            "files": {
+              "type": "boolean",
+              "description": "delete the downloaded data as well"
+            }
+          },
+          "result": "JSON value",
+          "confirm": "Delete torrent {{label}}?"
+        },
+        {
+          "name": "list",
+          "description": "the torrent rows: {id: hash, label: \"state  progress%  name\", data: {state, progress, size, dlspeed, eta, category, added_on, completed_on, save_path}}",
+          "kind": "application",
+          "result": "JSON value",
+          "rows": "torrent"
+        },
+        {
+          "name": "pause",
+          "description": "stop --target HASH or --all (torrents/stop, else v4's torrents/pause)",
+          "kind": "application",
+          "params": {
+            "all": {
+              "type": "boolean",
+              "description": "every torrent instead of --target HASH"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "recheck",
+          "description": "recheck --target HASH or --all",
+          "kind": "application",
+          "params": {
+            "all": {
+              "type": "boolean",
+              "description": "every torrent instead of --target HASH"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "resume",
+          "description": "start --target HASH or --all (torrents/start, else v4's torrents/resume)",
+          "kind": "application",
+          "params": {
+            "all": {
+              "type": "boolean",
+              "description": "every torrent instead of --target HASH"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "show",
+          "description": "one torrent's info and properties: --target HASH",
+          "kind": "application",
+          "result": "JSON value"
+        }
+      ]
+    },
+    {
+      "name": "transfer",
+      "verbs": [
+        {
+          "name": "info",
+          "description": "global speeds, session totals, limits, connection status, alternative limits on or off",
+          "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "limit",
+          "description": "set the global download and/or upload limit in bytes/s (0 = unlimited); prints transfer info",
+          "kind": "application",
+          "params": {
+            "dl": {
+              "type": "integer",
+              "description": "download limit, bytes/s (0 = unlimited)"
+            },
+            "up": {
+              "type": "integer",
+              "description": "upload limit, bytes/s (0 = unlimited)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "speed-limits-toggle",
+          "description": "switch the alternative speed limits on or off; prints transfer info",
+          "kind": "application",
+          "result": "JSON value"
+        }
+      ]
+    },
+    {
+      "name": "yank-history",
+      "verbs": [
+        {
+          "name": "move",
+          "description": "Move the yank-history selection",
+          "kind": "interaction",
+          "params": {
+            "steps": {
+              "type": "integer",
+              "required": true
+            }
+          },
+          "result": "yank history state"
+        },
+        {
+          "name": "open",
+          "description": "Select a previous application yank without inserting it",
+          "kind": "interaction",
+          "result": "yank history state"
+        },
+        {
+          "name": "select",
+          "description": "Make a history entry the unnamed register and restore origin focus",
+          "kind": "interaction",
+          "params": {
+            "index": {
+              "type": "integer"
+            }
+          },
+          "result": "yank history state"
+        }
+      ]
+    }
+  ],
+  "bindings": [
+    {
+      "noun": "confirm",
+      "pattern": "any",
+      "request": {
+        "verb": "ignore",
+        "noun": "key"
+      }
+    },
+    {
+      "noun": "confirm",
+      "keys": "enter",
+      "request": {
+        "verb": "accept",
+        "noun": "confirm"
+      }
+    },
+    {
+      "noun": "confirm",
+      "keys": "esc",
+      "request": {
+        "verb": "pop",
+        "noun": "modal"
+      }
+    },
+    {
+      "noun": "confirm",
+      "keys": "n",
+      "request": {
+        "verb": "pop",
+        "noun": "modal"
+      }
+    },
+    {
+      "noun": "confirm",
+      "keys": "y",
+      "request": {
+        "verb": "accept",
+        "noun": "confirm"
+      }
+    },
+    {
+      "noun": "yank-history",
+      "keys": "down",
+      "request": {
+        "verb": "move",
+        "noun": "yank-history",
+        "args": {
+          "steps": 1
+        }
+      }
+    },
+    {
+      "noun": "yank-history",
+      "keys": "enter",
+      "request": {
+        "verb": "select",
+        "noun": "yank-history"
+      }
+    },
+    {
+      "noun": "yank-history",
+      "keys": "esc",
+      "request": {
+        "verb": "pop",
+        "noun": "modal"
+      }
+    },
+    {
+      "noun": "yank-history",
+      "keys": "j",
+      "request": {
+        "verb": "move",
+        "noun": "yank-history",
+        "args": {
+          "steps": 1
+        }
+      }
+    },
+    {
+      "noun": "yank-history",
+      "keys": "k",
+      "request": {
+        "verb": "move",
+        "noun": "yank-history",
+        "args": {
+          "steps": -1
+        }
+      }
+    },
+    {
+      "noun": "yank-history",
+      "keys": "up",
+      "request": {
+        "verb": "move",
+        "noun": "yank-history",
+        "args": {
+          "steps": -1
+        }
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "count_pending",
+      "pattern": "digit",
+      "request": {
+        "verb": "append",
+        "noun": "count"
+      },
+      "from": {
+        "digit": "digit"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "count_pending",
+      "pattern": "any",
+      "request": {
+        "verb": "leave",
+        "noun": "mode"
+      },
+      "when": "no-input",
+      "replay": true
+    },
+    {
+      "noun": "app",
+      "mode": "count_pending",
+      "keys": "0",
+      "request": {
+        "verb": "append",
+        "noun": "count",
+        "args": {
+          "digit": 0
+        }
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "count_pending",
+      "pattern": "any",
+      "request": {
+        "verb": "leave",
+        "noun": "mode"
+      },
+      "replay": true
+    },
+    {
+      "noun": "editor",
+      "mode": "count_pending",
+      "keys": "esc",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "g_pending",
+      "pattern": "any",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "g_pending",
+      "keys": "g",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "first-line"
+        }
+      },
+      "from": {
+        "line": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "pattern": "printable",
+      "request": {
+        "verb": "insert",
+        "noun": "input"
+      },
+      "from": {
+        "text": "text"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "pattern": "paste",
+      "request": {
+        "verb": "insert",
+        "noun": "input"
+      },
+      "from": {
+        "text": "text"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "alt+b",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "word-previous"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "alt+f",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "word-next"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "backspace",
+      "request": {
+        "verb": "delete",
+        "noun": "input",
+        "args": {
+          "direction": "backward"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "ctrl+a",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "line-start"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "ctrl+b",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "left"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "ctrl+d",
+      "request": {
+        "verb": "delete",
+        "noun": "input"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "ctrl+e",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "line-end"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "ctrl+f",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "right"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "ctrl+h",
+      "request": {
+        "verb": "delete",
+        "noun": "input",
+        "args": {
+          "direction": "backward"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "ctrl+k",
+      "request": {
+        "verb": "kill",
+        "noun": "input",
+        "args": {
+          "motion": "line-end"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "ctrl+n",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "down"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "ctrl+p",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "up"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "ctrl+u",
+      "request": {
+        "verb": "kill",
+        "noun": "input",
+        "args": {
+          "motion": "line-start"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "ctrl+w",
+      "request": {
+        "verb": "kill",
+        "noun": "input",
+        "args": {
+          "motion": "word-backward"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "ctrl+y",
+      "request": {
+        "verb": "paste",
+        "noun": "input",
+        "args": {
+          "before": true,
+          "literal": true
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "delete",
+      "request": {
+        "verb": "delete",
+        "noun": "input"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "down",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "down"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "end",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "line-end"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "enter",
+      "request": {
+        "verb": "insert",
+        "noun": "input",
+        "args": {
+          "text": "\n"
+        }
+      },
+      "when": "multiline"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "esc",
+      "request": {
+        "verb": "set",
+        "noun": "mode",
+        "args": {
+          "mode": "normal"
+        }
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "home",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "line-start"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "left",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "left"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "right",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "right"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "space",
+      "request": {
+        "verb": "insert",
+        "noun": "input",
+        "args": {
+          "text": " "
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "insert",
+      "keys": "up",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "up"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "terminal",
+      "mode": "leader_pending",
+      "pattern": "paste",
+      "request": {
+        "verb": "paste",
+        "noun": "terminal"
+      },
+      "from": {
+        "keys": "prefix",
+        "text": "text"
+      }
+    },
+    {
+      "noun": "terminal",
+      "mode": "leader_pending",
+      "pattern": "any",
+      "request": {
+        "verb": "send",
+        "noun": "terminal"
+      },
+      "from": {
+        "keys": "prefix key"
+      }
+    },
+    {
+      "noun": "terminal",
+      "mode": "leader_pending",
+      "keys": "ctrl+a",
+      "request": {
+        "verb": "send",
+        "noun": "terminal",
+        "args": {
+          "keys": "ctrl+a"
+        }
+      }
+    },
+    {
+      "noun": "terminal",
+      "mode": "leader_pending",
+      "keys": "d",
+      "request": {
+        "verb": "detach",
+        "noun": "terminal"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "macro_pending",
+      "pattern": "any",
+      "request": {
+        "verb": "start",
+        "noun": "macro"
+      },
+      "from": {
+        "register": "key"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "macro_pending",
+      "keys": "esc",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "macro_recording",
+      "pattern": "paste",
+      "request": {
+        "verb": "record",
+        "noun": "macro",
+        "args": {
+          "paste": true
+        }
+      },
+      "from": {
+        "key": "key"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "macro_recording",
+      "pattern": "any",
+      "request": {
+        "verb": "record",
+        "noun": "macro"
+      },
+      "from": {
+        "key": "key"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "macro_recording",
+      "keys": "q",
+      "request": {
+        "verb": "stop",
+        "noun": "macro"
+      },
+      "when": "shadow-idle"
+    },
+    {
+      "noun": "app",
+      "mode": "normal",
+      "pattern": "digit-0",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "count_pending"
+        }
+      },
+      "from": {
+        "count": "digit"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "normal",
+      "keys": "\"",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "register_pending"
+        }
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "normal",
+      "keys": "(",
+      "request": {
+        "verb": "previous",
+        "noun": "focus",
+        "args": {
+          "scope": "region"
+        }
+      },
+      "from": {
+        "steps": "count"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "normal",
+      "keys": ")",
+      "request": {
+        "verb": "next",
+        "noun": "focus",
+        "args": {
+          "scope": "region"
+        }
+      },
+      "from": {
+        "steps": "count"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "normal",
+      "keys": ".",
+      "request": {
+        "verb": "repeat",
+        "noun": "history"
+      },
+      "from": {
+        "steps": "line"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "normal",
+      "keys": "@",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "replay_pending"
+        }
+      },
+      "from": {
+        "count": "count"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "normal",
+      "keys": "q",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "macro_pending"
+        }
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "normal",
+      "keys": "shift+tab",
+      "request": {
+        "verb": "previous",
+        "noun": "focus"
+      },
+      "from": {
+        "steps": "count"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "normal",
+      "keys": "tab",
+      "request": {
+        "verb": "next",
+        "noun": "focus"
+      },
+      "from": {
+        "steps": "count"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "normal",
+      "keys": "{",
+      "request": {
+        "verb": "previous",
+        "noun": "focus"
+      },
+      "from": {
+        "steps": "count"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "normal",
+      "keys": "}",
+      "request": {
+        "verb": "next",
+        "noun": "focus"
+      },
+      "from": {
+        "steps": "count"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "$",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "line-end"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "0",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "line-start"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "A",
+      "request": {
+        "verb": "begin",
+        "noun": "input",
+        "args": {
+          "position": "end"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "G",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "last-line"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "I",
+      "request": {
+        "verb": "begin",
+        "noun": "input",
+        "args": {
+          "position": "first"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "O",
+      "request": {
+        "verb": "begin",
+        "noun": "input",
+        "args": {
+          "position": "above"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "P",
+      "request": {
+        "verb": "paste",
+        "noun": "input",
+        "args": {
+          "before": true
+        }
+      },
+      "from": {
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "V",
+      "request": {
+        "verb": "select",
+        "noun": "input",
+        "args": {
+          "shape": "line"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "a",
+      "request": {
+        "verb": "begin",
+        "noun": "input",
+        "args": {
+          "position": "append"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "b",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "word-backward"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "c",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "operator_pending",
+          "op": "c"
+        }
+      },
+      "from": {
+        "opcount": "count"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "ctrl+r",
+      "request": {
+        "verb": "redo",
+        "noun": "input"
+      },
+      "from": {
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "ctrl+v",
+      "request": {
+        "verb": "select",
+        "noun": "input",
+        "args": {
+          "shape": "block"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "d",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "operator_pending",
+          "op": "d"
+        }
+      },
+      "from": {
+        "opcount": "count"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "delete",
+      "request": {
+        "verb": "delete",
+        "noun": "input"
+      },
+      "from": {
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "down",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "down"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "e",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "word-end"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "end",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "line-end"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "g",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "g_pending"
+        }
+      },
+      "from": {
+        "count": "count"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "h",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "left"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "home",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "line-start"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "i",
+      "request": {
+        "verb": "begin",
+        "noun": "input",
+        "args": {
+          "position": "insert"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "j",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "down"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "k",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "up"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "l",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "right"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "left",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "left"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "o",
+      "request": {
+        "verb": "begin",
+        "noun": "input",
+        "args": {
+          "position": "below"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "p",
+      "request": {
+        "verb": "paste",
+        "noun": "input",
+        "args": {
+          "before": false
+        }
+      },
+      "from": {
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "right",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "right"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "u",
+      "request": {
+        "verb": "undo",
+        "noun": "input"
+      },
+      "from": {
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "up",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "up"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "v",
+      "request": {
+        "verb": "select",
+        "noun": "input",
+        "args": {
+          "shape": "char"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "w",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "word-forward"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "x",
+      "request": {
+        "verb": "delete",
+        "noun": "input"
+      },
+      "from": {
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "normal",
+      "keys": "y",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "operator_pending",
+          "op": "y"
+        }
+      },
+      "from": {
+        "opcount": "count"
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "down",
+      "request": {
+        "verb": "move",
+        "noun": "list",
+        "args": {
+          "delta": 1
+        }
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "j",
+      "request": {
+        "verb": "move",
+        "noun": "list",
+        "args": {
+          "delta": 1
+        }
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "k",
+      "request": {
+        "verb": "move",
+        "noun": "list",
+        "args": {
+          "delta": -1
+        }
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "space",
+      "request": {
+        "verb": "mark",
+        "noun": "list"
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "up",
+      "request": {
+        "verb": "move",
+        "noun": "list",
+        "args": {
+          "delta": -1
+        }
+      }
+    },
+    {
+      "noun": "modal",
+      "mode": "normal",
+      "keys": "esc",
+      "request": {
+        "verb": "pop",
+        "noun": "modal"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_g_pending",
+      "pattern": "any",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_g_pending",
+      "keys": "g",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "first-line"
+        }
+      },
+      "from": {
+        "line": "steps",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "pattern": "digit-0",
+      "request": {
+        "verb": "append",
+        "noun": "count"
+      },
+      "from": {
+        "digit": "digit"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "pattern": "any",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "$",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "line-end"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "0",
+      "request": {
+        "verb": "append",
+        "noun": "count",
+        "args": {
+          "digit": 0
+        }
+      },
+      "when": "count"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "0",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "line-start"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "G",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "last-line"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "b",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "word-backward"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "c",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "line",
+          "operator": "c"
+        }
+      },
+      "from": {
+        "steps": "steps"
+      },
+      "when": "op:c"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "d",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "line",
+          "operator": "d"
+        }
+      },
+      "from": {
+        "steps": "steps"
+      },
+      "when": "op:d"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "down",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "down"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "e",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "word-end"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "end",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "line-end"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "esc",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "g",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "operator_g_pending"
+        }
+      },
+      "from": {
+        "count": "count",
+        "op": "op",
+        "opcount": "opcount"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "h",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "left"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "home",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "line-start"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "j",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "down"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "k",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "up"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "l",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "right"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "left",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "left"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "right",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "right"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "up",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "up"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "w",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "word-forward"
+        }
+      },
+      "from": {
+        "line": "line",
+        "operator": "op",
+        "steps": "steps"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "operator_pending",
+      "keys": "y",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "motion": "line",
+          "operator": "y"
+        }
+      },
+      "from": {
+        "steps": "steps"
+      },
+      "when": "op:y"
+    },
+    {
+      "noun": "app",
+      "mode": "register_pending",
+      "pattern": "any",
+      "request": {
+        "verb": "select",
+        "noun": "register"
+      },
+      "from": {
+        "name": "key"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "register_pending",
+      "keys": "esc",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "replay_pending",
+      "pattern": "any",
+      "request": {
+        "verb": "replay",
+        "noun": "macro"
+      },
+      "from": {
+        "register": "key",
+        "steps": "count"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "replay_pending",
+      "keys": "esc",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "terminal",
+      "mode": "terminal",
+      "pattern": "paste",
+      "request": {
+        "verb": "paste",
+        "noun": "terminal"
+      },
+      "from": {
+        "text": "text"
+      }
+    },
+    {
+      "noun": "terminal",
+      "mode": "terminal",
+      "pattern": "any",
+      "request": {
+        "verb": "send",
+        "noun": "terminal"
+      },
+      "from": {
+        "keys": "key"
+      }
+    },
+    {
+      "noun": "terminal",
+      "mode": "terminal",
+      "keys": "ctrl+a",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "leader_pending",
+          "prefix": "ctrl+a",
+          "request": {
+            "verb": "send",
+            "noun": "terminal",
+            "args": {
+              "keys": "ctrl+a"
+            }
+          }
+        }
+      },
+      "hint": "leader: d detaches, ctrl+a sends ctrl+a"
+    },
+    {
+      "noun": "app",
+      "mode": "visual",
+      "keys": "\"",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "register_pending"
+        }
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "visual",
+      "keys": "@",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "replay_pending"
+        }
+      },
+      "from": {
+        "count": "count"
+      }
+    },
+    {
+      "noun": "app",
+      "mode": "visual",
+      "keys": "q",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "macro_pending"
+        }
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "pattern": "digit-0",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "visual_count_pending"
+        }
+      },
+      "from": {
+        "count": "digit"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "$",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "line-end"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "0",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "line-start"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "A",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "G",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "last-line"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "I",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "O",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "P",
+      "request": {
+        "verb": "paste",
+        "noun": "input",
+        "args": {
+          "before": true
+        }
+      },
+      "from": {
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "V",
+      "request": {
+        "verb": "select",
+        "noun": "input",
+        "args": {
+          "shape": "line"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "a",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "b",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "word-backward"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "c",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "operator": "c"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "ctrl+r",
+      "request": {
+        "verb": "redo",
+        "noun": "input"
+      },
+      "from": {
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "ctrl+v",
+      "request": {
+        "verb": "select",
+        "noun": "input",
+        "args": {
+          "shape": "block"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "d",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "operator": "d"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "delete",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "operator": "d"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "down",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "down"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "e",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "word-end"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "end",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "line-end"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "esc",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "g",
+      "request": {
+        "verb": "enter",
+        "noun": "mode",
+        "args": {
+          "mode": "g_pending"
+        }
+      },
+      "from": {
+        "count": "count"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "h",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "left"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "home",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "line-start"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "i",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "j",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "down"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "k",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "up"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "l",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "right"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "left",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "left"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "o",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "p",
+      "request": {
+        "verb": "paste",
+        "noun": "input",
+        "args": {
+          "before": false
+        }
+      },
+      "from": {
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "right",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "right"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "u",
+      "request": {
+        "verb": "undo",
+        "noun": "input"
+      },
+      "from": {
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "up",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "up"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "v",
+      "request": {
+        "verb": "select",
+        "noun": "input",
+        "args": {
+          "shape": "char"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "w",
+      "request": {
+        "verb": "move",
+        "noun": "input",
+        "args": {
+          "motion": "word-forward"
+        }
+      },
+      "from": {
+        "line": "line",
+        "steps": "count"
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "x",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "operator": "d"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual",
+      "keys": "y",
+      "request": {
+        "verb": "operator",
+        "noun": "input",
+        "args": {
+          "operator": "y"
+        }
+      },
+      "when": "input"
+    },
+    {
+      "noun": "editor",
+      "mode": "visual_count_pending",
+      "pattern": "digit",
+      "request": {
+        "verb": "append",
+        "noun": "count"
+      },
+      "from": {
+        "digit": "digit"
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "visual_count_pending",
+      "pattern": "any",
+      "request": {
+        "verb": "leave",
+        "noun": "mode"
+      },
+      "replay": true
+    },
+    {
+      "noun": "editor",
+      "mode": "visual_count_pending",
+      "keys": "0",
+      "request": {
+        "verb": "append",
+        "noun": "count",
+        "args": {
+          "digit": 0
+        }
+      }
+    },
+    {
+      "noun": "editor",
+      "mode": "visual_count_pending",
+      "keys": "esc",
+      "request": {
+        "verb": "cancel",
+        "noun": "input"
+      }
+    }
+  ],
+  "pages": []
+}
