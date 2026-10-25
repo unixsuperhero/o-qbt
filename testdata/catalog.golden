@@ -11,6 +11,29 @@
           "name": "info",
           "description": "the credentials test: log in once and read the version, Web API version, build, speeds and free disk; changes nothing",
           "kind": "application",
+          "params": {
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            }
+          },
           "result": "JSON value"
         },
         {
@@ -67,8 +90,31 @@
       "verbs": [
         {
           "name": "list",
-          "description": "the category rows: {id: category/NAME, label: \"NAME  SAVE_PATH\", data: {name, savePath}}",
+          "description": "the category rows: {id: category/NAME, label: \"NAME  SAVE_PATH\", data: {name, savePath}}; --format, --columns (name, save_path), --out",
           "kind": "application",
+          "params": {
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            }
+          },
           "result": "JSON value",
           "rows": "category"
         }
@@ -1075,6 +1121,67 @@
       "name": "torrent",
       "verbs": [
         {
+          "name": "active",
+          "description": "alias of torrent list --filter active: torrents moving data now",
+          "kind": "application",
+          "params": {
+            "category": {
+              "type": "string",
+              "description": "only this category (\"\" = uncategorised)"
+            },
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "limit": {
+              "type": "integer",
+              "description": "at most N torrents"
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            },
+            "reverse": {
+              "type": "boolean",
+              "description": "reverse the order"
+            },
+            "sort": {
+              "type": "string",
+              "description": "sort by this field on the server (default name, here)",
+              "enum": [
+                "added_on",
+                "completed_on",
+                "dlspeed",
+                "eta",
+                "name",
+                "progress",
+                "ratio",
+                "size",
+                "state",
+                "upspeed"
+              ]
+            },
+            "tag": {
+              "type": "string",
+              "description": "only this tag (\"\" = untagged)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
           "name": "delete",
           "description": "remove --target HASH from qBittorrent; --files deletes its data too (asks first; --yes skips the question)",
           "kind": "application",
@@ -1088,11 +1195,318 @@
           "confirm": "Delete torrent {{label}}?"
         },
         {
-          "name": "list",
-          "description": "the torrent rows: {id: hash, label: \"state  progress%  name\", data: {state, progress, size, dlspeed, eta, category, added_on, completed_on, save_path}}",
+          "name": "downloading",
+          "description": "alias of torrent list --filter downloading: incomplete torrents downloading or waiting to",
           "kind": "application",
+          "params": {
+            "category": {
+              "type": "string",
+              "description": "only this category (\"\" = uncategorised)"
+            },
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "limit": {
+              "type": "integer",
+              "description": "at most N torrents"
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            },
+            "reverse": {
+              "type": "boolean",
+              "description": "reverse the order"
+            },
+            "sort": {
+              "type": "string",
+              "description": "sort by this field on the server (default name, here)",
+              "enum": [
+                "added_on",
+                "completed_on",
+                "dlspeed",
+                "eta",
+                "name",
+                "progress",
+                "ratio",
+                "size",
+                "state",
+                "upspeed"
+              ]
+            },
+            "tag": {
+              "type": "string",
+              "description": "only this tag (\"\" = untagged)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "errored",
+          "description": "alias of torrent list --filter errored: torrents in error or missing files",
+          "kind": "application",
+          "params": {
+            "category": {
+              "type": "string",
+              "description": "only this category (\"\" = uncategorised)"
+            },
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "limit": {
+              "type": "integer",
+              "description": "at most N torrents"
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            },
+            "reverse": {
+              "type": "boolean",
+              "description": "reverse the order"
+            },
+            "sort": {
+              "type": "string",
+              "description": "sort by this field on the server (default name, here)",
+              "enum": [
+                "added_on",
+                "completed_on",
+                "dlspeed",
+                "eta",
+                "name",
+                "progress",
+                "ratio",
+                "size",
+                "state",
+                "upspeed"
+              ]
+            },
+            "tag": {
+              "type": "string",
+              "description": "only this tag (\"\" = untagged)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "export",
+          "description": "write the torrents to --out FILE in --format (default from the extension, else json); takes torrent list's query and --columns",
+          "kind": "application",
+          "params": {
+            "category": {
+              "type": "string",
+              "description": "only this category (\"\" = uncategorised)"
+            },
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "filter": {
+              "type": "string",
+              "description": "torrents/info's filter (default all)",
+              "enum": [
+                "all",
+                "downloading",
+                "seeding",
+                "completed",
+                "paused",
+                "stopped",
+                "active",
+                "inactive",
+                "resumed",
+                "running",
+                "stalled",
+                "stalled_uploading",
+                "stalled_downloading",
+                "errored",
+                "checking",
+                "moving"
+              ]
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "limit": {
+              "type": "integer",
+              "description": "at most N torrents"
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            },
+            "reverse": {
+              "type": "boolean",
+              "description": "reverse the order"
+            },
+            "sort": {
+              "type": "string",
+              "description": "sort by this field on the server (default name, here)",
+              "enum": [
+                "added_on",
+                "completed_on",
+                "dlspeed",
+                "eta",
+                "name",
+                "progress",
+                "ratio",
+                "size",
+                "state",
+                "upspeed"
+              ]
+            },
+            "tag": {
+              "type": "string",
+              "description": "only this tag (\"\" = untagged)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "list",
+          "description": "the torrent rows: {id: hash, label: \"state  progress%  name\", data: {state, progress, size, dlspeed, eta, category, added_on, completed_on, save_path}}; --filter, --category, --tag, --sort, --reverse, --limit are torrents/info's query; --format, --columns, --out render them (a host's --json without --format gets the rows)",
+          "kind": "application",
+          "params": {
+            "category": {
+              "type": "string",
+              "description": "only this category (\"\" = uncategorised)"
+            },
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "filter": {
+              "type": "string",
+              "description": "torrents/info's filter (default all)",
+              "enum": [
+                "all",
+                "downloading",
+                "seeding",
+                "completed",
+                "paused",
+                "stopped",
+                "active",
+                "inactive",
+                "resumed",
+                "running",
+                "stalled",
+                "stalled_uploading",
+                "stalled_downloading",
+                "errored",
+                "checking",
+                "moving"
+              ]
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "limit": {
+              "type": "integer",
+              "description": "at most N torrents"
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            },
+            "reverse": {
+              "type": "boolean",
+              "description": "reverse the order"
+            },
+            "sort": {
+              "type": "string",
+              "description": "sort by this field on the server (default name, here)",
+              "enum": [
+                "added_on",
+                "completed_on",
+                "dlspeed",
+                "eta",
+                "name",
+                "progress",
+                "ratio",
+                "size",
+                "state",
+                "upspeed"
+              ]
+            },
+            "tag": {
+              "type": "string",
+              "description": "only this tag (\"\" = untagged)"
+            }
+          },
           "result": "JSON value",
           "rows": "torrent"
+        },
+        {
+          "name": "overview",
+          "description": "one screen: totals (torrents, active, seeding, downloading, paused, errored, size, speeds, free space, the guard), counts and size per state, top 5 by download and upload speed, the 5 oldest unfinished, categories; json is {totals, states, top_download, top_upload, oldest_unfinished, categories}",
+          "kind": "application",
+          "params": {
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            }
+          },
+          "result": "JSON value"
         },
         {
           "name": "pause",
@@ -1102,6 +1516,67 @@
             "all": {
               "type": "boolean",
               "description": "every torrent instead of --target HASH"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "paused",
+          "description": "alias of torrent list --filter paused: stopped torrents (v5 calls the filter stopped)",
+          "kind": "application",
+          "params": {
+            "category": {
+              "type": "string",
+              "description": "only this category (\"\" = uncategorised)"
+            },
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "limit": {
+              "type": "integer",
+              "description": "at most N torrents"
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            },
+            "reverse": {
+              "type": "boolean",
+              "description": "reverse the order"
+            },
+            "sort": {
+              "type": "string",
+              "description": "sort by this field on the server (default name, here)",
+              "enum": [
+                "added_on",
+                "completed_on",
+                "dlspeed",
+                "eta",
+                "name",
+                "progress",
+                "ratio",
+                "size",
+                "state",
+                "upspeed"
+              ]
+            },
+            "tag": {
+              "type": "string",
+              "description": "only this tag (\"\" = untagged)"
             }
           },
           "result": "JSON value"
@@ -1131,9 +1606,190 @@
           "result": "JSON value"
         },
         {
+          "name": "seeding",
+          "description": "alias of torrent list --filter seeding: complete torrents uploading or waiting to",
+          "kind": "application",
+          "params": {
+            "category": {
+              "type": "string",
+              "description": "only this category (\"\" = uncategorised)"
+            },
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "limit": {
+              "type": "integer",
+              "description": "at most N torrents"
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            },
+            "reverse": {
+              "type": "boolean",
+              "description": "reverse the order"
+            },
+            "sort": {
+              "type": "string",
+              "description": "sort by this field on the server (default name, here)",
+              "enum": [
+                "added_on",
+                "completed_on",
+                "dlspeed",
+                "eta",
+                "name",
+                "progress",
+                "ratio",
+                "size",
+                "state",
+                "upspeed"
+              ]
+            },
+            "tag": {
+              "type": "string",
+              "description": "only this tag (\"\" = untagged)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
           "name": "show",
           "description": "one torrent's info and properties: --target HASH",
           "kind": "application",
+          "result": "JSON value"
+        },
+        {
+          "name": "stalled",
+          "description": "alias of torrent list --filter stalled: torrents with peers but no data moving",
+          "kind": "application",
+          "params": {
+            "category": {
+              "type": "string",
+              "description": "only this category (\"\" = uncategorised)"
+            },
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "limit": {
+              "type": "integer",
+              "description": "at most N torrents"
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            },
+            "reverse": {
+              "type": "boolean",
+              "description": "reverse the order"
+            },
+            "sort": {
+              "type": "string",
+              "description": "sort by this field on the server (default name, here)",
+              "enum": [
+                "added_on",
+                "completed_on",
+                "dlspeed",
+                "eta",
+                "name",
+                "progress",
+                "ratio",
+                "size",
+                "state",
+                "upspeed"
+              ]
+            },
+            "tag": {
+              "type": "string",
+              "description": "only this tag (\"\" = untagged)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "summary",
+          "description": "count and total size per state, the total last, one table: [{state, count, size}]; takes --filter, --category, --tag",
+          "kind": "application",
+          "params": {
+            "category": {
+              "type": "string",
+              "description": "only this category (\"\" = uncategorised)"
+            },
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "filter": {
+              "type": "string",
+              "description": "torrents/info's filter (default all)",
+              "enum": [
+                "all",
+                "downloading",
+                "seeding",
+                "completed",
+                "paused",
+                "stopped",
+                "active",
+                "inactive",
+                "resumed",
+                "running",
+                "stalled",
+                "stalled_uploading",
+                "stalled_downloading",
+                "errored",
+                "checking",
+                "moving"
+              ]
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            },
+            "tag": {
+              "type": "string",
+              "description": "only this tag (\"\" = untagged)"
+            }
+          },
           "result": "JSON value"
         }
       ]
@@ -1145,6 +1801,29 @@
           "name": "info",
           "description": "global speeds, session totals, limits, connection status, alternative limits on or off",
           "kind": "application",
+          "params": {
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            }
+          },
           "result": "JSON value"
         },
         {

@@ -5,7 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/unixsuperhero/ochazuke"
 	ocli "github.com/unixsuperhero/ochazuke/cli"
@@ -77,36 +80,46 @@ func (t *Tool) shell() *ocli.Shell {
 		}
 		return lists[noun].SetItems(items)
 	}
-	torrentRows := func(ctx context.Context) ([]Row, error) {
+	// torrentsOf is the torrents q selects, set as the torrent list's rows.
+	torrentsOf := func(ctx context.Context, q TorrentQuery) ([]Torrent, []Row, error) {
 		c, err := api()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		ts, err := Torrents(ctx, c)
+		ts, err := Torrents(ctx, c, q)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		rows := make([]Row, len(ts))
 		for i, x := range ts {
 			rows[i] = torrentRow(x)
 		}
-		return rows, setRows("torrent", rows)
+		return ts, rows, setRows("torrent", rows)
 	}
-	categoryRows := func(ctx context.Context) ([]Row, error) {
+	torrentRows := func(ctx context.Context) ([]Row, error) {
+		_, rows, err := torrentsOf(ctx, TorrentQuery{})
+		return rows, err
+	}
+	categoriesOf := func(ctx context.Context) ([]Category, []Row, error) {
 		c, err := api()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		cs, err := Categories(ctx, c)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		rows := make([]Row, len(cs))
 		for i, x := range cs {
 			rows[i] = Row{ID: "category/" + x.Name, Label: x.Name + "  " + x.SavePath, Data: x}
 		}
-		return rows, setRows("category", rows)
+		return cs, rows, setRows("category", rows)
 	}
+	categoryRows := func(ctx context.Context) ([]Row, error) {
+		_, rows, err := categoriesOf(ctx)
+		return rows, err
+	}
+	loc := t.now().Location()
 	// hashes is what a torrent verb acts on: --target's hash, or all.
 	hashes := func(c ochazuke.Ctx, verb string) (string, error) {
 		all, _ := c.Args["all"].(bool)
@@ -131,7 +144,8 @@ func (t *Tool) shell() *ocli.Shell {
 			if err != nil {
 				return ochazuke.Failed(err)
 			}
-			return t.answer(AppInfo(ctxOf(c), cl))
+			i, err := AppInfo(ctxOf(c), cl)
+			return t.present(c, i, InfoTable(i), err)
 		}, "the credentials test: log in once and read the version, Web API version, build, speeds and free disk; changes nothing").
 		Verb("prefs", func(c ochazuke.Ctx) ochazuke.Result {
 			cl, err := api()
@@ -155,11 +169,61 @@ func (t *Tool) shell() *ocli.Shell {
 			return ochazuke.Done(out)
 		}, "every list's rows in one call, JSON Lines {noun, id, label} for torrent and category (the catalog's state)").State()
 
+	// listTorrents answers a torrent list-like verb: the rows (a host's
+	// --json), else the torrents in --format; preset fixes the filter.
+	listTorrents := func(c ochazuke.Ctx, preset string, need func(ochazuke.Ctx) error) ochazuke.Result {
+		if need != nil {
+			if err := need(c); err != nil {
+				return ochazuke.Failed(err)
+			}
+		}
+		q, err := torrentQuery(c, preset)
+		if err != nil {
+			return ochazuke.Failed(err)
+		}
+		ts, rows, err := torrentsOf(ctxOf(c), q)
+		return t.present(c, rows, TorrentTable(ts, loc), err)
+	}
 	r.Define("torrent").
-		Verb("list", func(c ochazuke.Ctx) ochazuke.Result {
-			rows, err := torrentRows(ctxOf(c))
-			return t.answer(rows, err)
-		}, "the torrent rows: {id: hash, label: \"state  progress%  name\", data: {state, progress, size, dlspeed, eta, category, added_on, completed_on, save_path}}").Rows("torrent").
+		Verb("list", func(c ochazuke.Ctx) ochazuke.Result { return listTorrents(c, "", nil) },
+			"the torrent rows: {id: hash, label: \"state  progress%  name\", data: {state, progress, size, dlspeed, eta, category, added_on, completed_on, save_path}}; --filter, --category, --tag, --sort, --reverse, --limit are torrents/info's query; --format, --columns, --out render them (a host's --json without --format gets the rows)").Rows("torrent").
+		Verb("export", func(c ochazuke.Ctx) ochazuke.Result {
+			return listTorrents(c, "", func(c ochazuke.Ctx) error {
+				if ochazuke.StringArg(c.Args, "out", "") == "" {
+					return errors.New("torrent export needs --out FILE (the format follows its extension, else --format, else json)")
+				}
+				return nil
+			})
+		}, "write the torrents to --out FILE in --format (default from the extension, else json); takes torrent list's query and --columns").
+		Verb("summary", func(c ochazuke.Ctx) ochazuke.Result {
+			q, err := torrentQuery(c, "")
+			if err != nil {
+				return ochazuke.Failed(err)
+			}
+			ts, _, err := torrentsOf(ctxOf(c), q)
+			ss := Summarize(ts)
+			return t.present(c, ss, SummaryTable(ss), err)
+		}, "count and total size per state, the total last, one table: [{state, count, size}]; takes --filter, --category, --tag").
+		Verb("overview", func(c ochazuke.Ctx) ochazuke.Result {
+			cl, err := api()
+			if err != nil {
+				return ochazuke.Failed(err)
+			}
+			ts, _, err := torrentsOf(ctxOf(c), TorrentQuery{})
+			if err != nil {
+				return ochazuke.Failed(err)
+			}
+			st, err := MainState(ctxOf(c), cl)
+			if err != nil {
+				return ochazuke.Failed(err)
+			}
+			g, err := t.guardState(st.Free)
+			if err != nil {
+				return ochazuke.Failed(err)
+			}
+			o := Overviews(ts, st, g)
+			return t.present(c, o, OverviewView{O: o, Loc: loc}, nil)
+		}, "one screen: totals (torrents, active, seeding, downloading, paused, errored, size, speeds, free space, the guard), counts and size per state, top 5 by download and upload speed, the 5 oldest unfinished, categories; json is {totals, states, top_download, top_upload, oldest_unfinished, categories}").
 		Verb("show", func(c ochazuke.Ctx) ochazuke.Result {
 			hash, err := hashes(c, "show")
 			if err == nil && hash == "all" {
@@ -224,6 +288,16 @@ func (t *Tool) shell() *ocli.Shell {
 		return t.answer(Message{Message: "deleted torrent " + h + ", " + what}, err)
 	}, "remove --target HASH from qBittorrent; --files deletes its data too (asks first; --yes skips the question)").Confirm("Delete torrent {{label}}?")
 	r.Operations["torrent.delete"] = withParams(r.Operations["torrent.delete"], params("files", ochazuke.Parameter{Type: "boolean", Description: "delete the downloaded data as well"}))
+	for _, p := range torrentPresets {
+		r.Define("torrent").Verb(p.Verb, func(c ochazuke.Ctx) ochazuke.Result { return listTorrents(c, p.Filter, nil) },
+			"alias of torrent list --filter "+p.Filter+": "+p.About)
+		r.Operations["torrent."+p.Verb] = withParams(r.Operations["torrent."+p.Verb], params(append(queryParams(false), outputParams()...)...))
+	}
+	for _, verb := range []string{"list", "export"} {
+		r.Operations["torrent."+verb] = withParams(r.Operations["torrent."+verb], params(append(queryParams(true), outputParams()...)...))
+	}
+	r.Operations["torrent.summary"] = withParams(r.Operations["torrent.summary"], params(append(queryParams(true)[:6], outputParams()...)...))
+	r.Operations["torrent.overview"] = withParams(r.Operations["torrent.overview"], params(outputParams()[:4]...))
 
 	r.Define("transfer").
 		Verb("info", func(c ochazuke.Ctx) ochazuke.Result {
@@ -231,7 +305,8 @@ func (t *Tool) shell() *ocli.Shell {
 			if err != nil {
 				return ochazuke.Failed(err)
 			}
-			return t.answer(TransferInfo(ctxOf(c), cl))
+			x, err := TransferInfo(ctxOf(c), cl)
+			return t.present(c, x, TransferTable(x), err)
 		}, "global speeds, session totals, limits, connection status, alternative limits on or off").
 		Verb("limit", func(c ochazuke.Ctx) ochazuke.Result {
 			_, hasDL := c.Args["dl"]
@@ -327,9 +402,9 @@ func (t *Tool) shell() *ocli.Shell {
 
 	r.Define("category").
 		Verb("list", func(c ochazuke.Ctx) ochazuke.Result {
-			rows, err := categoryRows(ctxOf(c))
-			return t.answer(rows, err)
-		}, "the category rows: {id: category/NAME, label: \"NAME  SAVE_PATH\", data: {name, savePath}}").Rows("category")
+			cs, rows, err := categoriesOf(ctxOf(c))
+			return t.present(c, rows, CategoryTable(cs), err)
+		}, "the category rows: {id: category/NAME, label: \"NAME  SAVE_PATH\", data: {name, savePath}}; --format, --columns (name, save_path), --out").Rows("category")
 
 	r.Define("config").
 		Verb("init", func(ochazuke.Ctx) ochazuke.Result { return t.answer(t.ConfigInit()) },
@@ -344,6 +419,10 @@ func (t *Tool) shell() *ocli.Shell {
 		"key", ochazuke.Parameter{Type: "string", Required: true, Enum: configKeys, Description: "the setting"},
 		"value", ochazuke.Parameter{Type: "string", Description: "the new value (not for pass)"},
 		"stdin", ochazuke.Parameter{Type: "boolean", Description: "read the value from one line of stdin"}))
+
+	for _, key := range []string{"app.info", "transfer.info", "category.list"} {
+		r.Operations[key] = withParams(r.Operations[key], params(outputParams()...))
+	}
 
 	sh := ocli.New(r, "o-qbt", t.Stdin, t.Stdout, t.Stderr)
 	sh.Usage = ocli.DefaultUsage(t.Prog)
@@ -368,4 +447,136 @@ func (t *Tool) shell() *ocli.Shell {
 func withParams(op ochazuke.Operation, p map[string]ochazuke.Parameter) ochazuke.Operation {
 	op.Parameters = p
 	return op
+}
+
+// torrentPresets are torrent verbs that are torrent list with a fixed
+// --filter: data, not code paths.
+var torrentPresets = []struct{ Verb, Filter, About string }{
+	{"active", "active", "torrents moving data now"},
+	{"seeding", "seeding", "complete torrents uploading or waiting to"},
+	{"downloading", "downloading", "incomplete torrents downloading or waiting to"},
+	{"paused", "paused", "stopped torrents (v5 calls the filter stopped)"},
+	{"errored", "errored", "torrents in error or missing files"},
+	{"stalled", "stalled", "torrents with peers but no data moving"},
+}
+
+// queryParams are torrents/info's query as parameters (filter first, when
+// the verb takes it), name/value pairs for params.
+func queryParams(filter bool) []any {
+	kv := []any{
+		"filter", ochazuke.Parameter{Type: "string", Enum: TorrentFilters, Description: "torrents/info's filter (default all)"},
+		"category", ochazuke.Parameter{Type: "string", Description: "only this category (\"\" = uncategorised)"},
+		"tag", ochazuke.Parameter{Type: "string", Description: "only this tag (\"\" = untagged)"},
+		"sort", ochazuke.Parameter{Type: "string", Enum: sortFields(), Description: "sort by this field on the server (default name, here)"},
+		"reverse", ochazuke.Parameter{Type: "boolean", Description: "reverse the order"},
+		"limit", ochazuke.Parameter{Type: "integer", Description: "at most N torrents"},
+	}
+	if !filter {
+		return kv[2:]
+	}
+	return kv
+}
+
+func sortFields() []string {
+	out := make([]string, 0, len(TorrentSorts))
+	for k := range TorrentSorts {
+		out = append(out, k)
+	}
+	slices.Sort(out)
+	return out
+}
+
+// outputParams are the output engine's parameters: format, out, columns.
+func outputParams() []any {
+	return []any{
+		"format", ochazuke.Parameter{Type: "string", Enum: Formats, Description: "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon"},
+		"out", ochazuke.Parameter{Type: "string", Description: "write to FILE instead of printing; its extension picks the format when --format is absent"},
+		"columns", ochazuke.Parameter{Type: "string", Description: "comma-separated columns, in order, for table, tsv, csv, md and toon"},
+	}
+}
+
+// torrentQuery is c's torrents/info query; preset, when set, is the filter.
+func torrentQuery(c ochazuke.Ctx, preset string) (TorrentQuery, error) {
+	q := TorrentQuery{Filter: ochazuke.StringArg(c.Args, "filter", ""), Sort: ochazuke.StringArg(c.Args, "sort", "")}
+	if preset != "" {
+		q.Filter = preset
+	}
+	for name, dst := range map[string]**string{"category": &q.Category, "tag": &q.Tag} {
+		if v, ok := c.Args[name].(string); ok {
+			*dst = &v
+		}
+	}
+	q.Reverse, _ = c.Args["reverse"].(bool)
+	if q.Limit = ochazuke.IntArg(c.Args, "limit", 0); q.Limit < 0 {
+		return q, fmt.Errorf("--limit %d: a count of 1 or more", q.Limit)
+	}
+	return q, nil
+}
+
+// View is an answer the output engine renders.
+type View interface {
+	Render(format string, columns []string) (string, error)
+}
+
+// present answers a list-like verb. A host's --json without --format gets
+// native as JSON (rows, for a list). Otherwise v is rendered in --format,
+// by default table on a terminal and json elsewhere (with --out, the
+// file's extension, else json), and printed or written to --out.
+func (t *Tool) present(c ochazuke.Ctx, native any, v View, err error) ochazuke.Result {
+	if err != nil {
+		return ochazuke.Failed(err)
+	}
+	format, out := ochazuke.StringArg(c.Args, "format", ""), ochazuke.StringArg(c.Args, "out", "")
+	if format == "" && out != "" {
+		if format = formatOf(out); format == "" {
+			format = "json"
+		}
+	}
+	if format == "" {
+		if !t.human {
+			return ochazuke.Done(native)
+		}
+		format = "json"
+		if t.TTY {
+			format = "table"
+		}
+	}
+	var columns []string
+	for _, name := range strings.Split(ochazuke.StringArg(c.Args, "columns", ""), ",") {
+		if name = strings.TrimSpace(name); name != "" {
+			columns = append(columns, name)
+		}
+	}
+	s, err := v.Render(format, columns)
+	if err != nil {
+		return ochazuke.Failed(err)
+	}
+	if out != "" {
+		if err := os.WriteFile(out, []byte(s), 0o644); err != nil {
+			return ochazuke.Failed(err)
+		}
+		what := ""
+		if tb, ok := v.(Table); ok {
+			what = fmt.Sprintf(" %d %s rows", tb.Len(), tb.Name)
+		}
+		m := Message{Message: fmt.Sprintf("wrote%s to %s (%s)", what, out, format), Path: out}
+		if !t.human {
+			return ochazuke.Done(m)
+		}
+		text := m.Text()
+		t.text = &text
+		return ochazuke.Done(m)
+	}
+	t.text = &s
+	return ochazuke.Done(native)
+}
+
+// guardState is the guard as the overview shows it, against free bytes.
+func (t *Tool) guardState(free int64) (GuardState, error) {
+	g := GuardState{Paused: t.marker(), Limit: DefaultLimit}
+	base, ok, err := t.readBaseline()
+	if ok {
+		g.Baseline, g.Used = base, base-free
+	}
+	return g, err
 }

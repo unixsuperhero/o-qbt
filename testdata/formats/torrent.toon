@@ -1,0 +1,4 @@
+torrent[3]{hash,name,state,progress,size,dlspeed,eta}:
+  aaa,alpha,downloading,0.4217,4096,3565158,60
+  ccc,"Movie, The \"Cut\"",pausedDL,0.5,1288490188,0,7800
+  bbb,Zeta,stalledUP,1,2048,0,8640000

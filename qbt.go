@@ -23,7 +23,9 @@ type Torrent struct {
 	DLSpeed     int64   `json:"dlspeed"`
 	UPSpeed     int64   `json:"upspeed"`
 	ETA         int64   `json:"eta"`
+	Ratio       float64 `json:"ratio"`
 	Category    string  `json:"category"`
+	Tags        string  `json:"tags"`
 	AddedOn     int64   `json:"added_on"`
 	CompletedOn int64   `json:"completion_on"`
 	SavePath    string  `json:"save_path"`
@@ -57,14 +59,80 @@ func torrentRow(t Torrent) Row {
 	}
 }
 
-// Torrents is every torrent, by name.
-func Torrents(ctx context.Context, c *Client) ([]Torrent, error) {
+// TorrentQuery is torrents/info's own query: what a list asks the server
+// to filter, sort and cut. The zero value is every torrent.
+type TorrentQuery struct {
+	Filter   string  // all, downloading, seeding, ... (the Web API's filter)
+	Category *string // nil: any; "": uncategorised
+	Tag      *string // nil: any; "": untagged
+	Sort     string  // a TorrentSorts field; "" sorts by name here
+	Reverse  bool
+	Limit    int // 0: no limit
+}
+
+// TorrentFilters are the Web API's filter values (v4 and v5 names).
+var TorrentFilters = []string{"all", "downloading", "seeding", "completed", "paused", "stopped", "active", "inactive", "resumed", "running", "stalled", "stalled_uploading", "stalled_downloading", "errored", "checking", "moving"}
+
+// TorrentSorts are the --sort fields; the value is the Web API's field.
+var TorrentSorts = map[string]string{"name": "name", "size": "size", "progress": "progress", "dlspeed": "dlspeed", "upspeed": "upspeed", "eta": "eta", "ratio": "ratio", "added_on": "added_on", "completed_on": "completion_on", "state": "state"}
+
+// Values is q as torrents/info's query string.
+func (q TorrentQuery) Values() url.Values {
+	v := url.Values{}
+	if q.Filter != "" {
+		v.Set("filter", q.Filter)
+	}
+	if q.Category != nil {
+		v.Set("category", *q.Category)
+	}
+	if q.Tag != nil {
+		v.Set("tag", *q.Tag)
+	}
+	if q.Sort != "" {
+		v.Set("sort", TorrentSorts[q.Sort])
+		if q.Reverse {
+			v.Set("reverse", "true")
+		}
+	}
+	if q.Limit > 0 {
+		v.Set("limit", strconv.Itoa(q.Limit))
+	}
+	return v
+}
+
+// Torrents is the torrents q selects: in the server's order when q sorts,
+// else by name (reversed with q.Reverse), cut to q.Limit.
+func Torrents(ctx context.Context, c *Client, q TorrentQuery) ([]Torrent, error) {
 	var ts []Torrent
-	if err := c.Get(ctx, "/api/v2/torrents/info", nil, &ts); err != nil {
+	if err := c.Get(ctx, "/api/v2/torrents/info", q.Values(), &ts); err != nil {
 		return nil, err
 	}
-	sort.SliceStable(ts, func(i, j int) bool { return strings.ToLower(ts[i].Name) < strings.ToLower(ts[j].Name) })
+	if q.Sort == "" {
+		sort.SliceStable(ts, func(i, j int) bool {
+			a, b := strings.ToLower(ts[i].Name), strings.ToLower(ts[j].Name)
+			if q.Reverse {
+				return a > b
+			}
+			return a < b
+		})
+	}
 	return ts, nil
+}
+
+// ServerState is sync/maindata's server_state, the fields an overview reads.
+type ServerState struct {
+	Free    int64 `json:"free_space_on_disk"`
+	DLSpeed int64 `json:"dl_info_speed"`
+	UPSpeed int64 `json:"up_info_speed"`
+}
+
+// MainState is sync/maindata's server_state (a full update).
+func MainState(ctx context.Context, c *Client) (ServerState, error) {
+	var main struct {
+		ServerState ServerState `json:"server_state"`
+	}
+	err := c.Get(ctx, "/api/v2/sync/maindata", url.Values{"rid": {"0"}}, &main)
+	return main.ServerState, err
 }
 
 // TorrentShow is one torrent's info and properties.
@@ -192,15 +260,11 @@ func AppInfo(ctx context.Context, c *Client) (Info, error) {
 		return i, err
 	}
 	i.DLSpeed, i.UPSpeed = x.DLSpeed, x.UPSpeed
-	var main struct {
-		ServerState struct {
-			Free int64 `json:"free_space_on_disk"`
-		} `json:"server_state"`
-	}
-	if err := c.Get(ctx, "/api/v2/sync/maindata", url.Values{"rid": {"0"}}, &main); err != nil {
+	st, err := MainState(ctx, c)
+	if err != nil {
 		return i, err
 	}
-	i.FreeSpace = main.ServerState.Free
+	i.FreeSpace = st.Free
 	return i, nil
 }
 

@@ -1,0 +1,126 @@
+{
+  "totals": {
+    "torrents": 3,
+    "active": 2,
+    "seeding": 1,
+    "downloading": 1,
+    "paused": 1,
+    "errored": 0,
+    "size": 1288496332,
+    "dlspeed": 3565158,
+    "upspeed": 1024,
+    "free": 628000000000,
+    "guard": {
+      "paused": "2026-10-25T12:00:00-0400",
+      "baseline": 630147483648,
+      "used": 2147483648,
+      "limit": 10737418240
+    }
+  },
+  "states": [
+    {
+      "state": "downloading",
+      "count": 1,
+      "size": 4096
+    },
+    {
+      "state": "pausedDL",
+      "count": 1,
+      "size": 1288490188
+    },
+    {
+      "state": "stalledUP",
+      "count": 1,
+      "size": 2048
+    },
+    {
+      "state": "total",
+      "count": 3,
+      "size": 1288496332
+    }
+  ],
+  "top_download": [
+    {
+      "hash": "aaa",
+      "name": "alpha",
+      "state": "downloading",
+      "progress": 0.4217,
+      "size": 4096,
+      "dlspeed": 3565158,
+      "upspeed": 0,
+      "eta": 60,
+      "ratio": 0,
+      "category": "",
+      "tags": "",
+      "added_on": 30,
+      "completion_on": -1,
+      "save_path": "/downloads"
+    }
+  ],
+  "top_upload": [
+    {
+      "hash": "bbb",
+      "name": "Zeta",
+      "state": "stalledUP",
+      "progress": 1,
+      "size": 2048,
+      "dlspeed": 0,
+      "upspeed": 1024,
+      "eta": 8640000,
+      "ratio": 2.5,
+      "category": "tv",
+      "tags": "",
+      "added_on": 10,
+      "completion_on": 20,
+      "save_path": "/downloads/tv"
+    }
+  ],
+  "oldest_unfinished": [
+    {
+      "hash": "ccc",
+      "name": "Movie, The \"Cut\"",
+      "state": "pausedDL",
+      "progress": 0.5,
+      "size": 1288490188,
+      "dlspeed": 0,
+      "upspeed": 0,
+      "eta": 7800,
+      "ratio": 0.125,
+      "category": "movies",
+      "tags": "hd,new",
+      "added_on": 5,
+      "completion_on": -1,
+      "save_path": "/downloads/movies"
+    },
+    {
+      "hash": "aaa",
+      "name": "alpha",
+      "state": "downloading",
+      "progress": 0.4217,
+      "size": 4096,
+      "dlspeed": 3565158,
+      "upspeed": 0,
+      "eta": 60,
+      "ratio": 0,
+      "category": "",
+      "tags": "",
+      "added_on": 30,
+      "completion_on": -1,
+      "save_path": "/downloads"
+    }
+  ],
+  "categories": [
+    {
+      "category": "movies",
+      "count": 1
+    },
+    {
+      "category": "tv",
+      "count": 1
+    },
+    {
+      "category": "",
+      "count": 1
+    }
+  ]
+}

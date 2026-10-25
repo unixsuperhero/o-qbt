@@ -7,6 +7,7 @@ replace github.com/unixsuperhero/ochazuke => /Users/unixsuperhero/proj/ochazuke
 replace github.com/unixsuperhero/oden => /Users/unixsuperhero/proj/oden
 
 require (
+	github.com/mattn/go-runewidth v0.0.30
 	github.com/unixsuperhero/ochazuke v0.0.0-00010101000000-000000000000
 	github.com/unixsuperhero/oden v0.0.0-00010101000000-000000000000
 	golang.org/x/term v0.47.0
@@ -25,7 +26,6 @@ require (
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.1 // indirect
-	github.com/mattn/go-runewidth v0.0.30 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/xo/terminfo v1.0.0 // indirect

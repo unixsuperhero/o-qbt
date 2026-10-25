@@ -20,20 +20,69 @@ qBittorrent bans an IP after repeated failed logins. A process logs in at most o
 ## Commands
 
 ```
-o qbt app info | prefs | state
-o qbt torrent list | show --target HASH
+o qbt app info [output] | prefs | state
+o qbt torrent list | active | seeding | downloading | paused | errored | stalled   [query] [output]
+o qbt torrent export --out FILE [query] [output] | summary [query] [output] | overview [output]
+o qbt torrent show --target HASH
 o qbt torrent pause|resume|recheck --target HASH | --all
 o qbt torrent delete --target HASH [--files] [--yes]
-o qbt transfer info | limit --dl N --up N | speed-limits-toggle     (bytes/s, 0 = unlimited)
+o qbt transfer info [output] | limit --dl N --up N | speed-limits-toggle     (bytes/s, 0 = unlimited)
 o qbt guard check|status|rebase|resume [--limit 10G] | rebase --bytes N | install | uninstall | log [N]
-o qbt category list
+o qbt category list [output]
+o qbt torrents | categories | overview          (shortcuts)
 o qbt config init | show | set KEY [VALUE] [--stdin]
 o qbt catalog
 ```
 
 `app info` changes nothing: it reads `app/version`, `app/webapiVersion`, `app/buildInfo`, `transfer/info` and `sync/maindata` and exits 0 only when the login worked. `torrent pause`/`resume` use v5's `torrents/stop`/`start` and fall back to v4's `pause`/`resume` on a 404. `torrent delete` asks `Delete torrent LABEL?` unless `--yes`.
 
-A torrent row is `{id: HASH, label: "state  progress%  name", data: {state, progress, size, dlspeed, eta, category, added_on, completed_on, save_path}}`; a category row is `{id: "category/NAME", label, data: {name, savePath}}`. `app state` prints both lists as JSON Lines `{noun, id, label}` (the catalog's state). Verbs a person reads (`app info`, `transfer info`, `guard *`, `config *`) print a short table; with `--json '{...}'` (how a host calls) every verb prints JSON.
+A torrent row is `{id: HASH, label: "state  progress%  name", data: {state, progress, size, dlspeed, eta, category, added_on, completed_on, save_path}}`; a category row is `{id: "category/NAME", label, data: {name, savePath}}`. `app state` prints both lists as JSON Lines `{noun, id, label}` (the catalog's state). List-like verbs print in `--format` (below). Other verbs a person reads (`guard *`, `config *`, `transfer limit`) print a short table; with `--json '{...}'` (how a host calls) every verb prints JSON.
+
+## Listing and exporting
+
+The query is qBittorrent's own (`torrents/info`), passed through:
+
+| Flag | Values |
+|---|---|
+| `--filter F` | `all downloading seeding completed paused stopped active inactive resumed running stalled stalled_uploading stalled_downloading errored checking moving` |
+| `--category C` / `--tag T` | one category or tag (`""` = none) |
+| `--sort FIELD` | `name size progress dlspeed upspeed eta ratio added_on completed_on state` (server-side; without it the list is by name) |
+| `--reverse`, `--limit N` | reverse the order, keep the first N |
+
+`torrent active|seeding|downloading|paused|errored|stalled` are aliases of `torrent list --filter` with that value (a table in `shell.go`), and take the other flags.
+
+Output, on `torrent list|export|summary|overview`, the presets, `category list`, `transfer info` and `app info`:
+
+| Flag | |
+|---|---|
+| `--format F` | `table` (the default on a terminal), `json` (the default otherwise), `jsonl`, `tsv`, `csv`, `md`, `toon` |
+| `--columns a,b,c` | which columns, in order, for table/tsv/csv/md/toon (json and jsonl carry every field) |
+| `--out FILE` | write instead of printing; with no `--format` the extension picks it (`.csv .tsv .md .json .jsonl .toon`, `.txt` = table, else json) |
+
+`table` and `md` humanise sizes, speeds, eta and times (`1.2 GiB`, `3.4 MiB/s`, `2h 10m`, `∞`, `2026-10-25 12:30`); every other format carries the raw numbers. A torrent's columns are `hash name state progress size dlspeed eta` (the default) then `upspeed ratio category tags added_on completed_on save_path`. A host's `--json '{}'` without a `format` still gets the rows (`{id, label, data}`); `--json '{"format":"csv"}'` renders.
+
+```sh
+o qbt torrent seeding --sort ratio --reverse --limit 10
+o qbt torrent list --category tv --format md --columns name,size,ratio
+o qbt torrent export --filter completed --out done.csv
+o qbt torrents --format toon | pbcopy
+o qbt torrent summary            # count and size per state, total last
+o qbt overview                   # one screen: totals and guard, by state, top 5 down/up, 5 oldest unfinished, categories
+```
+
+`torrent overview` (also `o qbt overview`) prints a totals line (torrents, active, seeding, downloading, paused, errored, size, speeds, the free space qBittorrent reports, the guard), the per-state table, the top 5 by download and by upload speed (moving torrents only), the 5 oldest unfinished, and the categories with their counts. `--format json` is the whole structure `{totals, states, top_download, top_upload, oldest_unfinished, categories}`; md, toon, csv, tsv and jsonl print each section in turn (md under `## name`, the others after `# name`, toon under its own header).
+
+### TOON
+
+`--format toon` is Token-Oriented Object Notation for uniform rows:
+
+```
+torrent[3]{hash,name,state,progress,size,dlspeed,eta}:
+  aaa,alpha,downloading,0.4217,4096,3565158,60
+  ccc,"Movie, The \"Cut\"",pausedDL,0.5,1288490188,0,7800
+```
+
+The rule, exactly: a header `NAME[N]{col,col,...}:` (N records, the columns in order), then one line per record, indented two spaces, its values joined by `,`. Numbers and booleans are bare (raw: bytes, bytes/s, seconds, 0..1 progress, Unix times); a missing value is empty. A string is bare unless it contains a `,`, a `"` or a newline; then it is wrapped in `"` with `\` `"` and newline written `\\` `\"` `\n`. A string that looks like a number is not quoted, so a reader types values by column.
 
 ## The guard
 

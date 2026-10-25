@@ -1,0 +1,6 @@
+[
+  {"state":"downloading","count":1,"size":4096},
+  {"state":"pausedDL","count":1,"size":1288490188},
+  {"state":"stalledUP","count":1,"size":2048},
+  {"state":"total","count":3,"size":1288496332}
+]

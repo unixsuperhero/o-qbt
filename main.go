@@ -9,7 +9,13 @@
 //
 //	o-qbt config init|show|set KEY [VALUE] [--stdin]
 //	o-qbt app info|prefs|state
-//	o-qbt torrent list|show|pause|resume|recheck|delete [--target HASH|--all]
+//	o-qbt torrent list|active|seeding|downloading|paused|errored|stalled [--filter F] [--category C] [--tag T] [--sort FIELD] [--reverse] [--limit N]
+//	o-qbt torrent export --out FILE | summary | overview  (o-qbt overview)
+//	o-qbt torrent show|pause|resume|recheck|delete [--target HASH|--all]
+//
+// Every list-like verb takes --format table|json|jsonl|tsv|csv|md|toon,
+// --columns a,b,c and --out FILE (format.go).
+//
 //	o-qbt transfer info|limit [--dl N] [--up N]|speed-limits-toggle
 //	o-qbt guard check|status|rebase|resume|install|uninstall|log [N]
 //	o-qbt category list
@@ -37,6 +43,7 @@ import (
 	"github.com/unixsuperhero/ochazuke"
 	ocli "github.com/unixsuperhero/ochazuke/cli"
 	"github.com/unixsuperhero/oden"
+	"golang.org/x/term"
 )
 
 // Tool is one invocation's world: streams, environment, home, and the
@@ -48,6 +55,7 @@ type Tool struct {
 	Home           string
 	UID            int
 	Prog           string // "o qbt" under o, else "o-qbt"; messages only
+	TTY            bool   // stdout is a terminal: list verbs default to table
 
 	now   func() time.Time
 	df    func(context.Context, Config) (int64, error)
@@ -69,7 +77,7 @@ func main() {
 	if err != nil {
 		os.Exit(oden.Report(os.Stderr, prog, err))
 	}
-	t := &Tool{Stdin: os.Stdin, Stdout: os.Stdout, Stderr: os.Stderr, Env: os.Environ(), Home: home, UID: os.Getuid(), Prog: prog}
+	t := &Tool{Stdin: os.Stdin, Stdout: os.Stdout, Stderr: os.Stderr, Env: os.Environ(), Home: home, UID: os.Getuid(), Prog: prog, TTY: term.IsTerminal(int(os.Stdout.Fd()))}
 	os.Exit(oden.Report(os.Stderr, t.Prog, t.Main(context.Background(), os.Args[1:])))
 }
 
@@ -92,8 +100,9 @@ func (t *Tool) getenv(name string) string {
 }
 
 // Main runs one command: a noun of the runtime (oden resolves a unique
-// prefix, the shell a verb's), catalog, an oden builtin, a plural noun
-// (torrents is torrent list), or the shell for anything else.
+// prefix, the shell a verb's), catalog, an oden builtin, a shortcut
+// (torrents is torrent list, overview torrent overview), or the shell for
+// anything else.
 func (t *Tool) Main(ctx context.Context, args []string) error {
 	if t.now == nil {
 		t.now = time.Now
@@ -107,8 +116,8 @@ func (t *Tool) Main(ctx context.Context, args []string) error {
 	t.mount(app, sh)
 	app.Default = func(ctx context.Context, args []string) error {
 		if len(args) > 0 {
-			if noun := plurals[args[0]]; noun != "" {
-				return t.runShell(ctx, sh, append([]string{noun, "list"}, args[1:]...))
+			if words := shortcuts[args[0]]; words != nil {
+				return t.runShell(ctx, sh, append(slices.Clone(words), args[1:]...))
 			}
 		}
 		return t.runShell(ctx, sh, args)
@@ -116,7 +125,8 @@ func (t *Tool) Main(ctx context.Context, args []string) error {
 	return app.Run(ctx)
 }
 
-var plurals = map[string]string{"torrents": "torrent", "categories": "category"}
+// shortcuts are top-level words that stand for a noun and verb.
+var shortcuts = map[string][]string{"torrents": {"torrent", "list"}, "categories": {"category", "list"}, "overview": {"torrent", "overview"}}
 
 // mount makes each of this tool's nouns a command running the shell, and
 // adds catalog. The framework's nouns stay out of the command words (they

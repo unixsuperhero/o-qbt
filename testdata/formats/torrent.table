@@ -1,0 +1,4 @@
+hash  name              state        progress     size    dlspeed     eta
+aaa   alpha             downloading     42.2%  4.0 KiB  3.4 MiB/s      1m
+ccc   Movie, The "Cut"  pausedDL        50.0%  1.2 GiB      0 B/s  2h 10m
+bbb   Zeta              stalledUP      100.0%  2.0 KiB      0 B/s       ∞

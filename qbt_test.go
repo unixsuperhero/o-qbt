@@ -20,11 +20,12 @@ var update = flag.Bool("update", false, "rewrite testdata/catalog.golden")
 func TestAppInfoLogsInOnceAndPrintsTable(t *testing.T) {
 	f := newFake(t)
 	tool := testTool(t, f.URL, "good", nil)
+	tool.TTY = true
 	out, _, err := cli(t, tool, "app", "info")
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"login      ok (admin)", "version    v5.0.4", "webapi     2.11.2", "qt 6.7.2", "download   2.0 MiB/s", "free disk  584.9 GiB"} {
+	for _, want := range []string{"login      ok", "user       admin", "version    v5.0.4", "webapi     2.11.2", "qt 6.7.2", "download   2.0 MiB/s", "free disk  584.9 GiB"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("app info lacks %q:\n%s", want, out)
 		}
@@ -92,7 +93,7 @@ func TestTimeoutIsAClearError(t *testing.T) {
 func TestTorrentRows(t *testing.T) {
 	f := newFake(t)
 	tool := testTool(t, f.URL, "good", nil)
-	out, _, err := cli(t, tool, "torrents")
+	out, _, err := cli(t, tool, "torrents", "--json", "{}")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,10 +105,10 @@ func TestTorrentRows(t *testing.T) {
 	if err := json.Unmarshal([]byte(out), &rows); err != nil {
 		t.Fatal(err, out)
 	}
-	if len(rows) != 2 || rows[0].ID != "aaa" || rows[0].Label != "downloading  42.2%  alpha" || rows[1].Label != "stalledUP  100.0%  Zeta" {
+	if len(rows) != 3 || rows[0].ID != "aaa" || rows[0].Label != "downloading  42.2%  alpha" || rows[1].Label != "pausedDL  50.0%  Movie, The \"Cut\"" || rows[2].Label != "stalledUP  100.0%  Zeta" {
 		t.Fatalf("rows: %+v", rows)
 	}
-	if d := rows[1].Data; d.CompletedOn != 20 || d.Category != "tv" || d.SavePath != "/downloads/tv" || d.Size != 2048 {
+	if d := rows[2].Data; d.CompletedOn != 20 || d.Category != "tv" || d.SavePath != "/downloads/tv" || d.Size != 2048 {
 		t.Fatalf("data: %+v", d)
 	}
 	out, _, err = cli(t, tool, "app", "state", "--json", "{}")
@@ -115,6 +116,7 @@ func TestTorrentRows(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := `{"noun":"torrent","id":"aaa","label":"downloading  42.2%  alpha"}
+{"noun":"torrent","id":"ccc","label":"pausedDL  50.0%  Movie, The \"Cut\""}
 {"noun":"torrent","id":"bbb","label":"stalledUP  100.0%  Zeta"}
 {"noun":"category","id":"category/movies","label":"movies  "}
 {"noun":"category","id":"category/tv","label":"tv  /downloads/tv"}

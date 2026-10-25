@@ -2,12 +2,17 @@ package main
 
 import (
 	"bytes"
+	"cmp"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"path/filepath"
+	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -24,6 +29,7 @@ type fakeQBT struct {
 	v4      bool // no torrents/stop or start: 404, as qBittorrent 4 answers
 	logins  int
 	calls   []string // "METHOD /path hashes=..." per request
+	queries []string // torrents/info's query strings, in order
 	removed []string
 }
 
@@ -72,10 +78,10 @@ func (f *fakeQBT) serve(w http.ResponseWriter, r *http.Request) {
 	case "/api/v2/transfer/speedLimitsMode":
 		fmt.Fprint(w, "0")
 	case "/api/v2/sync/maindata":
-		fmt.Fprint(w, `{"rid":1,"full_update":true,"server_state":{"free_space_on_disk":628000000000}}`)
+		fmt.Fprint(w, `{"rid":1,"full_update":true,"server_state":{"free_space_on_disk":628000000000,"dl_info_speed":3565158,"up_info_speed":1024}}`)
 	case "/api/v2/torrents/info":
-		fmt.Fprint(w, `[{"hash":"bbb","name":"Zeta","state":"stalledUP","progress":1,"size":2048,"dlspeed":0,"eta":8640000,"category":"tv","added_on":10,"completion_on":20,"save_path":"/downloads/tv"},
-{"hash":"aaa","name":"alpha","state":"downloading","progress":0.4217,"size":4096,"dlspeed":512,"eta":60,"category":"","added_on":30,"completion_on":-1,"save_path":"/downloads"}]`)
+		f.queries = append(f.queries, r.URL.RawQuery)
+		json.NewEncoder(w).Encode(fakeTorrents(r.URL.Query()))
 	case "/api/v2/torrents/properties":
 		fmt.Fprint(w, `{"save_path":"/downloads","comment":"c"}`)
 	case "/api/v2/torrents/categories":
@@ -145,4 +151,53 @@ func cli(t *testing.T, tool *Tool, args ...string) (string, string, error) {
 	tool.Stdout, tool.Stderr, tool.cl = &out, &errOut, nil
 	err := tool.Main(context.Background(), args)
 	return out.String(), errOut.String(), err
+}
+
+// fakeTorrentList is the fake's torrents, in the server's (unsorted) order.
+var fakeTorrentList = []map[string]any{
+	{"hash": "bbb", "name": "Zeta", "state": "stalledUP", "progress": 1.0, "size": 2048.0, "dlspeed": 0.0, "upspeed": 1024.0, "eta": 8640000.0, "ratio": 2.5, "category": "tv", "tags": "", "added_on": 10.0, "completion_on": 20.0, "save_path": "/downloads/tv"},
+	{"hash": "aaa", "name": "alpha", "state": "downloading", "progress": 0.4217, "size": 4096.0, "dlspeed": 3565158.0, "upspeed": 0.0, "eta": 60.0, "ratio": 0.0, "category": "", "tags": "", "added_on": 30.0, "completion_on": -1.0, "save_path": "/downloads"},
+	{"hash": "ccc", "name": "Movie, The \"Cut\"", "state": "pausedDL", "progress": 0.5, "size": 1288490188.0, "dlspeed": 0.0, "upspeed": 0.0, "eta": 7800.0, "ratio": 0.125, "category": "movies", "tags": "hd,new", "added_on": 5.0, "completion_on": -1.0, "save_path": "/downloads/movies"},
+}
+
+// fakeFilters are the states the fake's filter values select.
+var fakeFilters = map[string][]string{"downloading": {"downloading"}, "seeding": {"stalledUP"}, "paused": {"pausedDL"}, "stopped": {"pausedDL"}, "stalled": {"stalledUP"}, "errored": {}}
+
+// fakeTorrents applies torrents/info's query as qBittorrent does: filter,
+// category, tag, then sort, reverse, limit.
+func fakeTorrents(q url.Values) []map[string]any {
+	out := []map[string]any{}
+	for _, t := range fakeTorrentList {
+		if f := q.Get("filter"); f != "" && f != "all" {
+			if f == "active" {
+				if t["dlspeed"].(float64)+t["upspeed"].(float64) == 0 {
+					continue
+				}
+			} else if !slices.Contains(fakeFilters[f], t["state"].(string)) {
+				continue
+			}
+		}
+		if q.Has("category") && t["category"] != q.Get("category") {
+			continue
+		}
+		if q.Has("tag") && !slices.Contains(strings.Split(t["tags"].(string), ","), q.Get("tag")) {
+			continue
+		}
+		out = append(out, t)
+	}
+	if field := q.Get("sort"); field != "" {
+		slices.SortStableFunc(out, func(a, b map[string]any) int {
+			if x, ok := a[field].(float64); ok {
+				return cmp.Compare(x, b[field].(float64))
+			}
+			return cmp.Compare(a[field].(string), b[field].(string))
+		})
+		if q.Get("reverse") == "true" {
+			slices.Reverse(out)
+		}
+	}
+	if n, err := strconv.Atoi(q.Get("limit")); err == nil && n < len(out) {
+		out = out[:n]
+	}
+	return out
 }
