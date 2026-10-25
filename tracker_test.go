@@ -6,6 +6,29 @@ import (
 	"testing"
 )
 
+func TestTrackerHelpDoesNotCallAPI(t *testing.T) {
+	for _, args := range [][]string{{"tracker"}, {"tracker", "--help"}} {
+		t.Run(strings.Join(args, " "), func(t *testing.T) {
+			f := newFake(t)
+			tool := testTool(t, f.URL, "good", nil)
+			out, stderr, err := cli(t, tool, args...)
+			if err != nil {
+				t.Fatalf("help: %v\n%s", err, stderr)
+			}
+			for _, want := range []string{"o-qbt tracker", "list", "one torrent's trackers", "summary", "one row per tracker host", "hosts"} {
+				if !strings.Contains(out, want) {
+					t.Errorf("help missing %q:\n%s", want, out)
+				}
+			}
+			f.mu.Lock()
+			defer f.mu.Unlock()
+			if len(f.calls) != 0 {
+				t.Errorf("help made API requests: %v", f.calls)
+			}
+		})
+	}
+}
+
 func TestTrackerHostStripsPathQueryAndUserInfo(t *testing.T) {
 	for in, want := range map[string]string{
 		"https://Tracker.Example.org/a1b2c3d4SECRETPASSKEY/announce":           "https://tracker.example.org",

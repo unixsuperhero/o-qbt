@@ -40,7 +40,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/unixsuperhero/ochazuke"
 	ocli "github.com/unixsuperhero/ochazuke/cli"
 	"github.com/unixsuperhero/oden"
 	"golang.org/x/term"
@@ -128,30 +127,22 @@ func (t *Tool) Main(ctx context.Context, args []string) error {
 // shortcuts are top-level words that stand for a noun and verb.
 var shortcuts = map[string][]string{"torrents": {"torrent", "list"}, "categories": {"category", "list"}, "overview": {"torrent", "overview"}}
 
-// mount makes each of this tool's nouns a command running the shell, and
-// adds catalog. The framework's nouns stay out of the command words (they
-// remain reachable through Default and in the catalog, where a host skips
-// them).
+// mount reuses shared command metadata and keeps human output at execution.
 func (t *Tool) mount(app *oden.App, sh *ocli.Shell) {
-	for _, noun := range nouns {
-		var verbs []string
-		for _, op := range sh.Runtime.Catalog() {
-			if op.Noun == noun && op.Kind == ochazuke.KindApplication {
-				verbs = append(verbs, op.Verb)
+	ocli.Mount(app, sh)
+	for _, entry := range app.Catalog().Entries {
+		if entry.Command == nil || entry.Source != "noun" {
+			continue
+		}
+		noun := entry.Name
+		for i := range entry.Command.Children {
+			command := &entry.Command.Children[i]
+			verb := command.Name
+			command.Run = func(ctx context.Context, args []string) error {
+				return t.runShell(ctx, sh, append([]string{noun, verb}, args...))
 			}
 		}
-		app.Add(oden.Command{Name: noun, Summary: strings.Join(verbs, " "), Source: "noun", Run: func(ctx context.Context, rest []string) error {
-			return t.runShell(ctx, sh, append([]string{noun}, rest...))
-		}})
 	}
-	app.Add(oden.Command{Name: "catalog", Summary: "print the nouns, verbs, bindings and pages as JSON", Source: "cli", Run: func(context.Context, []string) error {
-		data, err := ocli.Catalog(sh.Runtime, sh.Bin, sh.Version)
-		if err != nil {
-			return err
-		}
-		_, err = fmt.Fprintf(t.Stdout, "%s\n", data)
-		return err
-	}})
 }
 
 // runShell runs one command; when the answer has a rendering for a person
