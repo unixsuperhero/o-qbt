@@ -143,7 +143,10 @@
                 "user",
                 "pass",
                 "volume",
-                "ssh"
+                "ssh",
+                "guard.mode",
+                "guard.minFree",
+                "guard.resumeAbove"
               ]
             },
             "stdin": {
@@ -291,12 +294,28 @@
       "verbs": [
         {
           "name": "check",
-          "description": "the monitor step: df the volume over ssh; pause every torrent once free space is more than --limit below the baseline, write the marker; one line to guard.log",
+          "description": "the monitor step: df the volume over ssh; floor mode (default) pauses every torrent when free space is below --min-free (5GiB) and resumes them above --resume-above (20GiB) when the guard paused; allowance mode pauses once free space is more than --limit below the baseline; one line to guard.log",
           "kind": "application",
           "params": {
             "limit": {
               "type": "string",
-              "description": "how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+              "description": "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+            },
+            "min-free": {
+              "type": "string",
+              "description": "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"
+            },
+            "mode": {
+              "type": "string",
+              "description": "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor",
+              "enum": [
+                "floor",
+                "allowance"
+              ]
+            },
+            "resume-above": {
+              "type": "string",
+              "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
             }
           },
           "result": "JSON value"
@@ -324,7 +343,7 @@
         },
         {
           "name": "rebase",
-          "description": "store the current free space as the baseline (or --bytes N) and clear the marker",
+          "description": "store the current free space as the baseline (or --bytes N) and clear the marker; only allowance mode reads the baseline",
           "kind": "application",
           "params": {
             "bytes": {
@@ -333,7 +352,23 @@
             },
             "limit": {
               "type": "string",
-              "description": "how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+              "description": "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+            },
+            "min-free": {
+              "type": "string",
+              "description": "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"
+            },
+            "mode": {
+              "type": "string",
+              "description": "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor",
+              "enum": [
+                "floor",
+                "allowance"
+              ]
+            },
+            "resume-above": {
+              "type": "string",
+              "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
             }
           },
           "result": "JSON value"
@@ -345,19 +380,51 @@
           "params": {
             "limit": {
               "type": "string",
-              "description": "how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+              "description": "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+            },
+            "min-free": {
+              "type": "string",
+              "description": "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"
+            },
+            "mode": {
+              "type": "string",
+              "description": "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor",
+              "enum": [
+                "floor",
+                "allowance"
+              ]
+            },
+            "resume-above": {
+              "type": "string",
+              "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
             }
           },
           "result": "JSON value"
         },
         {
           "name": "status",
-          "description": "the launchd agent, the last guard.log line, free space against the baseline and limit, the marker",
+          "description": "the launchd agent, the last guard.log line, the mode and its thresholds, free space (against the baseline in allowance mode), whether the guard paused",
           "kind": "application",
           "params": {
             "limit": {
               "type": "string",
-              "description": "how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+              "description": "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+            },
+            "min-free": {
+              "type": "string",
+              "description": "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"
+            },
+            "mode": {
+              "type": "string",
+              "description": "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor",
+              "enum": [
+                "floor",
+                "allowance"
+              ]
+            },
+            "resume-above": {
+              "type": "string",
+              "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
             }
           },
           "result": "JSON value"

@@ -72,10 +72,13 @@ type Totals struct {
 // GuardState is the guard as an overview shows it, without df: the marker
 // and the allowance used, from qBittorrent's own free space.
 type GuardState struct {
-	Paused   string `json:"paused"` // "" or the marker's time
-	Baseline int64  `json:"baseline"`
-	Used     int64  `json:"used"`
-	Limit    int64  `json:"limit"`
+	Mode        string `json:"mode"`
+	Paused      string `json:"paused"` // "" or the marker's time
+	MinFree     int64  `json:"min_free"`
+	ResumeAbove int64  `json:"resume_above"`
+	Baseline    int64  `json:"baseline"`
+	Used        int64  `json:"used"`
+	Limit       int64  `json:"limit"`
 }
 
 // CategoryCount is one category's torrent count ("" = uncategorised).

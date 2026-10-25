@@ -16,23 +16,34 @@ import (
 // Config is the tool's settings file, $XDG_CONFIG_HOME/o-qbt/config.json
 // (else ~/.config/o-qbt/config.json), mode 600:
 //
-//	{"url": "http://nas:8012", "user": "admin", "pass": "", "volume": "/volume1", "ssh": "nas"}
+//	{"url": "http://nas:8012", "user": "admin", "pass": "", "volume": "/volume1", "ssh": "nas",
+//	 "guard": {"mode": "floor", "minFree": "5GiB", "resumeAbove": "20GiB"}}
 //
 // O_QBT_URL, O_QBT_USER and O_QBT_PASS override the file. pass is never
 // printed and never read from argv.
 type Config struct {
-	URL    string `json:"url"`
-	User   string `json:"user"`
-	Pass   string `json:"pass"`
-	Volume string `json:"volume"` // the NAS path guard measures with df
-	SSH    string `json:"ssh"`    // the ssh alias guard runs df through
+	URL    string      `json:"url"`
+	User   string      `json:"user"`
+	Pass   string      `json:"pass"`
+	Volume string      `json:"volume"` // the NAS path guard measures with df
+	SSH    string      `json:"ssh"`    // the ssh alias guard runs df through
+	Guard  GuardConfig `json:"guard,omitzero"`
+}
+
+// GuardConfig is config.json's guard block; empty fields are DefaultGuard's.
+//
+//	"guard": {"mode": "floor", "minFree": "5GiB", "resumeAbove": "20GiB"}
+type GuardConfig struct {
+	Mode        string `json:"mode,omitempty"`        // floor (default) or allowance
+	MinFree     string `json:"minFree,omitempty"`     // a size: floor pauses below it
+	ResumeAbove string `json:"resumeAbove,omitempty"` // a size: floor resumes above it
 }
 
 // DefaultConfig is what config init writes.
 var DefaultConfig = Config{URL: "http://nas:8012", User: "admin", Volume: "/volume1", SSH: "nas"}
 
 // configKeys are the keys config set takes.
-var configKeys = []string{"url", "user", "pass", "volume", "ssh"}
+var configKeys = []string{"url", "user", "pass", "volume", "ssh", "guard.mode", "guard.minFree", "guard.resumeAbove"}
 
 // ConfigView is config show's answer: the effective settings without the
 // password, where each came from, and whether a password is set.
@@ -44,6 +55,7 @@ type ConfigView struct {
 	PassSet bool              `json:"pass_set"`
 	Volume  string            `json:"volume"`
 	SSH     string            `json:"ssh"`
+	Guard   GuardConfig       `json:"guard"`                   // effective, defaults filled
 	Env     map[string]string `json:"env_overrides,omitempty"` // key -> the variable that set it
 }
 
@@ -56,7 +68,8 @@ func (v ConfigView) Text() string {
 	if !v.Exists {
 		exists = " (missing: o qbt config init)"
 	}
-	rows := [][2]string{{"path", v.Path + exists}, {"url", v.URL}, {"user", v.User}, {"pass", pass}, {"volume", v.Volume}, {"ssh", v.SSH}}
+	rows := [][2]string{{"path", v.Path + exists}, {"url", v.URL}, {"user", v.User}, {"pass", pass}, {"volume", v.Volume}, {"ssh", v.SSH},
+		{"guard", fmt.Sprintf("mode %s, minFree %s, resumeAbove %s", v.Guard.Mode, v.Guard.MinFree, v.Guard.ResumeAbove)}}
 	for _, k := range configKeys {
 		if env := v.Env[k]; env != "" {
 			rows = append(rows, [2]string{"override", k + " from $" + env})
@@ -131,6 +144,12 @@ func (c *Config) field(key string) *string {
 		return &c.Volume
 	case "ssh":
 		return &c.SSH
+	case "guard.mode":
+		return &c.Guard.Mode
+	case "guard.minFree":
+		return &c.Guard.MinFree
+	case "guard.resumeAbove":
+		return &c.Guard.ResumeAbove
 	}
 	return nil
 }
@@ -197,7 +216,12 @@ func (t *Tool) ConfigShow() (ConfigView, error) {
 	if len(env) == 0 {
 		env = nil
 	}
-	return ConfigView{Path: t.ConfigPath(), Exists: exists, URL: c.URL, User: c.User, PassSet: c.Pass != "", Volume: c.Volume, SSH: c.SSH, Env: env}, nil
+	gs, err := guardSettings(c, nil)
+	if err != nil {
+		return ConfigView{}, err
+	}
+	g := GuardConfig{Mode: gs.Mode, MinFree: bytesH(gs.MinFree), ResumeAbove: bytesH(gs.ResumeAbove)}
+	return ConfigView{Path: t.ConfigPath(), Exists: exists, URL: c.URL, User: c.User, PassSet: c.Pass != "", Volume: c.Volume, SSH: c.SSH, Guard: g, Env: env}, nil
 }
 
 // ConfigSet sets one key in the file. pass never comes from value: it is
@@ -235,6 +259,11 @@ func (t *Tool) ConfigSet(key, value string, fromStdin bool) (Message, error) {
 		}
 	}
 	*c.field(key) = value
+	if strings.HasPrefix(key, "guard.") {
+		if _, err := guardSettings(c, nil); err != nil {
+			return Message{}, fmt.Errorf("config set %s: %w; nothing written", key, err)
+		}
+	}
 	if err := t.writeConfig(c); err != nil {
 		return Message{}, err
 	}

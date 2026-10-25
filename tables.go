@@ -107,8 +107,9 @@ func (v OverviewView) totals() Table {
 	return Table{Name: "totals", Vertical: true, Columns: []Column{
 		{Name: "torrents"}, {Name: "active"}, {Name: "seeding"}, {Name: "downloading"}, {Name: "paused"}, {Name: "errored"},
 		{Name: "size", Human: hBytes}, {Name: "dlspeed", Label: "down", Human: hRate}, {Name: "upspeed", Label: "up", Human: hRate},
-		{Name: "free", Human: hBytes}, {Name: "guard_paused"}, {Name: "guard_baseline", Human: hBytes}, {Name: "guard_used", Human: hBytes}, {Name: "guard_limit", Human: hBytes},
-	}, Rows: [][]any{{x.Torrents, x.Active, x.Seeding, x.Downloading, x.Paused, x.Errored, x.Size, x.DLSpeed, x.UPSpeed, x.Free, x.Guard.Paused, x.Guard.Baseline, x.Guard.Used, x.Guard.Limit}}}
+		{Name: "free", Human: hBytes}, {Name: "guard_mode"}, {Name: "guard_paused"}, {Name: "guard_min_free", Human: hBytes}, {Name: "guard_resume_above", Human: hBytes},
+		{Name: "guard_baseline", Human: hBytes}, {Name: "guard_used", Human: hBytes}, {Name: "guard_limit", Human: hBytes},
+	}, Rows: [][]any{{x.Torrents, x.Active, x.Seeding, x.Downloading, x.Paused, x.Errored, x.Size, x.DLSpeed, x.UPSpeed, x.Free, x.Guard.Mode, x.Guard.Paused, x.Guard.MinFree, x.Guard.ResumeAbove, x.Guard.Baseline, x.Guard.Used, x.Guard.Limit}}}
 }
 
 // sections are the overview's tables, named as json names them.
@@ -133,16 +134,19 @@ func (v OverviewView) sections() []Table {
 	}
 }
 
-// guardLine is the guard as the overview's header says it.
+// line is the guard as the overview's header says it.
 func (g GuardState) line() string {
-	if g.Baseline == 0 {
-		return "guard: no baseline (o qbt guard rebase)"
-	}
-	s := "guard: ok"
+	state := "ok"
 	if g.Paused != "" {
-		s = "guard: paused since " + g.Paused
+		state = "paused since " + g.Paused
 	}
-	return fmt.Sprintf("%s, %s of %s used", s, bytesH(g.Used), bytesH(g.Limit))
+	if g.Mode == "floor" {
+		return fmt.Sprintf("guard floor: %s (pause below %s, resume above %s)", state, bytesH(g.MinFree), bytesH(g.ResumeAbove))
+	}
+	if g.Baseline == 0 {
+		return "guard allowance: no baseline (o qbt guard rebase)"
+	}
+	return fmt.Sprintf("guard allowance: %s, %s of %s used", state, bytesH(g.Used), bytesH(g.Limit))
 }
 
 func (v OverviewView) Render(format string, columns []string) (string, error) {

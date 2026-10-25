@@ -11,7 +11,7 @@ o qbt config set pass      # prompts with echo off; or: printf %s "$PW" | o qbt 
 o qbt app info             # the credentials test
 ```
 
-`config.json` is `{url, user, pass, volume, ssh}`: `http://nas:8012` (or `http://10.0.0.200:8012` on the LAN), `admin`, the password, `/volume1` and the ssh alias `nas` the guard runs `df` through. It lives in `$XDG_CONFIG_HOME/o-qbt/` when that is set. `O_QBT_URL`, `O_QBT_USER` and `O_QBT_PASS` override it. `config show` prints everything but the password (only whether one is set); `config set KEY VALUE` sets the others. The password is never taken from the command line.
+`config.json` is `{url, user, pass, volume, ssh, guard}`: `http://nas:8012` (or `http://10.0.0.200:8012` on the LAN), `admin`, the password, `/volume1` and the ssh alias `nas` the guard runs `df` through. It lives in `$XDG_CONFIG_HOME/o-qbt/` when that is set. `O_QBT_URL`, `O_QBT_USER` and `O_QBT_PASS` override it. `config show` prints everything but the password (only whether one is set); `config set KEY VALUE` sets the others, `guard.mode`, `guard.minFree` and `guard.resumeAbove` included. The password is never taken from the command line.
 
 ## Ban caution
 
@@ -27,7 +27,7 @@ o qbt torrent show --target HASH
 o qbt torrent pause|resume|recheck --target HASH | --all
 o qbt torrent delete --target HASH [--files] [--yes]
 o qbt transfer info [output] | limit --dl N --up N | speed-limits-toggle     (bytes/s, 0 = unlimited)
-o qbt guard check|status|rebase|resume [--limit 10G] | rebase --bytes N | install | uninstall | log [N]
+o qbt guard check|status|rebase|resume [--mode floor|allowance] [--min-free 5GiB] [--resume-above 20GiB] [--limit 10G] | rebase --bytes N | install | uninstall | log [N]
 o qbt category list [output]
 o qbt torrents | categories | overview          (shortcuts)
 o qbt config init | show | set KEY [VALUE] [--stdin]
@@ -86,13 +86,29 @@ The rule, exactly: a header `NAME[N]{col,col,...}:` (N records, the columns in o
 
 ## The guard
 
-`guard check` is the monitor step. It reads the baseline, runs `ssh nas df -B1 --output=avail /volume1`, and when the baseline minus the free space is more than `--limit` (default 10 GiB) it pauses every torrent and writes a marker; later checks log `skipped-already-paused` until `guard resume` (resume all, clear the marker) or `guard rebase` (store the current free space, or `--bytes N`, as the baseline and clear the marker). Without a password it logs `error:no-credentials` and exits 0. Each check, rebase and resume appends one line to `~/.local/share/o-qbt/guard.log`:
+`guard check` is the monitor step: it reads the volume's free space with `ssh nas df -B1 --output=avail /volume1` and applies one of two rules, `guard.mode` in `config.json` (or `--mode`).
+
+**floor** (the default): when free space is below `minFree` (default 5 GiB; `guard.minFree`, `--min-free 5GiB`) it pauses every torrent and writes a marker. While the marker exists, later checks log `skipped-already-paused` until free space is back above `resumeAbove` (default 20 GiB, an absolute level; `guard.resumeAbove`, `--resume-above 20GiB`), when the guard resumes every torrent and clears the marker. It only resumes what it paused: torrents paused by hand (no marker) stay paused. `resumeAbove` must be above `minFree`.
+
+**allowance** (opt-in): when the stored baseline minus the free space is more than `--limit` (default 10 GiB) it pauses every torrent and writes the marker, and stays paused until `guard resume` (resume all, clear the marker) or `guard rebase` (store the current free space, or `--bytes N`, as the baseline and clear the marker). Only this mode reads the baseline; `rebase` in floor mode stores it and says so.
+
+```sh
+o qbt config set guard.mode floor            # or allowance
+o qbt config set guard.resumeAbove 30GiB
+o qbt config set guard.minFree 8GiB
+```
+
+```json
+"guard": {"mode": "floor", "minFree": "5GiB", "resumeAbove": "20GiB"}
+```
+
+Without a password a check logs `error:no-credentials` and exits 0. Each check, rebase and resume appends one line (GiB) to `~/.local/share/o-qbt/guard.log`:
 
 ```
-2026-10-25T12:30:00-0400 free=577.1 baseline=584.8 used=7.7 limit=10.0 action=ok
+2026-10-25T12:30:00-0400 mode=floor min=5.0 resume=20.0 free=577.1 baseline=584.8 used=7.7 limit=10.0 action=ok
 ```
 
-`guard install` writes `~/Library/LaunchAgents/com.unixsuperhero.o-qbt-guard.plist` (runs `~/bin/o-qbt guard check` every 300 s and at load; stdout and stderr in `~/Library/Logs/o-qbt/`), lints it and bootstraps it in `gui/UID`. `guard status` shows the agent, the last log line, free space against the baseline and the marker. `guard uninstall` removes the agent and keeps the data.
+`guard install` writes `~/Library/LaunchAgents/com.unixsuperhero.o-qbt-guard.plist` (runs `~/bin/o-qbt guard check` every 300 s and at load; stdout and stderr in `~/Library/Logs/o-qbt/`), lints it and bootstraps it in `gui/UID`. `guard status` shows the agent, the last log line, the mode and its thresholds (`min free`, `resume`), free space (against the baseline and limit in allowance mode) and whether the guard paused. `guard uninstall` removes the agent and keeps the data.
 
 It replaces the earlier shell guard (`qbt-guard.sh` on the NAS, driven by `com.unixsuperhero.qbt-guard`).
 

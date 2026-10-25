@@ -9,8 +9,11 @@ The qBittorrent family tool (`o-qbt`, so `o qbt`). An oden app with an ochazuke 
 | Settings file, env overrides, the password prompt | `config.go` |
 | The Web API session: one login per process, stop/pause fallback | `client.go` |
 | What each verb asks qBittorrent; records and tables | `qbt.go` |
-| The guard: baseline, marker, log, df over ssh, launchd agent | `guard.go` |
-| Fake qBittorrent and the test tool | `fake_test.go` |
+| Aggregations: summary per state, overview | `report.go` |
+| The output engine: `Table`, formats (table, json, jsonl, tsv, csv, md, toon), humanisers | `format.go` |
+| Each record type as a `Table`; the overview's rendering | `tables.go` |
+| The guard: floor and allowance modes, baseline, marker, log, df over ssh, launchd agent | `guard.go` |
+| Fake qBittorrent and the test tool; output goldens in `testdata/` (`go test -update`) | `fake_test.go` |
 
 ## Invariants
 

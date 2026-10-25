@@ -39,7 +39,7 @@ func params(kv ...any) map[string]ochazuke.Parameter {
 
 var (
 	allParam   = ochazuke.Parameter{Type: "boolean", Description: "every torrent instead of --target HASH"}
-	limitParam = ochazuke.Parameter{Type: "string", Description: "how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"}
+	limitParam = ochazuke.Parameter{Type: "string", Description: "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"}
 )
 
 // answer is a verb's Result; a Texter's rendering is kept for a person.
@@ -352,38 +352,35 @@ func (t *Tool) shell() *ocli.Shell {
 		"dl", ochazuke.Parameter{Type: "integer", Description: "download limit, bytes/s (0 = unlimited)"},
 		"up", ochazuke.Parameter{Type: "integer", Description: "upload limit, bytes/s (0 = unlimited)"}))
 
-	limitOf := func(c ochazuke.Ctx) (int64, error) {
-		s := ochazuke.StringArg(c.Args, "limit", "")
-		if s == "" {
-			return DefaultLimit, nil
-		}
-		return parseSize(s)
-	}
-	guardVerb := func(verb, desc string, run func(ctx context.Context, c ochazuke.Ctx, lim int64) (any, error)) {
+	guardVerb := func(verb, desc string, run func(ctx context.Context, c ochazuke.Ctx, gs GuardSettings) (any, error)) {
 		r.Define("guard").Verb(verb, func(c ochazuke.Ctx) ochazuke.Result {
-			lim, err := limitOf(c)
+			conf, _, _, err := t.config()
 			if err != nil {
 				return ochazuke.Failed(err)
 			}
-			v, err := run(ctxOf(c), c, lim)
+			gs, err := guardSettings(conf, c.Args)
+			if err != nil {
+				return ochazuke.Failed(err)
+			}
+			v, err := run(ctxOf(c), c, gs)
 			return t.answer(v, err)
 		}, desc)
 	}
-	guardVerb("check", "the monitor step: df the volume over ssh; pause every torrent once free space is more than --limit below the baseline, write the marker; one line to guard.log", func(ctx context.Context, _ ochazuke.Ctx, lim int64) (any, error) {
-		return t.GuardCheck(ctx, lim)
+	guardVerb("check", "the monitor step: df the volume over ssh; floor mode (default) pauses every torrent when free space is below --min-free (5GiB) and resumes them above --resume-above (20GiB) when the guard paused; allowance mode pauses once free space is more than --limit below the baseline; one line to guard.log", func(ctx context.Context, _ ochazuke.Ctx, gs GuardSettings) (any, error) {
+		return t.GuardCheck(ctx, gs)
 	})
-	guardVerb("status", "the launchd agent, the last guard.log line, free space against the baseline and limit, the marker", func(ctx context.Context, _ ochazuke.Ctx, lim int64) (any, error) {
-		return t.GuardStatusOf(ctx, lim)
+	guardVerb("status", "the launchd agent, the last guard.log line, the mode and its thresholds, free space (against the baseline in allowance mode), whether the guard paused", func(ctx context.Context, _ ochazuke.Ctx, gs GuardSettings) (any, error) {
+		return t.GuardStatusOf(ctx, gs)
 	})
-	guardVerb("rebase", "store the current free space as the baseline (or --bytes N) and clear the marker", func(ctx context.Context, c ochazuke.Ctx, lim int64) (any, error) {
+	guardVerb("rebase", "store the current free space as the baseline (or --bytes N) and clear the marker; only allowance mode reads the baseline", func(ctx context.Context, c ochazuke.Ctx, gs GuardSettings) (any, error) {
 		n := ochazuke.IntArg(c.Args, "bytes", 0)
 		if n < 0 {
 			return nil, errors.New("--bytes is a positive byte count")
 		}
-		return t.GuardRebase(ctx, int64(n), lim)
+		return t.GuardRebase(ctx, int64(n), gs)
 	})
-	guardVerb("resume", "resume every torrent and clear the marker", func(ctx context.Context, _ ochazuke.Ctx, lim int64) (any, error) {
-		return t.GuardResume(ctx, lim)
+	guardVerb("resume", "resume every torrent and clear the marker", func(ctx context.Context, _ ochazuke.Ctx, gs GuardSettings) (any, error) {
+		return t.GuardResume(ctx, gs)
 	})
 	r.Define("guard").
 		Verb("install", func(c ochazuke.Ctx) ochazuke.Result { return t.answer(t.GuardInstall(ctxOf(c))) },
@@ -393,11 +390,15 @@ func (t *Tool) shell() *ocli.Shell {
 		Verb("log", func(c ochazuke.Ctx) ochazuke.Result {
 			return t.answer(t.GuardLogTail(ochazuke.IntArg(c.Args, "tail", 20)), nil)
 		}, "the last --tail N lines of guard.log (default 20)").Positional("tail")
+	guardParams := []any{"limit", limitParam,
+		"mode", ochazuke.Parameter{Type: "string", Enum: GuardModes, Description: "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor"},
+		"min-free", ochazuke.Parameter{Type: "string", Description: "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"},
+		"resume-above", ochazuke.Parameter{Type: "string", Description: "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"}}
 	for _, verb := range []string{"check", "status", "resume"} {
-		r.Operations["guard."+verb] = withParams(r.Operations["guard."+verb], params("limit", limitParam))
+		r.Operations["guard."+verb] = withParams(r.Operations["guard."+verb], params(guardParams...))
 	}
-	r.Operations["guard.rebase"] = withParams(r.Operations["guard.rebase"], params("limit", limitParam,
-		"bytes", ochazuke.Parameter{Type: "integer", Description: "the baseline in bytes instead of the current free space"}))
+	r.Operations["guard.rebase"] = withParams(r.Operations["guard.rebase"], params(append(guardParams,
+		"bytes", ochazuke.Parameter{Type: "integer", Description: "the baseline in bytes instead of the current free space"})...))
 	r.Operations["guard.log"] = withParams(r.Operations["guard.log"], params("tail", ochazuke.Parameter{Type: "integer", Description: "how many lines (default 20)"}))
 
 	r.Define("category").
@@ -573,7 +574,15 @@ func (t *Tool) present(c ochazuke.Ctx, native any, v View, err error) ochazuke.R
 
 // guardState is the guard as the overview shows it, against free bytes.
 func (t *Tool) guardState(free int64) (GuardState, error) {
-	g := GuardState{Paused: t.marker(), Limit: DefaultLimit}
+	c, _, _, err := t.config()
+	if err != nil {
+		return GuardState{}, err
+	}
+	gs, err := guardSettings(c, nil)
+	if err != nil {
+		return GuardState{}, err
+	}
+	g := GuardState{Mode: gs.Mode, MinFree: gs.MinFree, ResumeAbove: gs.ResumeAbove, Paused: t.marker(), Limit: gs.Limit}
 	base, ok, err := t.readBaseline()
 	if ok {
 		g.Baseline, g.Used = base, base-free

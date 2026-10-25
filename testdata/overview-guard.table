@@ -1,4 +1,4 @@
-torrents 3  active 2  seeding 1  downloading 1  paused 1  errored 0  size 1.2 GiB  down 3.4 MiB/s  up 1.0 KiB/s  free 584.9 GiB  guard: paused since 2026-10-25T12:00:00-0400, 2.0 GiB of 10.0 GiB used
+torrents 3  active 2  seeding 1  downloading 1  paused 1  errored 0  size 1.2 GiB  down 3.4 MiB/s  up 1.0 KiB/s  free 584.9 GiB  guard floor: paused since 2026-10-25T12:00:00-0400 (pause below 5.0 GiB, resume above 20.0 GiB)
 
 by state
 state        count     size

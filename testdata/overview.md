@@ -12,7 +12,10 @@
 | down | 3.4 MiB/s |
 | up | 1.0 KiB/s |
 | free | 584.9 GiB |
+| guard_mode | floor |
 | guard_paused | 2026-10-25T12:00:00-0400 |
+| guard_min_free | 5.0 GiB |
+| guard_resume_above | 20.0 GiB |
 | guard_baseline | 586.9 GiB |
 | guard_used | 2.0 GiB |
 | guard_limit | 10.0 GiB |

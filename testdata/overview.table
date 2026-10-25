@@ -1,4 +1,4 @@
-torrents 3  active 2  seeding 1  downloading 1  paused 1  errored 0  size 1.2 GiB  down 3.4 MiB/s  up 1.0 KiB/s  free 584.9 GiB  guard: no baseline (o qbt guard rebase)
+torrents 3  active 2  seeding 1  downloading 1  paused 1  errored 0  size 1.2 GiB  down 3.4 MiB/s  up 1.0 KiB/s  free 584.9 GiB  guard floor: ok (pause below 5.0 GiB, resume above 20.0 GiB)
 
 by state
 state        count     size

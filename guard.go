@@ -8,14 +8,19 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
 )
 
-// The guard pauses every torrent once the NAS volume's free space has
-// dropped more than a limit below a stored baseline. Its state is in the
-// data dir ($XDG_DATA_HOME/o-qbt, else ~/.local/share/o-qbt):
+// The guard pauses every torrent before the NAS volume fills. In floor
+// mode (the default) it pauses when free space is below minFree and, when
+// it was the one that paused (the marker), resumes once free space is back
+// above resumeAbove. In allowance mode it pauses once free space has
+// dropped more than a limit below a stored baseline, and stays paused until
+// guard resume or rebase. Its state is in the data dir ($XDG_DATA_HOME/o-qbt,
+// else ~/.local/share/o-qbt):
 //
 //	baseline   free bytes when the guard was last rebased
 //	paused     the marker: the time guard check paused everything
@@ -29,10 +34,61 @@ const GuardLabel = "com.unixsuperhero.o-qbt-guard"
 // GuardInterval is the agent's StartInterval in seconds.
 const GuardInterval = 300
 
-// DefaultLimit is how far below the baseline free space may drop.
+// DefaultLimit is how far below the baseline free space may drop
+// (allowance mode).
 const DefaultLimit int64 = 10 << 30
 
 const gib = 1 << 30
+
+// GuardModes are the guard's rules; the first is the default.
+var GuardModes = []string{"floor", "allowance"}
+
+// GuardSettings are the guard's effective rule: flags over config.json's
+// guard block over the defaults (DefaultGuard).
+type GuardSettings struct {
+	Mode        string // floor or allowance
+	MinFree     int64  // floor: pause below this many free bytes
+	ResumeAbove int64  // floor: resume above this, when the guard paused
+	Limit       int64  // allowance: pause when more than this below the baseline
+}
+
+// DefaultGuard is the rule without settings: a 5 GiB floor, resume above
+// 20 GiB.
+var DefaultGuard = GuardSettings{Mode: "floor", MinFree: 5 * gib, ResumeAbove: 20 * gib, Limit: DefaultLimit}
+
+// guardSettings resolves the rule from args (mode, min-free, resume-above,
+// limit) over c.Guard over DefaultGuard.
+func guardSettings(c Config, args map[string]any) (GuardSettings, error) {
+	gs := DefaultGuard
+	str := func(flag, conf string) string {
+		if v, ok := args[flag].(string); ok && v != "" {
+			return v
+		}
+		return conf
+	}
+	if m := str("mode", c.Guard.Mode); m != "" {
+		if !slices.Contains(GuardModes, m) {
+			return gs, fmt.Errorf("guard mode %q: floor or allowance", m)
+		}
+		gs.Mode = m
+	}
+	for _, x := range []struct {
+		flag, conf string
+		dst        *int64
+	}{{"min-free", c.Guard.MinFree, &gs.MinFree}, {"resume-above", c.Guard.ResumeAbove, &gs.ResumeAbove}, {"limit", "", &gs.Limit}} {
+		if v := str(x.flag, x.conf); v != "" {
+			n, err := parseSize(v)
+			if err != nil {
+				return gs, fmt.Errorf("--%s: %w", x.flag, err)
+			}
+			*x.dst = n
+		}
+	}
+	if gs.ResumeAbove <= gs.MinFree {
+		return gs, fmt.Errorf("guard resumeAbove (%s) must be above minFree (%s)", bytesH(gs.ResumeAbove), bytesH(gs.MinFree))
+	}
+	return gs, nil
+}
 
 // DataDir holds the guard's baseline, marker and log.
 func (t *Tool) DataDir() string {
@@ -47,24 +103,39 @@ func (t *Tool) baselinePath() string { return filepath.Join(t.DataDir(), "baseli
 func (t *Tool) markerPath() string   { return filepath.Join(t.DataDir(), "paused") }
 func (t *Tool) guardLog() string     { return filepath.Join(t.DataDir(), "guard.log") }
 
-// GuardLine is one guard event, the shape of a guard.log line:
+// GuardLine is one guard event, the shape of a guard.log line (GiB):
 //
-//	2026-10-25T12:30:00-0400 free=577.1 baseline=584.8 used=7.7 limit=10.0 action=ok
+//	2026-10-25T12:30:00-0400 mode=floor min=5.0 resume=20.0 free=577.1 baseline=584.8 used=7.7 limit=10.0 action=ok
 type GuardLine struct {
-	Time     string `json:"time"`
-	Free     int64  `json:"free"`
-	Baseline int64  `json:"baseline"`
-	Used     int64  `json:"used"`
-	Limit    int64  `json:"limit"`
-	Action   string `json:"action"`
+	Time        string `json:"time"`
+	Mode        string `json:"mode"`
+	MinFree     int64  `json:"min_free"`
+	ResumeAbove int64  `json:"resume_above"`
+	Free        int64  `json:"free"`
+	Baseline    int64  `json:"baseline"`
+	Used        int64  `json:"used"`
+	Limit       int64  `json:"limit"`
+	Action      string `json:"action"`
+	Note        string `json:"note,omitempty"` // not logged
 }
 
 func (g GuardLine) String() string {
-	return fmt.Sprintf("%s free=%.1f baseline=%.1f used=%.1f limit=%.1f action=%s", g.Time,
-		float64(g.Free)/gib, float64(g.Baseline)/gib, float64(g.Used)/gib, float64(g.Limit)/gib, g.Action)
+	gb := func(n int64) float64 { return float64(n) / gib }
+	return fmt.Sprintf("%s mode=%s min=%.1f resume=%.1f free=%.1f baseline=%.1f used=%.1f limit=%.1f action=%s", g.Time, g.Mode,
+		gb(g.MinFree), gb(g.ResumeAbove), gb(g.Free), gb(g.Baseline), gb(g.Used), gb(g.Limit), g.Action)
 }
 
-func (g GuardLine) Text() string { return g.String() + "\n" }
+func (g GuardLine) Text() string {
+	if g.Note != "" {
+		return g.String() + "\n" + g.Note + "\n"
+	}
+	return g.String() + "\n"
+}
+
+// line is a GuardLine stamped now under gs.
+func (t *Tool) line(gs GuardSettings) GuardLine {
+	return GuardLine{Time: t.stamp(), Mode: gs.Mode, MinFree: gs.MinFree, ResumeAbove: gs.ResumeAbove, Limit: gs.Limit}
+}
 
 // logLine appends g to guard.log.
 func (t *Tool) logLine(g GuardLine) (GuardLine, error) {
@@ -155,23 +226,30 @@ func parseSize(s string) (int64, error) {
 	return int64(f * float64(int64(1)<<shift)), nil
 }
 
-// GuardCheck is the monitor step: pause everything once the volume's free
-// space is more than lim below the baseline. In order: no baseline is an
-// error; the df failing is an error; a marker skips (idempotent: one pause
-// until guard resume or rebase); no password logs error:no-credentials and
-// succeeds, so the agent keeps running and the log says what is missing;
-// within the limit logs ok; else pause all, write the marker, log paused.
-func (t *Tool) GuardCheck(ctx context.Context, lim int64) (GuardLine, error) {
+// GuardCheck is the monitor step under gs. It reads the baseline (an
+// error without one in allowance mode) and the volume's free space (a df
+// failure is an error), then decides:
+//
+// floor: paused by the guard and free at or below resumeAbove skips; no
+// password logs error:no-credentials and succeeds (the agent keeps
+// running and the log says what is missing); paused by the guard and free
+// above resumeAbove resumes all and clears the marker; free below minFree
+// pauses all and writes the marker; else ok.
+//
+// allowance: a marker skips (one pause until guard resume or rebase); no
+// password logs error:no-credentials; within the limit logs ok; else
+// pause all and write the marker.
+func (t *Tool) GuardCheck(ctx context.Context, gs GuardSettings) (GuardLine, error) {
 	c, _, _, err := t.config()
 	if err != nil {
 		return GuardLine{}, err
 	}
-	g := GuardLine{Time: t.stamp(), Limit: lim}
+	g := t.line(gs)
 	base, ok, err := t.readBaseline()
 	if err != nil {
 		return g, err
 	}
-	if !ok {
+	if !ok && gs.Mode == "allowance" {
 		g.Action = "error:no-baseline"
 		t.logLine(g)
 		return g, errors.New("no baseline: run o qbt guard rebase")
@@ -182,36 +260,79 @@ func (t *Tool) GuardCheck(ctx context.Context, lim int64) (GuardLine, error) {
 		t.logLine(g)
 		return g, err
 	}
-	g.Used = base - g.Free
+	if ok {
+		g.Used = base - g.Free
+	}
+	paused := t.marker() != ""
+	if gs.Mode == "floor" {
+		switch {
+		case paused && g.Free <= gs.ResumeAbove:
+			g.Action = "skipped-already-paused"
+		case c.Pass == "":
+			g.Action = "error:no-credentials"
+		case paused:
+			return t.resumeAll(ctx, c, g)
+		case g.Free < gs.MinFree:
+			return t.pauseAll(ctx, c, g)
+		default:
+			g.Action = "ok"
+		}
+		return t.logLine(g)
+	}
 	switch {
-	case t.marker() != "":
+	case paused:
 		g.Action = "skipped-already-paused"
 	case c.Pass == "":
 		g.Action = "error:no-credentials"
-	case g.Used <= lim:
+	case g.Used <= gs.Limit:
 		g.Action = "ok"
 	default:
-		if _, err := t.client(c).Pause(ctx, "all"); err != nil {
-			g.Action = "error:pause"
-			t.logLine(g)
-			return g, err
-		}
-		if err := os.WriteFile(t.markerPath(), []byte(g.Time+"\n"), 0o600); err != nil {
-			return g, err
-		}
-		g.Action = "paused"
+		return t.pauseAll(ctx, c, g)
 	}
 	return t.logLine(g)
 }
 
+// pauseAll stops every torrent, writes the marker and logs paused.
+func (t *Tool) pauseAll(ctx context.Context, c Config, g GuardLine) (GuardLine, error) {
+	if _, err := t.client(c).Pause(ctx, "all"); err != nil {
+		g.Action = "error:pause"
+		t.logLine(g)
+		return g, err
+	}
+	if err := os.WriteFile(t.markerPath(), []byte(g.Time+"\n"), 0o600); err != nil {
+		return g, err
+	}
+	g.Action = "paused"
+	return t.logLine(g)
+}
+
+// resumeAll starts every torrent, clears the marker and logs resumed.
+func (t *Tool) resumeAll(ctx context.Context, c Config, g GuardLine) (GuardLine, error) {
+	if _, err := t.client(c).Resume(ctx, "all"); err != nil {
+		g.Action = "error:resume"
+		t.logLine(g)
+		return g, err
+	}
+	if err := os.Remove(t.markerPath()); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return g, err
+	}
+	g.Action = "resumed"
+	return t.logLine(g)
+}
+
 // GuardRebase stores bytes as the baseline (the current free space when
-// bytes is 0), clears the marker and logs rebase.
-func (t *Tool) GuardRebase(ctx context.Context, bytes, lim int64) (GuardLine, error) {
+// bytes is 0), clears the marker and logs rebase. The baseline only
+// matters in allowance mode; in floor mode the answer says so.
+func (t *Tool) GuardRebase(ctx context.Context, bytes int64, gs GuardSettings) (GuardLine, error) {
 	c, _, _, err := t.config()
 	if err != nil {
 		return GuardLine{}, err
 	}
-	g := GuardLine{Time: t.stamp(), Limit: lim, Action: "rebase"}
+	g := t.line(gs)
+	g.Action = "rebase"
+	if gs.Mode == "floor" {
+		g.Note = "note: the guard is in floor mode (pause below " + bytesH(gs.MinFree) + "); the baseline only matters in allowance mode (o qbt config set guard.mode allowance)"
+	}
 	if g.Free, err = t.df(ctx, c); err != nil {
 		if bytes == 0 {
 			return g, err
@@ -233,41 +354,35 @@ func (t *Tool) GuardRebase(ctx context.Context, bytes, lim int64) (GuardLine, er
 }
 
 // GuardResume resumes every torrent, clears the marker and logs resumed.
-func (t *Tool) GuardResume(ctx context.Context, lim int64) (GuardLine, error) {
+func (t *Tool) GuardResume(ctx context.Context, gs GuardSettings) (GuardLine, error) {
 	c, _, _, err := t.config()
 	if err != nil {
 		return GuardLine{}, err
 	}
-	g := GuardLine{Time: t.stamp(), Limit: lim}
+	g := t.line(gs)
 	g.Baseline, _, _ = t.readBaseline()
 	if free, err := t.df(ctx, c); err == nil {
 		g.Free, g.Used = free, g.Baseline-free
 	}
-	if _, err := t.client(c).Resume(ctx, "all"); err != nil {
-		g.Action = "error:resume"
-		t.logLine(g)
-		return g, err
-	}
-	if err := os.Remove(t.markerPath()); err != nil && !errors.Is(err, os.ErrNotExist) {
-		return g, err
-	}
-	g.Action = "resumed"
-	return t.logLine(g)
+	return t.resumeAll(ctx, c, g)
 }
 
 // GuardStatus is guard status's answer.
 type GuardStatus struct {
-	Launchd  string `json:"launchd"`
-	LastLine string `json:"last_line"`
-	Target   string `json:"target"`
-	Free     int64  `json:"free"`
-	DFError  string `json:"df_error,omitempty"`
-	Baseline int64  `json:"baseline"`
-	Used     int64  `json:"used"`
-	Limit    int64  `json:"limit"`
-	Paused   string `json:"paused"`
-	PassSet  bool   `json:"pass_set"`
-	Log      string `json:"log"`
+	Launchd     string `json:"launchd"`
+	LastLine    string `json:"last_line"`
+	Mode        string `json:"mode"`
+	MinFree     int64  `json:"min_free"`
+	ResumeAbove int64  `json:"resume_above"`
+	Target      string `json:"target"`
+	Free        int64  `json:"free"`
+	DFError     string `json:"df_error,omitempty"`
+	Baseline    int64  `json:"baseline"`
+	Used        int64  `json:"used"`
+	Limit       int64  `json:"limit"`
+	Paused      string `json:"paused"`
+	PassSet     bool   `json:"pass_set"`
+	Log         string `json:"log"`
 }
 
 func (s GuardStatus) Text() string {
@@ -283,23 +398,26 @@ func (s GuardStatus) Text() string {
 	if !s.PassSet {
 		pass = "not set: guard check cannot pause (o qbt config set pass)"
 	}
-	return table([][2]string{
-		{"launchd", s.Launchd}, {"last", s.LastLine}, {"free", free + " on " + s.Target}, {"baseline", base},
-		{"used", fmt.Sprintf("%s of %s limit", bytesH(s.Used), bytesH(s.Limit))}, {"paused", s.Paused},
-		{"pass", pass}, {"log", s.Log},
-	})
+	rows := [][2]string{{"launchd", s.Launchd}, {"last", s.LastLine}, {"mode", s.Mode}}
+	if s.Mode == "floor" {
+		rows = append(rows, [2]string{"min free", bytesH(s.MinFree) + " (pause below)"}, [2]string{"resume", "above " + bytesH(s.ResumeAbove) + " when the guard paused"}, [2]string{"free", free + " on " + s.Target})
+	} else {
+		rows = append(rows, [2]string{"free", free + " on " + s.Target}, [2]string{"baseline", base}, [2]string{"used", fmt.Sprintf("%s of %s limit", bytesH(s.Used), bytesH(s.Limit))})
+	}
+	return table(append(rows, [2]string{"paused", s.Paused}, [2]string{"pass", pass}, [2]string{"log", s.Log}))
 }
 
-// GuardStatusOf reports the agent, the last log line, free space against
-// the baseline and the marker. A df failure is reported, not an error.
-func (t *Tool) GuardStatusOf(ctx context.Context, lim int64) (GuardStatus, error) {
+// GuardStatusOf reports the agent, the last log line, the rule, free space
+// (against the baseline in allowance mode) and whether the guard paused. A
+// df failure is reported, not an error.
+func (t *Tool) GuardStatusOf(ctx context.Context, gs GuardSettings) (GuardStatus, error) {
 	c, _, _, err := t.config()
 	if err != nil {
 		return GuardStatus{}, err
 	}
-	s := GuardStatus{Target: c.SSH + ":" + c.Volume, Limit: lim, PassSet: c.Pass != "", Log: t.guardLog(), Paused: "no"}
+	s := GuardStatus{Mode: gs.Mode, MinFree: gs.MinFree, ResumeAbove: gs.ResumeAbove, Target: c.SSH + ":" + c.Volume, Limit: gs.Limit, PassSet: c.Pass != "", Log: t.guardLog(), Paused: "no"}
 	if m := t.marker(); m != "" {
-		s.Paused = "since " + m + " (o qbt guard resume)"
+		s.Paused = "by the guard since " + m + " (o qbt guard resume)"
 	}
 	if s.Baseline, _, err = t.readBaseline(); err != nil {
 		return s, err
