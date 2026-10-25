@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 // The domain: what each verb asks qBittorrent and the records it answers.
@@ -321,4 +322,138 @@ func limit(n int64) string {
 		return "unlimited"
 	}
 	return rate(n)
+}
+
+// TrackerStatuses are torrents/trackers' status codes by number.
+var TrackerStatuses = []string{"disabled", "not contacted", "working", "updating", "not working"}
+
+// Tracker statuses a summary counts.
+const (
+	TrackerWorking    = 2
+	TrackerNotWorking = 4
+)
+
+// trackerStatus is a status code's name.
+func trackerStatus(n int) string {
+	if n >= 0 && n < len(TrackerStatuses) {
+		return TrackerStatuses[n]
+	}
+	return strconv.Itoa(n)
+}
+
+// Tracker is a torrents/trackers element. Its URL may carry a passkey:
+// only TrackerHost(URL) leaves this file unless the owner asks.
+type Tracker struct {
+	URL       string  `json:"url"`
+	Status    int     `json:"status"`
+	Tier      flexInt `json:"tier"`
+	Peers     int     `json:"num_peers"`
+	Seeds     int     `json:"num_seeds"`
+	Leeches   int     `json:"num_leeches"`
+	Downloads int     `json:"num_downloaded"`
+	Msg       string  `json:"msg"`
+}
+
+// flexInt is a number qBittorrent sometimes answers as a string ("" for
+// the DHT/PeX/LSD entries' tier in older versions); anything else is -1.
+type flexInt int
+
+func (n *flexInt) UnmarshalJSON(b []byte) error {
+	var v any
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	*n = -1
+	switch x := v.(type) {
+	case float64:
+		*n = flexInt(x)
+	case string:
+		if i, err := strconv.Atoi(x); err == nil {
+			*n = flexInt(i)
+		}
+	}
+	return nil
+}
+
+// pseudoTracker is whether u is one of the DHT, PeX and LSD entries
+// ("** [DHT] **"), which are not trackers.
+func pseudoTracker(u string) bool { return strings.HasPrefix(strings.TrimSpace(u), "**") }
+
+// TrackerHost is u's scheme and host (port kept): no user info, path or
+// query, where private trackers put the passkey. A URL without a host is
+// "(unparsed)", never the URL itself.
+func TrackerHost(u string) string {
+	p, err := url.Parse(strings.TrimSpace(u))
+	if err != nil || p.Host == "" || p.Scheme == "" {
+		return "(unparsed)"
+	}
+	return strings.ToLower(p.Scheme + "://" + p.Host)
+}
+
+// Trackers is hash's trackers without the DHT, PeX and LSD entries.
+func Trackers(ctx context.Context, c *Client, hash string) ([]Tracker, error) {
+	var all []Tracker
+	if err := c.Get(ctx, "/api/v2/torrents/trackers", url.Values{"hash": {hash}}, &all); err != nil {
+		return nil, err
+	}
+	out := all[:0]
+	for _, t := range all {
+		if !pseudoTracker(t.URL) {
+			out = append(out, t)
+		}
+	}
+	return out, nil
+}
+
+// trackerWorkers is how many torrents/trackers requests run at once.
+const trackerWorkers = 8
+
+// TrackersOf is each torrent's trackers, in ts's order, fetched by a pool
+// of trackerWorkers; progress (when set) hears each torrent done. The
+// first error stops the rest and is the answer.
+func TrackersOf(ctx context.Context, c *Client, ts []Torrent, progress func(done, total int)) ([][]Tracker, error) {
+	out := make([][]Tracker, len(ts))
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	jobs := make(chan int)
+	var (
+		mu    sync.Mutex
+		done  int
+		first error
+		wg    sync.WaitGroup
+	)
+	for range min(trackerWorkers, len(ts)) {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for i := range jobs {
+				trs, err := Trackers(ctx, c, ts[i].Hash)
+				mu.Lock()
+				if err != nil && first == nil {
+					first = err
+					cancel()
+				}
+				out[i] = trs
+				done++
+				if progress != nil && first == nil {
+					progress(done, len(ts))
+				}
+				mu.Unlock()
+			}
+		}()
+	}
+feed:
+	for i := range ts {
+		select {
+		case jobs <- i:
+		case <-ctx.Done():
+			break feed
+		}
+	}
+	close(jobs)
+	wg.Wait()
+	if first == nil {
+		first = ctx.Err()
+	}
+	return out, first
 }

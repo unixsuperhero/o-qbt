@@ -1862,6 +1862,163 @@
       ]
     },
     {
+      "name": "tracker",
+      "verbs": [
+        {
+          "name": "hosts",
+          "description": "the distinct tracker hosts (scheme://host) of the torrents --filter, --category, --tag select, one per line for piping (--format renders a host table)",
+          "kind": "application",
+          "params": {
+            "category": {
+              "type": "string",
+              "description": "only this category (\"\" = uncategorised)"
+            },
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "filter": {
+              "type": "string",
+              "description": "torrents/info's filter (default all)",
+              "enum": [
+                "all",
+                "downloading",
+                "seeding",
+                "completed",
+                "paused",
+                "stopped",
+                "active",
+                "inactive",
+                "resumed",
+                "running",
+                "stalled",
+                "stalled_uploading",
+                "stalled_downloading",
+                "errored",
+                "checking",
+                "moving"
+              ]
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            },
+            "tag": {
+              "type": "string",
+              "description": "only this tag (\"\" = untagged)"
+            }
+          },
+          "result": "JSON value"
+        },
+        {
+          "name": "list",
+          "description": "one torrent's trackers, without DHT/PeX/LSD: --target HASH; rows {id: host, label: \"host  status\", data: {url, status, tier, peers, seeds, leeches, msg}}; url is the scheme and host only (passkeys live in the path) unless --full-url; columns host status tier peers seeds leeches msg (default), url",
+          "kind": "application",
+          "params": {
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "full-url": {
+              "type": "boolean",
+              "description": "data.url and the url column carry the whole announce URL, passkey included (for the owner only)"
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            }
+          },
+          "result": "JSON value",
+          "rows": "tracker"
+        },
+        {
+          "name": "summary",
+          "description": "one row per tracker host across the torrents --filter, --category, --tag select: [{host, torrents, working, not_working, msg}]; working counts torrents with an entry there in status 2, not_working those with one in status 4 and none working; msg is the host's most common message (60 chars); one request per torrent, 8 at a time, progress on stderr",
+          "kind": "application",
+          "params": {
+            "category": {
+              "type": "string",
+              "description": "only this category (\"\" = uncategorised)"
+            },
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "filter": {
+              "type": "string",
+              "description": "torrents/info's filter (default all)",
+              "enum": [
+                "all",
+                "downloading",
+                "seeding",
+                "completed",
+                "paused",
+                "stopped",
+                "active",
+                "inactive",
+                "resumed",
+                "running",
+                "stalled",
+                "stalled_uploading",
+                "stalled_downloading",
+                "errored",
+                "checking",
+                "moving"
+              ]
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            },
+            "tag": {
+              "type": "string",
+              "description": "only this tag (\"\" = untagged)"
+            }
+          },
+          "result": "JSON value"
+        }
+      ]
+    },
+    {
       "name": "transfer",
       "verbs": [
         {

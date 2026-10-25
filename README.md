@@ -26,6 +26,7 @@ o qbt torrent export --out FILE [query] [output] | summary [query] [output] | ov
 o qbt torrent show --target HASH
 o qbt torrent pause|resume|recheck --target HASH | --all
 o qbt torrent delete --target HASH [--files] [--yes]
+o qbt tracker list --target HASH [--full-url] [output] | summary [query] [output] | hosts [query] [output]
 o qbt transfer info [output] | limit --dl N --up N | speed-limits-toggle     (bytes/s, 0 = unlimited)
 o qbt guard check|status|rebase|resume [--mode floor|allowance] [--min-free 5GiB] [--resume-above 20GiB] [--limit 10G] | rebase --bytes N | install | uninstall | log [N]
 o qbt category list [output]
@@ -83,6 +84,22 @@ torrent[3]{hash,name,state,progress,size,dlspeed,eta}:
 ```
 
 The rule, exactly: a header `NAME[N]{col,col,...}:` (N records, the columns in order), then one line per record, indented two spaces, its values joined by `,`. Numbers and booleans are bare (raw: bytes, bytes/s, seconds, 0..1 progress, Unix times); a missing value is empty. A string is bare unless it contains a `,`, a `"` or a newline; then it is wrapped in `"` with `\` `"` and newline written `\\` `\"` `\n`. A string that looks like a number is not quoted, so a reader types values by column.
+
+## Trackers
+
+`torrents/trackers?hash=H` answers one torrent's trackers; the DHT, PeX and LSD entries (`** [DHT] **` and so on) are skipped everywhere. A tracker's host is its scheme and host (`https://tracker.example.org`, `udp://open.example.net:1337`): no user info, path or query, because private trackers put the passkey there. A URL with no host is `(unparsed)`, never the URL.
+
+- `tracker list --target HASH`: rows `{id: host, label: "host  status", data: {url, status, tier, peers, seeds, leeches, msg}}` (a host listed again is `host#2`). `data.url` is the host; `--full-url` puts the whole announce URL there and in a `url` column, for the owner's own use only. Columns `host status tier peers seeds leeches msg` (the default), `url`.
+- `tracker summary [--filter F] [--category C] [--tag T]`: one row per host across the torrents the query selects, most torrents first: `host`, `torrents` (how many list it), `working` (torrents with an entry there in status 2), `not-working` (an entry in status 4 and none working), `msg sample` (the host's most common message, 60 characters).
+- `tracker hosts [query]`: the distinct hosts, one per line, for piping; `--format` renders them as a table.
+
+`summary` and `hosts` make one request per torrent, 8 at a time, with a `trackers: N/M torrents` line on stderr. Status codes: 0 disabled, 1 not contacted, 2 working, 3 updating, 4 not working.
+
+```sh
+o qbt tracker summary --filter errored --format table   # which trackers the errored torrents (error, missingFiles) use
+o qbt tracker hosts --filter errored | wc -l
+o qbt tracker list --target HASH
+```
 
 ## The guard
 

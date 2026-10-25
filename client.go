@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -23,6 +24,7 @@ type Client struct {
 	Base, User, Pass string
 	HTTP             *http.Client
 
+	mu       sync.Mutex // login is shared by concurrent calls (tracker summary's pool)
 	tried    bool
 	loginErr error
 }
@@ -44,6 +46,8 @@ func newClient(c Config) *Client {
 
 // login posts the credentials once; its outcome is kept for the process.
 func (c *Client) login(ctx context.Context) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if c.tried {
 		return c.loginErr
 	}

@@ -200,3 +200,73 @@ func (v OverviewView) Render(format string, columns []string) (string, error) {
 	}
 	return strings.Join(parts, "\n"), nil
 }
+
+// TrackerData is a tracker row's data; URL is the host unless --full-url.
+type TrackerData struct {
+	URL     string `json:"url"`
+	Status  string `json:"status"`
+	Tier    int    `json:"tier"`
+	Peers   int    `json:"peers"`
+	Seeds   int    `json:"seeds"`
+	Leeches int    `json:"leeches"`
+	Msg     string `json:"msg"`
+}
+
+// trackerRows are one torrent's trackers as rows: id is the host (#2, #3
+// for a host listed again), url the host unless full.
+func trackerRows(trs []Tracker, full bool) []Row {
+	rows := make([]Row, len(trs))
+	seen := map[string]int{}
+	for i, tr := range trs {
+		host := TrackerHost(tr.URL)
+		seen[host]++
+		id := host
+		if n := seen[host]; n > 1 {
+			id = fmt.Sprintf("%s#%d", host, n)
+		}
+		u := host
+		if full {
+			u = tr.URL
+		}
+		rows[i] = Row{ID: id, Label: host + "  " + trackerStatus(tr.Status), Data: TrackerData{u, trackerStatus(tr.Status), int(tr.Tier), tr.Peers, tr.Seeds, tr.Leeches, tr.Msg}}
+	}
+	return rows
+}
+
+// TrackerTable is a torrent's tracker rows as table "tracker"; the url
+// column is a default only with full.
+func TrackerTable(rows []Row, full bool) Table {
+	t := Table{Name: "tracker", Columns: []Column{
+		{Name: "host"}, {Name: "status"}, {Name: "tier", Right: true}, {Name: "peers", Right: true},
+		{Name: "seeds", Right: true}, {Name: "leeches", Right: true}, {Name: "msg"}, {Name: "url"},
+	}, Default: []string{"host", "status", "tier", "peers", "seeds", "leeches", "msg"}, Rows: make([][]any, len(rows))}
+	if full {
+		t.Default = append(t.Default, "url")
+	}
+	for i, r := range rows {
+		d := r.Data.(TrackerData)
+		t.Rows[i] = []any{strings.SplitN(r.Label, "  ", 2)[0], d.Status, d.Tier, d.Peers, d.Seeds, d.Leeches, d.Msg, d.URL}
+	}
+	return t
+}
+
+// TrackerSummaryTable is the per-host summary as table "tracker_summary".
+func TrackerSummaryTable(hs []HostSummary) Table {
+	t := Table{Name: "tracker_summary", Columns: []Column{
+		{Name: "host"}, {Name: "torrents", Right: true}, {Name: "working", Right: true},
+		{Name: "not_working", Label: "not-working", Right: true}, {Name: "msg", Label: "msg sample"},
+	}, Rows: make([][]any, len(hs))}
+	for i, h := range hs {
+		t.Rows[i] = []any{h.Host, h.Torrents, h.Working, h.NotWorking, h.Msg}
+	}
+	return t
+}
+
+// HostsTable is distinct hosts as table "tracker_host".
+func HostsTable(hosts []string) Table {
+	t := Table{Name: "tracker_host", Columns: []Column{{Name: "host"}}, Rows: make([][]any, len(hosts))}
+	for i, h := range hosts {
+		t.Rows[i] = []any{h}
+	}
+	return t
+}

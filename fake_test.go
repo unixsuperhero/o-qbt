@@ -82,6 +82,13 @@ func (f *fakeQBT) serve(w http.ResponseWriter, r *http.Request) {
 	case "/api/v2/torrents/info":
 		f.queries = append(f.queries, r.URL.RawQuery)
 		json.NewEncoder(w).Encode(fakeTorrents(r.URL.Query()))
+	case "/api/v2/torrents/trackers":
+		trs, ok := fakeTrackers[r.Form.Get("hash")]
+		if !ok {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		fmt.Fprint(w, trs)
 	case "/api/v2/torrents/properties":
 		fmt.Fprint(w, `{"save_path":"/downloads","comment":"c"}`)
 	case "/api/v2/torrents/categories":
@@ -200,4 +207,20 @@ func fakeTorrents(q url.Values) []map[string]any {
 		out = out[:n]
 	}
 	return out
+}
+
+// fakeTrackers are torrents/trackers' answers by hash: the DHT/PeX/LSD
+// entries (tier "" as older versions answer, or -1), passkeys in a path,
+// a query and user info.
+var fakeTrackers = map[string]string{
+	"bbb": `[{"url":"** [DHT] **","status":2,"tier":"","num_peers":5,"num_seeds":1,"num_leeches":0,"num_downloaded":0,"msg":""},
+		{"url":"** [PeX] **","status":2,"tier":-1,"num_peers":0,"num_seeds":0,"num_leeches":0,"num_downloaded":0,"msg":""},
+		{"url":"** [LSD] **","status":0,"tier":-1,"num_peers":0,"num_seeds":0,"num_leeches":0,"num_downloaded":0,"msg":""},
+		{"url":"https://Tracker.Example.org/a1b2c3d4SECRETPASSKEY/announce","status":2,"tier":0,"num_peers":12,"num_seeds":10,"num_leeches":2,"num_downloaded":40,"msg":""},
+		{"url":"udp://open.example.net:1337/announce","status":4,"tier":1,"num_peers":0,"num_seeds":0,"num_leeches":0,"num_downloaded":0,"msg":"Connection timed out"}]`,
+	"aaa": `[{"url":"https://tracker.example.org/announce.php?passkey=SECRETPASSKEY","status":4,"tier":0,"num_peers":0,"num_seeds":0,"num_leeches":0,"num_downloaded":0,"msg":"Unregistered torrent"},
+		{"url":"https://tracker.example.org/announce.php?passkey=SECRETPASSKEY&backup=1","status":4,"tier":1,"num_peers":0,"num_seeds":0,"num_leeches":0,"num_downloaded":0,"msg":"Unregistered torrent"},
+		{"url":"udp://open.example.net:1337/announce","status":4,"tier":2,"num_peers":0,"num_seeds":0,"num_leeches":0,"num_downloaded":0,"msg":"Connection timed out"}]`,
+	"ccc": `[{"url":"http://user:SECRETPASSKEY@private.example.com/SECRETPASSKEY/announce","status":1,"tier":0,"num_peers":0,"num_seeds":0,"num_leeches":0,"num_downloaded":0,"msg":""},
+		{"url":"udp://open.example.net:1337/announce","status":4,"tier":1,"num_peers":0,"num_seeds":0,"num_leeches":0,"num_downloaded":0,"msg":"Connection refused"}]`,
 }

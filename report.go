@@ -3,6 +3,7 @@ package main
 import (
 	"cmp"
 	"slices"
+	"strings"
 )
 
 // Aggregations over torrents: summary (counts and size per state) and the
@@ -144,4 +145,86 @@ func top(ts []Torrent, keep func(Torrent) bool, by func(a, b Torrent) int) []Tor
 	}
 	slices.SortStableFunc(out, by)
 	return out[:min(len(out), overviewTop)]
+}
+
+// HostSummary is one tracker host across torrents: how many torrents list
+// it, and of those how many have an entry there working (status 2) and
+// how many have one not working (status 4) and none working; Msg is the
+// host's most common non-empty message, cut to msgSample runes.
+type HostSummary struct {
+	Host       string `json:"host"`
+	Torrents   int    `json:"torrents"`
+	Working    int    `json:"working"`
+	NotWorking int    `json:"not_working"`
+	Msg        string `json:"msg"`
+}
+
+// msgSample is how long a summary's message sample may be.
+const msgSample = 60
+
+// SummarizeTrackers aggregates each torrent's trackers (perTorrent[i] is
+// one torrent's) by host: most torrents first, then by host.
+func SummarizeTrackers(perTorrent [][]Tracker) []HostSummary {
+	by := map[string]*HostSummary{}
+	msgs := map[string]map[string]int{}
+	for _, trs := range perTorrent {
+		status := map[string][2]bool{} // host: {working, not working}
+		for _, tr := range trs {
+			h := TrackerHost(tr.URL)
+			s := status[h]
+			s[0] = s[0] || tr.Status == TrackerWorking
+			s[1] = s[1] || tr.Status == TrackerNotWorking
+			status[h] = s
+			if m := strings.TrimSpace(tr.Msg); m != "" {
+				if msgs[h] == nil {
+					msgs[h] = map[string]int{}
+				}
+				msgs[h][m]++
+			}
+		}
+		for h, s := range status {
+			x := by[h]
+			if x == nil {
+				x = &HostSummary{Host: h}
+				by[h] = x
+			}
+			x.Torrents++
+			switch {
+			case s[0]:
+				x.Working++
+			case s[1]:
+				x.NotWorking++
+			}
+		}
+	}
+	out := make([]HostSummary, 0, len(by))
+	for h, x := range by {
+		best, n := "", 0
+		for m, c := range msgs[h] {
+			if c > n || c == n && m < best {
+				best, n = m, c
+			}
+		}
+		if r := []rune(best); len(r) > msgSample {
+			best = string(r[:msgSample-1]) + "…"
+		}
+		x.Msg = best
+		out = append(out, *x)
+	}
+	slices.SortFunc(out, func(a, b HostSummary) int {
+		return cmp.Or(cmp.Compare(b.Torrents, a.Torrents), cmp.Compare(a.Host, b.Host))
+	})
+	return out
+}
+
+// TrackerHosts is the distinct hosts perTorrent lists, sorted.
+func TrackerHosts(perTorrent [][]Tracker) []string {
+	var out []string
+	for _, trs := range perTorrent {
+		for _, tr := range trs {
+			out = append(out, TrackerHost(tr.URL))
+		}
+	}
+	slices.Sort(out)
+	return slices.Compact(out)
 }

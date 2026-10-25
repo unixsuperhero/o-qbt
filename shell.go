@@ -24,7 +24,7 @@ import (
 const Version = "0.1.0"
 
 // nouns are this tool's nouns, mounted as commands.
-var nouns = []string{"app", "torrent", "transfer", "guard", "category", "config"}
+var nouns = []string{"app", "torrent", "tracker", "transfer", "guard", "category", "config"}
 
 // listNouns are the nouns with rows.
 var listNouns = []string{"torrent", "category"}
@@ -57,12 +57,19 @@ func (t *Tool) answer(v any, err error) ochazuke.Result {
 func (t *Tool) shell() *ocli.Shell {
 	r := ochazuke.NewRuntime()
 	lists := map[string]*ochazuke.List{}
+	var err error
 	for _, noun := range listNouns {
-		list, err := r.AddList("list/"+noun, nil)
+		var list *ochazuke.List
+		list, err = r.AddList("list/"+noun, nil)
 		if err != nil {
 			panic(err) // a fresh runtime takes every list
 		}
 		lists[noun] = list
+	}
+	// tracker rows are one torrent's (tracker list); app state skips them,
+	// since all of them cost a request per torrent.
+	if lists["tracker"], err = r.AddList("list/tracker", nil); err != nil {
+		panic(err)
 	}
 	ctxOf := func(c ochazuke.Ctx) context.Context { return context.Background() }
 	// api is the effective config's session.
@@ -298,6 +305,80 @@ func (t *Tool) shell() *ocli.Shell {
 	}
 	r.Operations["torrent.summary"] = withParams(r.Operations["torrent.summary"], params(append(queryParams(true)[:6], outputParams()...)...))
 	r.Operations["torrent.overview"] = withParams(r.Operations["torrent.overview"], params(outputParams()[:4]...))
+
+	// trackersOf is every tracker of the torrents c's query selects, one
+	// request per torrent through the pool, with a progress line on stderr.
+	trackersOf := func(c ochazuke.Ctx) ([][]Tracker, error) {
+		q, err := torrentQuery(c, "")
+		if err != nil {
+			return nil, err
+		}
+		cl, err := api()
+		if err != nil {
+			return nil, err
+		}
+		ts, err := Torrents(ctxOf(c), cl, q)
+		if err != nil {
+			return nil, err
+		}
+		trs, err := TrackersOf(ctxOf(c), cl, ts, func(done, total int) {
+			fmt.Fprintf(t.Stderr, "\rtrackers: %d/%d torrents", done, total)
+		})
+		if len(ts) > 0 {
+			fmt.Fprintln(t.Stderr)
+		}
+		return trs, err
+	}
+	r.Define("tracker").
+		Verb("list", func(c ochazuke.Ctx) ochazuke.Result {
+			var hash string
+			if c.Instance != nil && c.Instance.Noun == "torrent" {
+				hash, _ = c.Instance.Data.(string)
+			}
+			if hash == "" {
+				return ochazuke.Failed(errors.New("tracker list needs --target HASH (o qbt torrent list)"))
+			}
+			cl, err := api()
+			if err != nil {
+				return ochazuke.Failed(err)
+			}
+			trs, err := Trackers(ctxOf(c), cl, hash)
+			if err != nil {
+				return ochazuke.Failed(err)
+			}
+			full, _ := c.Args["full-url"].(bool)
+			rows := trackerRows(trs, full)
+			if err := setRows("tracker", rows); err != nil {
+				return ochazuke.Failed(err)
+			}
+			return t.present(c, rows, TrackerTable(rows, full), nil)
+		}, "one torrent's trackers, without DHT/PeX/LSD: --target HASH; rows {id: host, label: \"host  status\", data: {url, status, tier, peers, seeds, leeches, msg}}; url is the scheme and host only (passkeys live in the path) unless --full-url; columns host status tier peers seeds leeches msg (default), url").Rows("tracker").
+		Verb("summary", func(c ochazuke.Ctx) ochazuke.Result {
+			trs, err := trackersOf(c)
+			hs := SummarizeTrackers(trs)
+			return t.present(c, hs, TrackerSummaryTable(hs), err)
+		}, "one row per tracker host across the torrents --filter, --category, --tag select: [{host, torrents, working, not_working, msg}]; working counts torrents with an entry there in status 2, not_working those with one in status 4 and none working; msg is the host's most common message (60 chars); one request per torrent, 8 at a time, progress on stderr").
+		Verb("hosts", func(c ochazuke.Ctx) ochazuke.Result {
+			trs, err := trackersOf(c)
+			if err != nil {
+				return ochazuke.Failed(err)
+			}
+			hosts := TrackerHosts(trs)
+			if t.human && ochazuke.StringArg(c.Args, "format", "") == "" && ochazuke.StringArg(c.Args, "out", "") == "" {
+				s := ""
+				if len(hosts) > 0 {
+					s = strings.Join(hosts, "\n") + "\n"
+				}
+				t.text = &s
+				return ochazuke.Done(hosts)
+			}
+			return t.present(c, hosts, HostsTable(hosts), nil)
+		}, "the distinct tracker hosts (scheme://host) of the torrents --filter, --category, --tag select, one per line for piping (--format renders a host table)")
+	r.Operations["tracker.list"] = withParams(r.Operations["tracker.list"], params(append([]any{
+		"full-url", ochazuke.Parameter{Type: "boolean", Description: "data.url and the url column carry the whole announce URL, passkey included (for the owner only)"}}, outputParams()...)...))
+	for _, verb := range []string{"summary", "hosts"} {
+		r.Operations["tracker."+verb] = withParams(r.Operations["tracker."+verb], params(append(queryParams(true)[:6], outputParams()...)...))
+	}
 
 	r.Define("transfer").
 		Verb("info", func(c ochazuke.Ctx) ochazuke.Result {
