@@ -175,6 +175,33 @@ func TestDeleteAsksFirst(t *testing.T) {
 	}
 }
 
+func TestDeleteSelection(t *testing.T) {
+	f := newFake(t)
+	tool := testTool(t, f.URL, "good", nil)
+	if _, _, err := cli(t, tool, "torrent", "delete", "--state", "stalledUP", "--yes"); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := cli(t, tool, "torrent", "delete", "--hashes", "aaa,ccc", "--yes"); err != nil {
+		t.Fatal(err)
+	}
+	old := deleteBatch
+	deleteBatch = 2
+	t.Cleanup(func() { deleteBatch = old })
+	_, stderr, err := cli(t, tool, "torrent", "delete", "--filter", "all", "--yes")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(stderr, "deleted 2/3") || !strings.Contains(stderr, "deleted 3/3") {
+		t.Errorf("progress %q", stderr)
+	}
+	if got := strings.Join(f.removed, ","); got != "bbb files=false,aaa|ccc files=false,aaa|ccc files=false,bbb files=false" {
+		t.Fatalf("removed %v", f.removed)
+	}
+	if _, _, err := cli(t, tool, "torrent", "delete", "--target", "aaa", "--state", "x", "--yes"); err == nil || !strings.Contains(err.Error(), "not both") {
+		t.Fatal("--target with a selection should fail")
+	}
+}
+
 func TestTransferLimitAndPrefs(t *testing.T) {
 	f := newFake(t)
 	tool := testTool(t, f.URL, "good", nil)

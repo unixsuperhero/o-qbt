@@ -26,6 +26,7 @@ o qbt torrent export --out FILE [query] [output] | summary [query] [output] | ov
 o qbt torrent show --target HASH
 o qbt torrent pause|resume|recheck --target HASH | --all
 o qbt torrent delete --target HASH [--files] [--yes]
+o qbt torrent delete --hashes H1,H2 | [--state STATE] [--filter F] [--category C] [--tag T]  [--files] [--yes]
 o qbt tracker list --target HASH [--full-url] [output] | summary [query] [output] | hosts [query] [output]
 o qbt transfer info [output] | limit --dl N --up N | speed-limits-toggle     (bytes/s, 0 = unlimited)
 o qbt guard check|status|rebase|resume [--mode floor|allowance] [--min-free 5GiB] [--resume-above 20GiB] [--limit 10G] | rebase --bytes N | install | uninstall | log [N]
@@ -35,7 +36,7 @@ o qbt config init | show | set KEY [VALUE] [--stdin]
 o qbt catalog
 ```
 
-`app info` changes nothing: it reads `app/version`, `app/webapiVersion`, `app/buildInfo`, `transfer/info` and `sync/maindata` and exits 0 only when the login worked. `torrent pause`/`resume` use v5's `torrents/stop`/`start` and fall back to v4's `pause`/`resume` on a 404. `torrent delete` asks `Delete torrent LABEL?` unless `--yes`.
+`app info` changes nothing: it reads `app/version`, `app/webapiVersion`, `app/buildInfo`, `transfer/info` and `sync/maindata` and exits 0 only when the login worked. `torrent pause`/`resume` use v5's `torrents/stop`/`start` and fall back to v4's `pause`/`resume` on a 404. `torrent delete` asks `Delete torrent LABEL?` unless `--yes`. With a selection instead of `--target` (`--hashes`, or torrents/info's `--filter`/`--category`/`--tag` narrowed by `--state`, the exact qBittorrent state), it posts `torrents/delete` in batches of 200 hashes and prints `deleted N/TOTAL` on stderr when there is more than one batch.
 
 A torrent row is `{id: HASH, label: "state  progress%  name", data: {state, progress, size, dlspeed, eta, category, added_on, completed_on, save_path}}`; a category row is `{id: "category/NAME", label, data: {name, savePath}}`. `app state` prints both lists as JSON Lines `{noun, id, label}` (the catalog's state). List-like verbs print in `--format` (below). Other verbs a person reads (`guard *`, `config *`, `transfer limit`) print a short table; with `--json '{...}'` (how a host calls) every verb prints JSON.
 

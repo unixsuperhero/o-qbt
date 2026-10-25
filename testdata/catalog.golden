@@ -1250,12 +1250,50 @@
         },
         {
           "name": "delete",
-          "description": "remove --target HASH from qBittorrent; --files deletes its data too (asks first; --yes skips the question)",
+          "description": "remove --target HASH, or a selection (--hashes H1,H2; --state STATE, the exact qBittorrent state; --filter, --category, --tag), from qBittorrent in batches of 200; --files deletes their data too (asks first; --yes skips the question)",
           "kind": "application",
           "params": {
+            "category": {
+              "type": "string",
+              "description": "only this category (\"\" = uncategorised)"
+            },
             "files": {
               "type": "boolean",
               "description": "delete the downloaded data as well"
+            },
+            "filter": {
+              "type": "string",
+              "description": "torrents/info's filter (default all)",
+              "enum": [
+                "all",
+                "downloading",
+                "seeding",
+                "completed",
+                "paused",
+                "stopped",
+                "active",
+                "inactive",
+                "resumed",
+                "running",
+                "stalled",
+                "stalled_uploading",
+                "stalled_downloading",
+                "errored",
+                "checking",
+                "moving"
+              ]
+            },
+            "hashes": {
+              "type": "string",
+              "description": "comma-separated hashes to remove instead of --target"
+            },
+            "state": {
+              "type": "string",
+              "description": "only torrents in exactly this state (missingFiles, error, ...)"
+            },
+            "tag": {
+              "type": "string",
+              "description": "only this tag (\"\" = untagged)"
             }
           },
           "result": "JSON value",

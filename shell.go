@@ -275,26 +275,72 @@ func (t *Tool) shell() *ocli.Shell {
 		r.Operations["torrent."+v.verb] = withParams(r.Operations["torrent."+v.verb], params("all", allParam))
 	}
 	r.Define("torrent").Verb("delete", func(c ochazuke.Ctx) ochazuke.Result {
-		h, err := hashes(c, "delete")
-		if err == nil && h == "all" {
-			err = errors.New("torrent delete takes --target HASH, never --all")
+		files, _ := c.Args["files"].(bool)
+		what := "kept their files"
+		if files {
+			what = "deleted their files"
 		}
-		if err != nil {
-			return ochazuke.Failed(err)
+		var hs []string
+		if bulk := deleteSelects(c); bulk {
+			if c.Instance != nil && c.Instance.Noun == "torrent" && c.Instance.Data != nil {
+				return ochazuke.Failed(errors.New("torrent delete: --target or a selection (--hashes, --state, --filter, --category, --tag), not both"))
+			}
+			if v := ochazuke.StringArg(c.Args, "hashes", ""); v != "" {
+				hs = strings.FieldsFunc(v, func(r rune) bool { return r == ',' || r == '|' })
+			} else {
+				q, err := torrentQuery(c, "")
+				if err != nil {
+					return ochazuke.Failed(err)
+				}
+				cl, err := api()
+				if err != nil {
+					return ochazuke.Failed(err)
+				}
+				ts, err := Torrents(ctxOf(c), cl, q)
+				if err != nil {
+					return ochazuke.Failed(err)
+				}
+				state := ochazuke.StringArg(c.Args, "state", "")
+				for _, x := range ts {
+					if state == "" || x.State == state {
+						hs = append(hs, x.Hash)
+					}
+				}
+			}
+		} else {
+			h, err := hashes(c, "delete")
+			if err == nil && h == "all" {
+				err = errors.New("torrent delete takes --target HASH or a selection, never --all")
+			}
+			if err != nil {
+				return ochazuke.Failed(err)
+			}
+			hs = []string{h}
 		}
 		cl, err := api()
 		if err != nil {
 			return ochazuke.Failed(err)
 		}
-		files, _ := c.Args["files"].(bool)
-		err = cl.Post(ctxOf(c), "/api/v2/torrents/delete", url.Values{"hashes": {h}, "deleteFiles": {strconv.FormatBool(files)}})
-		what := "kept its files"
-		if files {
-			what = "deleted its files"
+		done := 0
+		for chunk := range slices.Chunk(hs, deleteBatch) {
+			if err := cl.Post(ctxOf(c), "/api/v2/torrents/delete", url.Values{"hashes": {strings.Join(chunk, "|")}, "deleteFiles": {strconv.FormatBool(files)}}); err != nil {
+				return ochazuke.Failed(fmt.Errorf("torrent delete: %d of %d removed: %w", done, len(hs), err))
+			}
+			done += len(chunk)
+			if len(hs) > deleteBatch && t.Stderr != nil {
+				fmt.Fprintf(t.Stderr, "deleted %d/%d\n", done, len(hs))
+			}
 		}
-		return t.answer(Message{Message: "deleted torrent " + h + ", " + what}, err)
-	}, "remove --target HASH from qBittorrent; --files deletes its data too (asks first; --yes skips the question)").Confirm("Delete torrent {{label}}?")
-	r.Operations["torrent.delete"] = withParams(r.Operations["torrent.delete"], params("files", ochazuke.Parameter{Type: "boolean", Description: "delete the downloaded data as well"}))
+		if len(hs) == 1 {
+			return t.answer(Message{Message: "deleted torrent " + hs[0] + ", " + strings.Replace(what, "their", "its", 1)}, nil)
+		}
+		return t.answer(Message{Message: fmt.Sprintf("deleted %d torrents, %s", len(hs), what)}, nil)
+	}, "remove --target HASH, or a selection (--hashes H1,H2; --state STATE, the exact qBittorrent state; --filter, --category, --tag), from qBittorrent in batches of 200; --files deletes their data too (asks first; --yes skips the question)").Confirm("Delete torrent {{label}}?")
+	r.Operations["torrent.delete"] = withParams(r.Operations["torrent.delete"], params(append([]any{
+		"files", ochazuke.Parameter{Type: "boolean", Description: "delete the downloaded data as well"},
+		"hashes", ochazuke.Parameter{Type: "string", Description: "comma-separated hashes to remove instead of --target"},
+		"state", ochazuke.Parameter{Type: "string", Description: "only torrents in exactly this state (missingFiles, error, ...)"},
+	}, queryParams(true)[:6]...)...))
 	for _, p := range torrentPresets {
 		r.Define("torrent").Verb(p.Verb, func(c ochazuke.Ctx) ochazuke.Result { return listTorrents(c, p.Filter, nil) },
 			"alias of torrent list --filter "+p.Filter+": "+p.About)
@@ -669,4 +715,18 @@ func (t *Tool) guardState(free int64) (GuardState, error) {
 		g.Baseline, g.Used = base, base-free
 	}
 	return g, err
+}
+
+// deleteBatch is how many hashes one torrents/delete request carries.
+var deleteBatch = 200
+
+// deleteSelects reports whether c selects torrents for delete by
+// --hashes or a query rather than --target.
+func deleteSelects(c ochazuke.Ctx) bool {
+	for _, k := range []string{"hashes", "state", "filter", "category", "tag"} {
+		if _, ok := c.Args[k]; ok {
+			return true
+		}
+	}
+	return false
 }
