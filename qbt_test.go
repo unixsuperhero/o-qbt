@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/unixsuperhero/oden"
 	"time"
 
 	ocli "github.com/unixsuperhero/ochazuke/cli"
@@ -296,5 +298,13 @@ func TestCatalogGolden(t *testing.T) {
 	}
 	if doc.State != "app.state" {
 		t.Errorf("state %q", doc.State)
+	}
+}
+
+func TestUnknownWordIsNotFound(t *testing.T) {
+	tool := testTool(t, "http://127.0.0.1:1", "", nil)
+	out, errOut, err := cli(t, tool, "torrentz")
+	if oden.ExitCode(err) != 1 || out != "" || !strings.HasPrefix(errOut, "o-qbt: command \"torrentz\" not found\ndid you mean: torrent\n") {
+		t.Fatalf("torrentz: %v %q\n%s", err, out, errOut)
 	}
 }

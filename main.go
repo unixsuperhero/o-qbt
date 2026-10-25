@@ -100,8 +100,8 @@ func (t *Tool) getenv(name string) string {
 
 // Main runs one command: a noun of the runtime (oden resolves a unique
 // prefix, the shell a verb's), catalog, an oden builtin, a shortcut
-// (torrents is torrent list, overview torrent overview), or the shell for
-// anything else.
+// (torrents is torrent list, overview torrent overview), the shell's usage
+// with no words, else oden's not found report.
 func (t *Tool) Main(ctx context.Context, args []string) error {
 	if t.now == nil {
 		t.now = time.Now
@@ -114,12 +114,13 @@ func (t *Tool) Main(ctx context.Context, args []string) error {
 	sh := t.shell()
 	t.mount(app, sh)
 	app.Default = func(ctx context.Context, args []string) error {
-		if len(args) > 0 {
-			if words := shortcuts[args[0]]; words != nil {
-				return t.runShell(ctx, sh, append(slices.Clone(words), args[1:]...))
-			}
+		if len(args) == 0 {
+			return t.runShell(ctx, sh, args)
 		}
-		return t.runShell(ctx, sh, args)
+		if words := shortcuts[args[0]]; words != nil {
+			return t.runShell(ctx, sh, append(slices.Clone(words), args[1:]...))
+		}
+		return oden.ErrNotFound
 	}
 	return app.Run(ctx)
 }
