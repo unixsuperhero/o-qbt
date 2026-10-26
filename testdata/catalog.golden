@@ -61,14 +61,14 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "prefs",
           "description": "selected preferences: save and temp paths, max active downloads/uploads/torrents, dl/up limits (bytes/s)",
           "kind": "application",
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "quit",
@@ -338,7 +338,7 @@
           "description": "the effective settings and the environment overrides; never the password, only whether one is set",
           "kind": "application",
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         }
       ]
     },
@@ -623,7 +623,7 @@
           "positional": [
             "tail"
           ],
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "rebase",
@@ -714,7 +714,7 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "uninstall",
@@ -1934,7 +1934,7 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "delete",
@@ -2048,7 +2048,7 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "errored",
@@ -2110,7 +2110,7 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "export",
@@ -2305,7 +2305,7 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "pause",
@@ -2380,7 +2380,7 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "recheck",
@@ -2468,14 +2468,14 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "show",
           "description": "one torrent's info and properties: --target HASH",
           "kind": "application",
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "stalled",
@@ -2537,7 +2537,7 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "summary",
@@ -2597,7 +2597,7 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         }
       ]
     },
@@ -2662,7 +2662,7 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "list",
@@ -2757,7 +2757,7 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         }
       ]
     },
@@ -2792,7 +2792,7 @@
             }
           },
           "result": "JSON value",
-          "history": "change"
+          "history": "fetch"
         },
         {
           "name": "limit",

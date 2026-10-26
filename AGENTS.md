@@ -25,6 +25,7 @@ Family plans, todos and the roadmap live in `~/hub/o-plans/` (`README.md` is the
 - Tests never reach the NAS or a real qBittorrent: `testTool` injects the URL, `df`, the clock and external commands.
 - The password is never printed and never read from argv.
 - Every list verb declares `.Rows(noun)`; `testdata/catalog.golden` pins the catalog.
+- Every verb declares its history kind: `.Fetch()` on a read, `setHistory(r, ochazuke.HistoryChange, ...)` on a verb that acts on qBittorrent, the guard or a file; `TestEveryVerbDeclaresItsHistory` fails on one left to the default.
 - Never bind function keys.
 
 ## Every commit
