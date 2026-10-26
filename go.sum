@@ -56,8 +56,8 @@ github.com/muesli/cancelreader v0.2.2 h1:3I4Kt4BQjOR54NavqnDogx/MIoWBFa0StPA8ELU
 github.com/muesli/cancelreader v0.2.2/go.mod h1:3XuTXfFS2VjM+HTLZY9Ak0l6eUKfijIfMUZ4EgX0QYo=
 github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
 github.com/rivo/uniseg v0.4.7/go.mod h1:FN3SvrM+Zdj16jyLfmOkMNblXMcoc8DfTHruCPUcx88=
-github.com/unixsuperhero/ochazuke v0.7.0 h1:Ueo9LkbQxrsQZIlqc37afqhqzXVT/ULTpJKB3rczmJk=
-github.com/unixsuperhero/ochazuke v0.7.0/go.mod h1:BO2IxrpPy2dfcPQl1j1MzpU9DDZ90Z4t46KOkC0sYkk=
+github.com/unixsuperhero/ochazuke v0.8.0 h1:paJ2kn55lLWmGWSx3086YC4cbFCD8wcm7aygmiBfMJk=
+github.com/unixsuperhero/ochazuke v0.8.0/go.mod h1:BO2IxrpPy2dfcPQl1j1MzpU9DDZ90Z4t46KOkC0sYkk=
 github.com/unixsuperhero/oden v0.1.1 h1:g7wpBYIw+7oCNAhRj6oDuBxWrbGj1amvn8x49o7YbaI=
 github.com/unixsuperhero/oden v0.1.1/go.mod h1:rKy5pz2e3eEKm4QBG/LfdzrHDMu7jHbs/GXwt9G1+YQ=
 github.com/xo/terminfo v1.0.0 h1:2ZpYzqWzyyytjk3TP6aJVDhkMAkc99/1xKQdA3TDTBY=
