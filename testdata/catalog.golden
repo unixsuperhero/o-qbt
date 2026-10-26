@@ -11,19 +11,22 @@
           "name": "list",
           "description": "List the actions installed from actions.json: verbs that run an external command",
           "kind": "interaction",
-          "result": "action[]"
+          "result": "action[]",
+          "history": "fetch"
         },
         {
           "name": "path",
           "description": "Print the user actions file: actions.json beside bindings.json",
           "kind": "interaction",
-          "result": "path"
+          "result": "path",
+          "history": "fetch"
         },
         {
           "name": "reload",
           "description": "Read actions.json again: its verbs replace the last load's, a bad entry is skipped and reported; the user bindings are applied again",
           "kind": "interaction",
-          "result": "problem[]"
+          "result": "problem[]",
+          "history": "fetch"
         }
       ]
     },
@@ -57,25 +60,29 @@
               "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "prefs",
           "description": "selected preferences: save and temp paths, max active downloads/uploads/torrents, dl/up limits (bytes/s)",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "quit",
           "description": "Exit the application",
           "kind": "interaction",
-          "result": "boolean"
+          "result": "boolean",
+          "history": "action"
         },
         {
           "name": "state",
           "description": "every list's rows in one call, JSON Lines {noun, id, label} for torrent and category (the catalog's state)",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "fetch"
         }
       ]
     },
@@ -86,13 +93,15 @@
           "name": "check",
           "description": "Report the rows of the user bindings file that would be skipped, and any merged row that does not validate",
           "kind": "interaction",
-          "result": "problem[]"
+          "result": "problem[]",
+          "history": "fetch"
         },
         {
           "name": "help",
           "description": "Open the keys the focus answers to, with the operation each runs and its description",
           "kind": "interaction",
-          "result": "help row[]"
+          "result": "help row[]",
+          "history": "action"
         },
         {
           "name": "list",
@@ -104,7 +113,8 @@
               "description": "Return every stored binding row, including inactive modes and contexts, in configuration JSON format"
             }
           },
-          "result": "binding[]"
+          "result": "binding[]",
+          "history": "fetch"
         },
         {
           "name": "load",
@@ -116,25 +126,29 @@
               "required": true
             }
           },
-          "result": "binding[]"
+          "result": "binding[]",
+          "history": "change"
         },
         {
           "name": "path",
           "description": "Print the user bindings file: $XDG_CONFIG_HOME/\u003capp\u003e/bindings.json, else ~/.config/\u003capp\u003e/bindings.json",
           "kind": "interaction",
-          "result": "path"
+          "result": "path",
+          "history": "fetch"
         },
         {
           "name": "reload",
           "description": "Read the user bindings file again: its rows replace or unbind the defaults, a bad row is skipped and reported",
           "kind": "interaction",
-          "result": "problem[]"
+          "result": "problem[]",
+          "history": "fetch"
         },
         {
           "name": "stops",
           "description": "List the rows every focus stop answers to, app-wide: each page's stops in drawing order, the open modals', then app; each with the focus and mode it is read at",
           "kind": "interaction",
-          "result": "stop bindings[]"
+          "result": "stop bindings[]",
+          "history": "fetch"
         }
       ]
     },
@@ -169,7 +183,8 @@
             }
           },
           "result": "JSON value",
-          "rows": "category"
+          "rows": "category",
+          "history": "fetch"
         }
       ]
     },
@@ -181,7 +196,8 @@
           "name": "cancel",
           "description": "Close without choosing",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "move",
@@ -193,13 +209,15 @@
               "required": true
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "pick",
           "description": "Take the highlighted row, else the top match, else create from the query",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         }
       ]
     },
@@ -210,13 +228,15 @@
           "name": "accept",
           "description": "Replace the token with the highlighted suggestion, else the first, keeping its trigger; one undoable edit",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "dismiss",
           "description": "Hide the suggestions; the input stays in its mode and typing reopens them",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "move",
@@ -228,13 +248,15 @@
               "required": true
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "open",
           "description": "Offer suggestions for the trigger token at the cursor now",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         }
       ]
     },
@@ -258,19 +280,22 @@
           "result": "export",
           "positional": [
             "dir"
-          ]
+          ],
+          "history": "change"
         },
         {
           "name": "init",
           "description": "write the settings file (url, user admin, empty pass, volume, ssh), mode 600, unless it exists; prints its path",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "path",
           "description": "Print the config directory (bindings.json, settings.json, actions.json, themes.json), the state directory (history.jsonl, panes.json) and the default config export directory",
           "kind": "interaction",
-          "result": "paths"
+          "result": "paths",
+          "history": "fetch"
         },
         {
           "name": "set",
@@ -305,13 +330,15 @@
           "positional": [
             "key",
             "value"
-          ]
+          ],
+          "history": "change"
         },
         {
           "name": "show",
           "description": "the effective settings and the environment overrides; never the password, only whether one is set",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         }
       ]
     },
@@ -322,7 +349,8 @@
           "name": "accept",
           "description": "Run the request the open confirm modal holds and close it",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "set",
@@ -338,7 +366,8 @@
               "type": "string"
             }
           },
-          "result": "operation"
+          "result": "operation",
+          "history": "change"
         }
       ]
     },
@@ -362,7 +391,8 @@
               "description": "JSON array of instance IDs, outermost first, beginning with app (when instance is omitted)"
             }
           },
-          "result": "context"
+          "result": "context",
+          "history": "action"
         }
       ]
     },
@@ -379,7 +409,8 @@
               "required": true
             }
           },
-          "result": "count"
+          "result": "count",
+          "history": "action"
         }
       ]
     },
@@ -404,7 +435,8 @@
               "description": "Lines to move, down when positive (default 1)"
             }
           },
-          "result": "detail offset"
+          "result": "detail offset",
+          "history": "action"
         }
       ]
     },
@@ -425,7 +457,8 @@
               "description": "How many stops or regions to move (the count; default 1)"
             }
           },
-          "result": "context"
+          "result": "context",
+          "history": "action"
         },
         {
           "name": "previous",
@@ -441,7 +474,8 @@
               "description": "How many stops or regions to move (the count; default 1)"
             }
           },
-          "result": "context"
+          "result": "context",
+          "history": "action"
         },
         {
           "name": "set",
@@ -453,7 +487,8 @@
               "required": true
             }
           },
-          "result": "context"
+          "result": "context",
+          "history": "action"
         }
       ]
     },
@@ -464,7 +499,8 @@
           "name": "pick",
           "description": "Set the field to this choice; written at once",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         }
       ]
     },
@@ -475,13 +511,15 @@
           "name": "choose",
           "description": "Choose the field's value from its choices",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "leave",
           "description": "Leave the editor; every change is already written",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "next",
@@ -493,7 +531,8 @@
               "description": "keep typing when the field is a text field"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "previous",
@@ -505,25 +544,29 @@
               "description": "keep typing when the field is a text field"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "redo",
           "description": "Redo the record's last undone change",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "suggest",
           "description": "Fill the field from its suggestions; typing stays free",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "undo",
           "description": "Undo the record's last change; the undo is written like any change",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         }
       ]
     },
@@ -556,13 +599,15 @@
               "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "install",
           "description": "write ~/Library/LaunchAgents/com.unixsuperhero.o-qbt-guard.plist (o-qbt guard check every 300 s and at load), lint it, bootstrap it in gui/UID; idempotent",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "log",
@@ -577,7 +622,8 @@
           "result": "JSON value",
           "positional": [
             "tail"
-          ]
+          ],
+          "history": "change"
         },
         {
           "name": "rebase",
@@ -609,7 +655,8 @@
               "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "resume",
@@ -637,7 +684,8 @@
               "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "status",
@@ -665,13 +713,15 @@
               "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "uninstall",
           "description": "bootout the agent and remove its plist; the baseline, marker and log stay",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         }
       ]
     },
@@ -680,21 +730,27 @@
       "verbs": [
         {
           "name": "list",
-          "description": "List the last executed requests, oldest first, with their context, source and result",
+          "description": "List the last executed requests, oldest first, with their kind, context, source and result; by default the user's actions and changes",
           "kind": "interaction",
           "params": {
+            "kind": {
+              "type": "string",
+              "description": "Kinds separated by commas (action, change, fetch, system) or all; default action,change"
+            },
             "last": {
               "type": "integer",
               "description": "How many entries (default 50, 0 for all)"
             }
           },
-          "result": "history[]"
+          "result": "history[]",
+          "history": "fetch"
         },
         {
           "name": "path",
           "description": "Print the history file: $XDG_STATE_HOME/\u003capp\u003e/history.jsonl, else ~/.local/state/\u003capp\u003e/history.jsonl",
           "kind": "interaction",
-          "result": "path"
+          "result": "path",
+          "history": "fetch"
         },
         {
           "name": "repeat",
@@ -706,7 +762,8 @@
               "description": "Count replacing the recorded one; 0 keeps it"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         }
       ]
     },
@@ -722,13 +779,15 @@
               "type": "string"
             }
           },
-          "result": "input state"
+          "result": "input state",
+          "history": "action"
         },
         {
           "name": "cancel",
           "description": "Cancel the pending count, operator, prefix or register of the focused instance; a visual selection returns to normal",
           "kind": "interaction",
-          "result": "mode"
+          "result": "mode",
+          "history": "action"
         },
         {
           "name": "delete",
@@ -743,7 +802,8 @@
             }
           },
           "result": "input state",
-          "repeatable": true
+          "repeatable": true,
+          "history": "change"
         },
         {
           "name": "focus",
@@ -755,7 +815,8 @@
               "required": true
             }
           },
-          "result": "context"
+          "result": "context",
+          "history": "action"
         },
         {
           "name": "insert",
@@ -768,7 +829,8 @@
             }
           },
           "result": "input state",
-          "repeatable": true
+          "repeatable": true,
+          "history": "change"
         },
         {
           "name": "kill",
@@ -781,7 +843,8 @@
             }
           },
           "result": "editor state",
-          "repeatable": true
+          "repeatable": true,
+          "history": "change"
         },
         {
           "name": "move",
@@ -799,7 +862,8 @@
               "type": "integer"
             }
           },
-          "result": "input state"
+          "result": "input state",
+          "history": "action"
         },
         {
           "name": "operator",
@@ -824,7 +888,8 @@
             }
           },
           "result": "editor state",
-          "repeatable": true
+          "repeatable": true,
+          "history": "change"
         },
         {
           "name": "paste",
@@ -845,7 +910,8 @@
             }
           },
           "result": "editor state",
-          "repeatable": true
+          "repeatable": true,
+          "history": "change"
         },
         {
           "name": "redo",
@@ -859,7 +925,8 @@
               "type": "integer"
             }
           },
-          "result": "input state"
+          "result": "input state",
+          "history": "change"
         },
         {
           "name": "replace",
@@ -880,7 +947,8 @@
             }
           },
           "result": "input state",
-          "repeatable": true
+          "repeatable": true,
+          "history": "change"
         },
         {
           "name": "select",
@@ -891,7 +959,8 @@
               "type": "string"
             }
           },
-          "result": "editor state"
+          "result": "editor state",
+          "history": "action"
         },
         {
           "name": "undo",
@@ -902,7 +971,8 @@
               "type": "integer"
             }
           },
-          "result": "input state"
+          "result": "input state",
+          "history": "change"
         },
         {
           "name": "yank",
@@ -916,7 +986,8 @@
               "type": "integer"
             }
           },
-          "result": "editor state"
+          "result": "editor state",
+          "history": "change"
         }
       ]
     },
@@ -933,7 +1004,8 @@
               "description": "Predicates, ANDed"
             }
           },
-          "result": "instance[]"
+          "result": "instance[]",
+          "history": "fetch"
         }
       ]
     },
@@ -944,7 +1016,8 @@
           "name": "list",
           "description": "List off-loop jobs: running ones and those finished since the last read (done, failed or cancelled, with the error)",
           "kind": "interaction",
-          "result": "job[]"
+          "result": "job[]",
+          "history": "fetch"
         }
       ]
     },
@@ -970,13 +1043,15 @@
               "description": "The key is pasted text"
             }
           },
-          "result": "boolean"
+          "result": "boolean",
+          "history": "action"
         },
         {
           "name": "ignore",
           "description": "Consume a key without effect; the row a noun binds to swallow keys",
           "kind": "interaction",
-          "result": "null"
+          "result": "null",
+          "history": "action"
         }
       ]
     },
@@ -996,7 +1071,8 @@
               "required": true
             }
           },
-          "result": "list state"
+          "result": "list state",
+          "history": "action"
         },
         {
           "name": "focus",
@@ -1008,7 +1084,8 @@
               "required": true
             }
           },
-          "result": "list state"
+          "result": "list state",
+          "history": "action"
         },
         {
           "name": "mark",
@@ -1022,7 +1099,8 @@
               "type": "string"
             }
           },
-          "result": "list state"
+          "result": "list state",
+          "history": "action"
         },
         {
           "name": "move",
@@ -1041,7 +1119,8 @@
               "description": "Repeat count (3j); stops at the list's edge, and spills as one move only from the edge"
             }
           },
-          "result": "list state"
+          "result": "list state",
+          "history": "action"
         },
         {
           "name": "select",
@@ -1056,7 +1135,8 @@
               "required": true
             }
           },
-          "result": "list state"
+          "result": "list state",
+          "history": "action"
         }
       ]
     },
@@ -1078,7 +1158,8 @@
               "description": "The key is pasted text"
             }
           },
-          "result": "macro state"
+          "result": "macro state",
+          "history": "action"
         },
         {
           "name": "record",
@@ -1095,7 +1176,8 @@
               "description": "The key is pasted text"
             }
           },
-          "result": "macro state"
+          "result": "macro state",
+          "history": "action"
         },
         {
           "name": "replay",
@@ -1110,7 +1192,8 @@
               "type": "integer"
             }
           },
-          "result": "macro state"
+          "result": "macro state",
+          "history": "action"
         },
         {
           "name": "start",
@@ -1122,13 +1205,15 @@
               "required": true
             }
           },
-          "result": "macro state"
+          "result": "macro state",
+          "history": "action"
         },
         {
           "name": "stop",
           "description": "Finish the current macro recording",
           "kind": "interaction",
-          "result": "macro state"
+          "result": "macro state",
+          "history": "action"
         }
       ]
     },
@@ -1139,7 +1224,8 @@
           "name": "pop",
           "description": "Close the active modal and restore its parent",
           "kind": "interaction",
-          "result": "context"
+          "result": "context",
+          "history": "action"
         },
         {
           "name": "push",
@@ -1155,7 +1241,8 @@
               "required": true
             }
           },
-          "result": "context"
+          "result": "context",
+          "history": "action"
         }
       ]
     },
@@ -1189,13 +1276,15 @@
               "description": "Request run when the sequence times out"
             }
           },
-          "result": "mode"
+          "result": "mode",
+          "history": "action"
         },
         {
           "name": "leave",
           "description": "Return from a pending mode to the mode it shadowed",
           "kind": "interaction",
-          "result": "mode"
+          "result": "mode",
+          "history": "action"
         },
         {
           "name": "register",
@@ -1210,7 +1299,8 @@
               "type": "boolean"
             }
           },
-          "result": "mode"
+          "result": "mode",
+          "history": "change"
         },
         {
           "name": "set",
@@ -1222,7 +1312,8 @@
               "required": true
             }
           },
-          "result": "mode"
+          "result": "mode",
+          "history": "action"
         }
       ]
     },
@@ -1233,7 +1324,8 @@
           "name": "list",
           "description": "List registered interaction modes, pending modes included",
           "kind": "interaction",
-          "result": "string[]"
+          "result": "string[]",
+          "history": "fetch"
         }
       ]
     },
@@ -1244,7 +1336,8 @@
           "name": "list",
           "description": "List registered verbs, nouns, kinds (interaction or application), confirm prompts and argument schemas",
           "kind": "interaction",
-          "result": "operation[]"
+          "result": "operation[]",
+          "history": "fetch"
         }
       ]
     },
@@ -1265,49 +1358,57 @@
               ]
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "collapse",
           "description": "Collapse the node, or step onto its parent when it is closed",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "delete",
           "description": "Delete the node and its children; u brings them back",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "edit",
           "description": "Edit the node's line; typing is written after a pause and when the line is left",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "expand",
           "description": "Expand the node, or step onto its first child when it is open",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "fold",
           "description": "Expand or collapse the node",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "indent",
           "description": "Nest the node under the node above it",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "leave",
           "description": "Leave the line: it is written, never discarded",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "move",
@@ -1319,19 +1420,22 @@
               "required": true
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "next",
           "description": "Write the line and start a new one below it",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "outdent",
           "description": "Move the node out to follow its parent",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "paste",
@@ -1343,19 +1447,22 @@
               "required": true
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "redo",
           "description": "Redo the last undone change",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "undo",
           "description": "Undo the last change; the undo is written like any change",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         }
       ]
     },
@@ -1366,7 +1473,8 @@
           "name": "next",
           "description": "Open the next page, wrapping in registration order",
           "kind": "interaction",
-          "result": "context"
+          "result": "context",
+          "history": "action"
         },
         {
           "name": "open",
@@ -1378,19 +1486,22 @@
               "required": true
             }
           },
-          "result": "context"
+          "result": "context",
+          "history": "action"
         },
         {
           "name": "pick",
           "description": "Choose a page, most recently visited first and the current one last: type to filter, enter opens",
           "kind": "interaction",
-          "result": "chooser state"
+          "result": "chooser state",
+          "history": "action"
         },
         {
           "name": "previous",
           "description": "Open the previous page, wrapping in registration order",
           "kind": "interaction",
-          "result": "context"
+          "result": "context",
+          "history": "action"
         }
       ]
     },
@@ -1401,7 +1512,8 @@
           "name": "list",
           "description": "List pages in registration order",
           "kind": "interaction",
-          "result": "page[]"
+          "result": "page[]",
+          "history": "fetch"
         }
       ]
     },
@@ -1422,7 +1534,8 @@
               "description": "How many steps of 5% to move the divider (the count; default 1)"
             }
           },
-          "result": "page and shift"
+          "result": "page and shift",
+          "history": "action"
         },
         {
           "name": "reset",
@@ -1434,7 +1547,8 @@
               "description": "The page (default the current page)"
             }
           },
-          "result": "page and shift"
+          "result": "page and shift",
+          "history": "action"
         },
         {
           "name": "shrink",
@@ -1450,7 +1564,8 @@
               "description": "How many steps of 5% to move the divider (the count; default 1)"
             }
           },
-          "result": "page and shift"
+          "result": "page and shift",
+          "history": "action"
         }
       ]
     },
@@ -1466,7 +1581,8 @@
               "type": "string"
             }
           },
-          "result": "editor state"
+          "result": "editor state",
+          "history": "fetch"
         },
         {
           "name": "select",
@@ -1478,7 +1594,8 @@
               "required": true
             }
           },
-          "result": "editor state"
+          "result": "editor state",
+          "history": "action"
         },
         {
           "name": "set",
@@ -1500,7 +1617,8 @@
               "type": "integer"
             }
           },
-          "result": "editor state"
+          "result": "editor state",
+          "history": "change"
         }
       ]
     },
@@ -1511,7 +1629,8 @@
           "name": "run",
           "description": "Execute the request stored in the mode payload",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         }
       ]
     },
@@ -1523,13 +1642,15 @@
           "name": "cancel",
           "description": "Close the prompt and keep the value",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "commit",
           "description": "Set the setting to the typed value and close the prompt",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         }
       ]
     },
@@ -1546,19 +1667,22 @@
               "description": "1 for the next value, -1 for the previous"
             }
           },
-          "result": "setting"
+          "result": "setting",
+          "history": "change"
         },
         {
           "name": "edit",
           "description": "Edit the setting: flip a boolean, take an enum's next value, else type a new value",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "reset",
           "description": "Reset the setting to its default",
           "kind": "interaction",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         }
       ]
     },
@@ -1566,10 +1690,18 @@
       "name": "settings",
       "verbs": [
         {
-          "name": "edit",
-          "description": "Open the settings editor: every change is saved as it is made",
+          "name": "close",
+          "description": "Leave the Settings page for the page it was opened from",
           "kind": "interaction",
-          "result": "setting[]"
+          "result": "context",
+          "history": "action"
+        },
+        {
+          "name": "edit",
+          "description": "Open the Settings page (or switch to it): every change is saved as it is made",
+          "kind": "interaction",
+          "result": "setting[]",
+          "history": "action"
         },
         {
           "name": "get",
@@ -1583,31 +1715,36 @@
               "source": "settings.names"
             }
           },
-          "result": "setting"
+          "result": "setting",
+          "history": "fetch"
         },
         {
           "name": "list",
           "description": "List the declared settings with their values, defaults and descriptions",
           "kind": "interaction",
-          "result": "setting[]"
+          "result": "setting[]",
+          "history": "fetch"
         },
         {
           "name": "names",
           "description": "List the names of the declared settings",
           "kind": "interaction",
-          "result": "string[]"
+          "result": "string[]",
+          "history": "fetch"
         },
         {
           "name": "path",
           "description": "Print the settings file: settings.json beside bindings.json",
           "kind": "interaction",
-          "result": "path"
+          "result": "path",
+          "history": "fetch"
         },
         {
           "name": "reload",
           "description": "Read settings.json again; observers see every value that changed",
           "kind": "interaction",
-          "result": "problem[]"
+          "result": "problem[]",
+          "history": "fetch"
         },
         {
           "name": "reset",
@@ -1621,7 +1758,8 @@
               "source": "settings.names"
             }
           },
-          "result": "setting"
+          "result": "setting",
+          "history": "change"
         },
         {
           "name": "set",
@@ -1640,7 +1778,8 @@
               "description": "The value: text, a number, true or false, or a duration such as 400ms"
             }
           },
-          "result": "setting"
+          "result": "setting",
+          "history": "change"
         }
       ]
     },
@@ -1656,7 +1795,8 @@
               "type": "string"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "fetch"
         }
       ]
     },
@@ -1674,7 +1814,8 @@
               "description": "Terminal instance (defaults to the focused one)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "detach",
@@ -1686,7 +1827,8 @@
               "description": "Terminal instance (defaults to the focused one)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "action"
         },
         {
           "name": "paste",
@@ -1706,7 +1848,8 @@
               "required": true
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "send",
@@ -1723,7 +1866,8 @@
               "description": "Space-separated key names, forwarded in order"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         }
       ]
     },
@@ -1789,7 +1933,8 @@
               "description": "only this tag (\"\" = untagged)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "delete",
@@ -1840,7 +1985,8 @@
             }
           },
           "result": "JSON value",
-          "confirm": "Delete torrent {{label}}?"
+          "confirm": "Delete torrent {{label}}?",
+          "history": "change"
         },
         {
           "name": "downloading",
@@ -1901,7 +2047,8 @@
               "description": "only this tag (\"\" = untagged)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "errored",
@@ -1962,7 +2109,8 @@
               "description": "only this tag (\"\" = untagged)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "export",
@@ -2045,7 +2193,8 @@
               "description": "only this tag (\"\" = untagged)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "list",
@@ -2129,7 +2278,8 @@
             }
           },
           "result": "JSON value",
-          "rows": "torrent"
+          "rows": "torrent",
+          "history": "fetch"
         },
         {
           "name": "overview",
@@ -2154,7 +2304,8 @@
               "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "pause",
@@ -2166,7 +2317,8 @@
               "description": "every torrent instead of --target HASH"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "paused",
@@ -2227,7 +2379,8 @@
               "description": "only this tag (\"\" = untagged)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "recheck",
@@ -2239,7 +2392,8 @@
               "description": "every torrent instead of --target HASH"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "resume",
@@ -2251,7 +2405,8 @@
               "description": "every torrent instead of --target HASH"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "seeding",
@@ -2312,13 +2467,15 @@
               "description": "only this tag (\"\" = untagged)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "show",
           "description": "one torrent's info and properties: --target HASH",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "stalled",
@@ -2379,7 +2536,8 @@
               "description": "only this tag (\"\" = untagged)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "summary",
@@ -2438,7 +2596,8 @@
               "description": "only this tag (\"\" = untagged)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         }
       ]
     },
@@ -2502,7 +2661,8 @@
               "description": "only this tag (\"\" = untagged)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "list",
@@ -2536,7 +2696,8 @@
             }
           },
           "result": "JSON value",
-          "rows": "tracker"
+          "rows": "tracker",
+          "history": "fetch"
         },
         {
           "name": "summary",
@@ -2595,7 +2756,8 @@
               "description": "only this tag (\"\" = untagged)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         }
       ]
     },
@@ -2629,7 +2791,8 @@
               "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "limit",
@@ -2645,13 +2808,15 @@
               "description": "upload limit, bytes/s (0 = unlimited)"
             }
           },
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         },
         {
           "name": "speed-limits-toggle",
           "description": "switch the alternative speed limits on or off; prints transfer info",
           "kind": "application",
-          "result": "JSON value"
+          "result": "JSON value",
+          "history": "change"
         }
       ]
     },
@@ -2668,13 +2833,15 @@
               "required": true
             }
           },
-          "result": "yank history state"
+          "result": "yank history state",
+          "history": "action"
         },
         {
           "name": "open",
           "description": "Select a previous application yank without inserting it",
           "kind": "interaction",
-          "result": "yank history state"
+          "result": "yank history state",
+          "history": "action"
         },
         {
           "name": "select",
@@ -2685,7 +2852,8 @@
               "type": "integer"
             }
           },
-          "result": "yank history state"
+          "result": "yank history state",
+          "history": "change"
         }
       ]
     }
@@ -4943,7 +5111,8 @@
           "step": -1
         }
       },
-      "when": "setting-steps"
+      "when": "setting-steps",
+      "hint": "h/l setting.cycle"
     },
     {
       "noun": "setting",
@@ -4956,7 +5125,8 @@
           "step": 1
         }
       },
-      "when": "setting-steps"
+      "when": "setting-steps",
+      "hidden": true
     },
     {
       "noun": "setting",
@@ -4969,7 +5139,8 @@
           "step": -1
         }
       },
-      "when": "setting-steps"
+      "when": "setting-steps",
+      "hidden": true
     },
     {
       "noun": "setting",
@@ -4991,7 +5162,8 @@
           "step": 1
         }
       },
-      "when": "setting-steps"
+      "when": "setting-steps",
+      "hidden": true
     },
     {
       "noun": "setting",
@@ -5004,7 +5176,53 @@
           "step": 1
         }
       },
-      "when": "setting-steps"
+      "when": "setting-steps",
+      "hidden": true
+    },
+    {
+      "noun": "settings-page",
+      "mode": "normal",
+      "keys": "esc",
+      "request": {
+        "verb": "close",
+        "noun": "settings"
+      }
+    },
+    {
+      "noun": "settings-page",
+      "mode": "normal",
+      "keys": "q",
+      "request": {
+        "verb": "close",
+        "noun": "settings"
+      }
+    },
+    {
+      "noun": "settings-section",
+      "mode": "normal",
+      "keys": "enter",
+      "request": {
+        "verb": "next",
+        "noun": "focus"
+      }
+    },
+    {
+      "noun": "settings-section",
+      "mode": "normal",
+      "keys": "l",
+      "request": {
+        "verb": "next",
+        "noun": "focus"
+      }
+    },
+    {
+      "noun": "settings-section",
+      "mode": "normal",
+      "keys": "right",
+      "request": {
+        "verb": "next",
+        "noun": "focus"
+      }
     },
     {
       "noun": "editor",
