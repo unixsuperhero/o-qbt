@@ -1255,6 +1255,32 @@
           "builtin": true
         },
         {
+          "name": "goto",
+          "description": "Select the first or last row, or the row numbered row (5G); clamps, never spills",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "description": "The list (default: the focused one)"
+            },
+            "position": {
+              "type": "string",
+              "description": "Where to go without a row number (default first)",
+              "enum": [
+                "first",
+                "last"
+              ]
+            },
+            "row": {
+              "type": "integer",
+              "description": "The row number, 1 the first (a count: 5G); 0 or absent goes to position"
+            }
+          },
+          "result": "list state",
+          "history": "action",
+          "builtin": true
+        },
+        {
           "name": "mark",
           "description": "Toggle the mark on a row (the selected row by default) for fan-out verbs",
           "kind": "interaction",
@@ -1289,6 +1315,63 @@
             "steps": {
               "type": "integer",
               "description": "Repeat count (3j); stops at the list's edge, and spills as one move only from the edge"
+            }
+          },
+          "result": "list state",
+          "history": "action",
+          "builtin": true
+        },
+        {
+          "name": "scroll",
+          "description": "Move the selection and the window a page (half a page with half) down or up; clamps, never spills",
+          "kind": "interaction",
+          "params": {
+            "delta": {
+              "type": "integer",
+              "required": true,
+              "description": "1 down, -1 up"
+            },
+            "half": {
+              "type": "boolean",
+              "description": "Half a page (ctrl+d, ctrl+u); steps is then rows"
+            },
+            "id": {
+              "type": "string",
+              "description": "The list (default: the focused one)"
+            },
+            "steps": {
+              "type": "integer",
+              "description": "A count: pages, or rows with half (Vim's [count]ctrl+d); 0 or absent is one page or half a page"
+            }
+          },
+          "result": "list state",
+          "history": "action",
+          "builtin": true
+        },
+        {
+          "name": "scroll-columns",
+          "description": "Scroll a table's columns: to the first or the last, or delta columns right or left; the first column stays",
+          "kind": "interaction",
+          "params": {
+            "delta": {
+              "type": "integer",
+              "description": "Columns to scroll, positive right (zl), negative left (zh)"
+            },
+            "id": {
+              "type": "string",
+              "description": "The list (default: the focused one)"
+            },
+            "steps": {
+              "type": "integer",
+              "description": "Repeat count (3zl)"
+            },
+            "to": {
+              "type": "string",
+              "description": "The unscrolled view (first) or the one showing the last column (last)",
+              "enum": [
+                "first",
+                "last"
+              ]
             }
           },
           "result": "list state",
@@ -5327,6 +5410,120 @@
     {
       "noun": "list",
       "mode": "normal",
+      "keys": "$",
+      "request": {
+        "verb": "scroll-columns",
+        "noun": "list",
+        "args": {
+          "to": "last"
+        }
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "0",
+      "request": {
+        "verb": "scroll-columns",
+        "noun": "list",
+        "args": {
+          "to": "first"
+        }
+      },
+      "when": "no-count"
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "G",
+      "request": {
+        "verb": "goto",
+        "noun": "list",
+        "args": {
+          "position": "last"
+        }
+      },
+      "from": {
+        "row": "line"
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "^",
+      "request": {
+        "verb": "scroll-columns",
+        "noun": "list",
+        "args": {
+          "to": "first"
+        }
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "ctrl+b",
+      "request": {
+        "verb": "scroll",
+        "noun": "list",
+        "args": {
+          "delta": -1
+        }
+      },
+      "from": {
+        "steps": "line"
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "ctrl+d",
+      "request": {
+        "verb": "scroll",
+        "noun": "list",
+        "args": {
+          "delta": 1,
+          "half": true
+        }
+      },
+      "from": {
+        "steps": "line"
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "ctrl+f",
+      "request": {
+        "verb": "scroll",
+        "noun": "list",
+        "args": {
+          "delta": 1
+        }
+      },
+      "from": {
+        "steps": "line"
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "ctrl+u",
+      "request": {
+        "verb": "scroll",
+        "noun": "list",
+        "args": {
+          "delta": -1,
+          "half": true
+        }
+      },
+      "from": {
+        "steps": "line"
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
       "keys": "down",
       "request": {
         "verb": "move",
@@ -5346,6 +5543,30 @@
       "request": {
         "verb": "filter-clear",
         "noun": "list"
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "g esc",
+      "request": {
+        "verb": "leave",
+        "noun": "mode"
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "g g",
+      "request": {
+        "verb": "goto",
+        "noun": "list",
+        "args": {
+          "position": "first"
+        }
+      },
+      "from": {
+        "row": "line"
       }
     },
     {
@@ -5396,6 +5617,45 @@
         "noun": "list",
         "args": {
           "delta": -1
+        }
+      },
+      "from": {
+        "steps": "count"
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "z esc",
+      "request": {
+        "verb": "leave",
+        "noun": "mode"
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "z h",
+      "request": {
+        "verb": "scroll-columns",
+        "noun": "list",
+        "args": {
+          "delta": -1
+        }
+      },
+      "from": {
+        "steps": "count"
+      }
+    },
+    {
+      "noun": "list",
+      "mode": "normal",
+      "keys": "z l",
+      "request": {
+        "verb": "scroll-columns",
+        "noun": "list",
+        "args": {
+          "delta": 1
         }
       },
       "from": {
