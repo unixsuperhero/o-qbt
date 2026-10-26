@@ -2,14 +2,10 @@ module github.com/unixsuperhero/o-qbt
 
 go 1.26.0
 
-replace github.com/unixsuperhero/ochazuke => /Users/unixsuperhero/proj/ochazuke
-
-replace github.com/unixsuperhero/oden => /Users/unixsuperhero/proj/oden
-
 require (
 	github.com/mattn/go-runewidth v0.0.30
-	github.com/unixsuperhero/ochazuke v0.0.0-00010101000000-000000000000
-	github.com/unixsuperhero/oden v0.0.0-00010101000000-000000000000
+	github.com/unixsuperhero/ochazuke v0.1.0
+	github.com/unixsuperhero/oden v0.1.0
 	golang.org/x/term v0.47.0
 )
 

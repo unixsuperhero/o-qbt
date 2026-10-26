@@ -140,4 +140,4 @@ MTM_SERVER=default o-nabe extension register o-qbt
 
 ## Development
 
-`gofmt -l . && go vet ./... && go test -race ./... && go run . catalog | head -5`. Tests run against a fake qBittorrent (`fake_test.go`) with an injected `df` and clock; they never reach the NAS. `go test -run Catalog -update` rewrites `testdata/catalog.golden`. ochazuke and oden are local `replace`s on `~/proj/ochazuke` and `~/proj/oden`.
+`gofmt -l . && go vet ./... && go test -race ./... && go run . catalog | head -5`. Tests run against a fake qBittorrent (`fake_test.go`) with an injected `df` and clock; they never reach the NAS. `go test -run Catalog -update` rewrites `testdata/catalog.golden`. oden and ochazuke are required at their tags (`v0.1.0`); an untracked `go.work` (`go work init . && go work use ../oden ../ochazuke`) builds against the sibling checkouts, and `GOWORK=off` builds from the tags as a fresh clone does.
