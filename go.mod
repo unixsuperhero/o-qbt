@@ -4,8 +4,8 @@ go 1.26.0
 
 require (
 	github.com/mattn/go-runewidth v0.0.30
-	github.com/unixsuperhero/ochazuke v0.1.0
-	github.com/unixsuperhero/oden v0.1.0
+	github.com/unixsuperhero/ochazuke v0.1.1
+	github.com/unixsuperhero/oden v0.1.1
 	golang.org/x/term v0.47.0
 )
 

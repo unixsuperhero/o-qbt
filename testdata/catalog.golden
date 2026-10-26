@@ -2951,7 +2951,8 @@
       "from": {
         "count": "digit"
       },
-      "hidden": true
+      "hidden": true,
+      "help": "Start a count for the next key (3j)"
     },
     {
       "noun": "app",
@@ -2964,7 +2965,8 @@
           "mode": "register_pending"
         }
       },
-      "hidden": true
+      "hidden": true,
+      "help": "Pick the register the next yank, delete or paste uses (\"a)"
     },
     {
       "noun": "app",
@@ -3023,7 +3025,8 @@
       "from": {
         "count": "count"
       },
-      "hidden": true
+      "hidden": true,
+      "help": "Replay the macro in the register typed next (@a), count times"
     },
     {
       "noun": "app",
@@ -3036,7 +3039,8 @@
           "mode": "macro_pending"
         }
       },
-      "hidden": true
+      "hidden": true,
+      "help": "Record a macro into the register typed next (qa); q again stops"
     },
     {
       "noun": "app",
@@ -4395,7 +4399,8 @@
           "mode": "register_pending"
         }
       },
-      "hidden": true
+      "hidden": true,
+      "help": "Pick the register the next yank, delete or paste uses (\"a)"
     },
     {
       "noun": "app",
@@ -4411,7 +4416,8 @@
       "from": {
         "count": "count"
       },
-      "hidden": true
+      "hidden": true,
+      "help": "Replay the macro in the register typed next (@a), count times"
     },
     {
       "noun": "app",
@@ -4424,7 +4430,8 @@
           "mode": "macro_pending"
         }
       },
-      "hidden": true
+      "hidden": true,
+      "help": "Record a macro into the register typed next (qa); q again stops"
     },
     {
       "noun": "editor",
