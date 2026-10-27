@@ -55,7 +55,7 @@ func TestLoginRefusedIsOneAttempt(t *testing.T) {
 			f := newFake(t)
 			f.ban = tc.ban
 			tool := testTool(t, f.URL, "bad", nil)
-			_, _, err := cli(t, tool, "app", "state") // two lists, one process
+			_, _, err := cli(t, tool, "app", "rows") // two lists, one process
 			if err == nil || !strings.Contains(err.Error(), "login refused: check user/pass; qBittorrent bans an IP after repeated failures, so do not retry blindly") || !strings.Contains(err.Error(), tc.want) {
 				t.Fatalf("err = %v", err)
 			}
@@ -113,7 +113,7 @@ func TestTorrentRows(t *testing.T) {
 	if d := rows[2].Data; d.CompletedOn != 20 || d.Category != "tv" || d.SavePath != "/downloads/tv" || d.Size != 2048 {
 		t.Fatalf("data: %+v", d)
 	}
-	out, _, err = cli(t, tool, "app", "state", "--json", "{}")
+	out, _, err = cli(t, tool, "app", "rows", "--json", "{}")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -296,7 +296,7 @@ func TestCatalogGolden(t *testing.T) {
 			t.Errorf("%s list declares rows %q", noun, rows[noun])
 		}
 	}
-	if doc.State != "app.state" {
+	if doc.State != "app.rows" {
 		t.Errorf("state %q", doc.State)
 	}
 }

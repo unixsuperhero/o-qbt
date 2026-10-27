@@ -2,11 +2,62 @@
   "schema": 1,
   "name": "o-qbt",
   "version": "0.1.0",
-  "state": "app.state",
+  "state": "app.rows",
   "stateDelta": 1,
+  "aliases": {
+    "actions": "app.actions",
+    "binding": "app.binding",
+    "bindings": "app.bindings",
+    "bindings-help": "app.bindings-help",
+    "chooser": "app.chooser",
+    "completion": "app.completion",
+    "confirm": "app.confirm",
+    "context": "app.context",
+    "count": "app.count",
+    "detail": "app.detail",
+    "editor": "app.editor",
+    "focus": "app.focus",
+    "form": "app.form",
+    "form-choice": "app.form-choice",
+    "form-field": "app.form-field",
+    "form-option": "app.form-option",
+    "form-suggest": "app.form-suggest",
+    "form-text": "app.form-text",
+    "history": "app.history",
+    "input": "app.input",
+    "instances": "app.instances",
+    "jobs": "app.jobs",
+    "key": "app.key",
+    "list": "app.list",
+    "macro": "app.macro",
+    "modal": "app.modal",
+    "mode": "app.mode",
+    "modes": "app.modes",
+    "nouns": "app.nouns",
+    "operations": "app.operations",
+    "outline": "app.outline",
+    "outline-line": "app.outline-line",
+    "outline-row": "app.outline-row",
+    "page": "app.page",
+    "pages": "app.pages",
+    "pane": "app.pane",
+    "prompt": "app.prompt",
+    "register": "app.register",
+    "registers": "app.registers",
+    "request": "app.request",
+    "setting": "app.setting",
+    "setting-item": "app.setting-item",
+    "setting-value": "app.setting-value",
+    "settings": "app.settings",
+    "settings-page": "app.settings-page",
+    "state": "app.state",
+    "terminal": "app.terminal",
+    "ui": "app.ui",
+    "yank-history": "app.yank-history"
+  },
   "nouns": [
     {
-      "name": "actions",
+      "name": "app.actions",
       "verbs": [
         {
           "name": "list",
@@ -35,67 +86,44 @@
       ]
     },
     {
-      "name": "app",
+      "name": "app.bindings-help",
       "verbs": [
         {
-          "name": "info",
-          "description": "the credentials test: log in once and read the version, Web API version, build, speeds and free disk; changes nothing",
-          "kind": "application",
-          "params": {
-            "columns": {
-              "type": "string",
-              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
-            },
-            "format": {
-              "type": "string",
-              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
-              "enum": [
-                "table",
-                "json",
-                "jsonl",
-                "tsv",
-                "csv",
-                "md",
-                "toon"
-              ]
-            },
-            "out": {
-              "type": "string",
-              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
-            }
-          },
-          "result": "JSON value",
-          "history": "fetch",
-          "builtin": false
-        },
-        {
-          "name": "prefs",
-          "description": "selected preferences: save and temp paths, max active downloads/uploads/torrents, dl/up limits (bytes/s)",
-          "kind": "application",
-          "result": "JSON value",
-          "history": "fetch",
-          "builtin": false
-        },
-        {
-          "name": "quit",
-          "description": "Exit the application",
+          "name": "mode",
+          "description": "Choose the mode the help's pick view describes",
           "kind": "interaction",
-          "result": "boolean",
+          "result": "view",
           "history": "action",
           "builtin": true
         },
         {
-          "name": "state",
-          "description": "every list's rows in one call, JSON Lines {noun, id, label} for torrent and category (the catalog's state)",
-          "kind": "application",
-          "result": "JSON value",
-          "history": "fetch",
-          "builtin": false
+          "name": "noun",
+          "description": "Choose the noun the help's pick and table views describe",
+          "kind": "interaction",
+          "result": "view",
+          "history": "action",
+          "builtin": true
+        },
+        {
+          "name": "place",
+          "description": "Choose where the help's pick and table views put the noun: one of the places it was seen (the page, the levels above it, the modal), or none (the noun and app)",
+          "kind": "interaction",
+          "result": "place",
+          "history": "action",
+          "builtin": true
+        },
+        {
+          "name": "view",
+          "description": "Show the help's next view: here (the focus), pick (a noun and mode you choose), table (a noun's keys by mode)",
+          "kind": "interaction",
+          "result": "view",
+          "history": "action",
+          "builtin": true
         }
       ]
     },
     {
-      "name": "bindings",
+      "name": "app.bindings",
       "verbs": [
         {
           "name": "check",
@@ -168,44 +196,7 @@
       ]
     },
     {
-      "name": "category",
-      "verbs": [
-        {
-          "name": "list",
-          "description": "the category rows: {id: category/NAME, label: \"NAME  SAVE_PATH\", data: {name, savePath}}; --format, --columns (name, save_path), --out",
-          "kind": "application",
-          "params": {
-            "columns": {
-              "type": "string",
-              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
-            },
-            "format": {
-              "type": "string",
-              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
-              "enum": [
-                "table",
-                "json",
-                "jsonl",
-                "tsv",
-                "csv",
-                "md",
-                "toon"
-              ]
-            },
-            "out": {
-              "type": "string",
-              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
-            }
-          },
-          "result": "JSON value",
-          "rows": "category",
-          "history": "fetch",
-          "builtin": false
-        }
-      ]
-    },
-    {
-      "name": "chooser",
+      "name": "app.chooser",
       "pin": "insert",
       "verbs": [
         {
@@ -241,7 +232,7 @@
       ]
     },
     {
-      "name": "completion",
+      "name": "app.completion",
       "verbs": [
         {
           "name": "accept",
@@ -284,7 +275,7 @@
       ]
     },
     {
-      "name": "config",
+      "name": "app.config",
       "verbs": [
         {
           "name": "export",
@@ -308,14 +299,6 @@
           "builtin": true
         },
         {
-          "name": "init",
-          "description": "write the settings file (url, user admin, empty pass, volume, ssh), mode 600, unless it exists; prints its path",
-          "kind": "application",
-          "result": "JSON value",
-          "history": "change",
-          "builtin": false
-        },
-        {
           "name": "path",
           "description": "Print the config directory (bindings.json, settings.json, actions.json, themes.json), the state directory (history.jsonl, panes.json) and the default config export directory",
           "kind": "interaction",
@@ -324,54 +307,17 @@
           "builtin": true
         },
         {
-          "name": "set",
-          "description": "set KEY to VALUE; pass is never taken from the command line: it prompts with echo off, or reads one line with --stdin",
-          "kind": "application",
-          "params": {
-            "key": {
-              "type": "string",
-              "required": true,
-              "description": "the setting",
-              "enum": [
-                "url",
-                "user",
-                "pass",
-                "volume",
-                "ssh",
-                "guard.mode",
-                "guard.minFree",
-                "guard.resumeAbove"
-              ]
-            },
-            "stdin": {
-              "type": "boolean",
-              "description": "read the value from one line of stdin"
-            },
-            "value": {
-              "type": "string",
-              "description": "the new value (not for pass)"
-            }
-          },
-          "result": "JSON value",
-          "positional": [
-            "key",
-            "value"
-          ],
-          "history": "change",
-          "builtin": false
-        },
-        {
-          "name": "show",
-          "description": "the effective settings and the environment overrides; never the password, only whether one is set",
-          "kind": "application",
-          "result": "JSON value",
+          "name": "reload",
+          "description": "Read every config file again: themes.json, settings.json, actions.json, bindings.json, then the application's own; a bad file or entry is skipped and reported",
+          "kind": "interaction",
+          "result": "problem[]",
           "history": "fetch",
-          "builtin": false
+          "builtin": true
         }
       ]
     },
     {
-      "name": "confirm",
+      "name": "app.confirm",
       "verbs": [
         {
           "name": "accept",
@@ -389,7 +335,9 @@
             "operation": {
               "type": "string",
               "required": true,
-              "description": "noun.verb"
+              "description": "noun.verb",
+              "source": "app.operations.list",
+              "noun": "app.operations"
             },
             "prompt": {
               "type": "string"
@@ -402,7 +350,7 @@
       ]
     },
     {
-      "name": "context",
+      "name": "app.context",
       "verbs": [
         {
           "name": "select",
@@ -428,7 +376,7 @@
       ]
     },
     {
-      "name": "count",
+      "name": "app.count",
       "verbs": [
         {
           "name": "append",
@@ -447,7 +395,7 @@
       ]
     },
     {
-      "name": "detail",
+      "name": "app.detail",
       "verbs": [
         {
           "name": "scroll",
@@ -474,7 +422,7 @@
       ]
     },
     {
-      "name": "focus",
+      "name": "app.focus",
       "verbs": [
         {
           "name": "next",
@@ -529,7 +477,7 @@
       ]
     },
     {
-      "name": "form-option",
+      "name": "app.form-option",
       "verbs": [
         {
           "name": "pick",
@@ -542,7 +490,7 @@
       ]
     },
     {
-      "name": "form",
+      "name": "app.form",
       "verbs": [
         {
           "name": "choose",
@@ -615,169 +563,7 @@
       ]
     },
     {
-      "name": "guard",
-      "verbs": [
-        {
-          "name": "check",
-          "description": "the monitor step: df the volume over ssh; floor mode (default) pauses every torrent when free space is below --min-free (5GiB) and resumes them above --resume-above (20GiB) when the guard paused; allowance mode pauses once free space is more than --limit below the baseline; one line to guard.log",
-          "kind": "application",
-          "params": {
-            "limit": {
-              "type": "string",
-              "description": "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
-            },
-            "min-free": {
-              "type": "string",
-              "description": "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"
-            },
-            "mode": {
-              "type": "string",
-              "description": "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor",
-              "enum": [
-                "floor",
-                "allowance"
-              ]
-            },
-            "resume-above": {
-              "type": "string",
-              "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
-            }
-          },
-          "result": "JSON value",
-          "history": "change",
-          "builtin": false
-        },
-        {
-          "name": "install",
-          "description": "write ~/Library/LaunchAgents/com.unixsuperhero.o-qbt-guard.plist (o-qbt guard check every 300 s and at load), lint it, bootstrap it in gui/UID; idempotent",
-          "kind": "application",
-          "result": "JSON value",
-          "history": "change",
-          "builtin": false
-        },
-        {
-          "name": "log",
-          "description": "the last --tail N lines of guard.log (default 20)",
-          "kind": "application",
-          "params": {
-            "tail": {
-              "type": "integer",
-              "description": "how many lines (default 20)"
-            }
-          },
-          "result": "JSON value",
-          "positional": [
-            "tail"
-          ],
-          "history": "fetch",
-          "builtin": false
-        },
-        {
-          "name": "rebase",
-          "description": "store the current free space as the baseline (or --bytes N) and clear the marker; only allowance mode reads the baseline",
-          "kind": "application",
-          "params": {
-            "bytes": {
-              "type": "integer",
-              "description": "the baseline in bytes instead of the current free space"
-            },
-            "limit": {
-              "type": "string",
-              "description": "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
-            },
-            "min-free": {
-              "type": "string",
-              "description": "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"
-            },
-            "mode": {
-              "type": "string",
-              "description": "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor",
-              "enum": [
-                "floor",
-                "allowance"
-              ]
-            },
-            "resume-above": {
-              "type": "string",
-              "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
-            }
-          },
-          "result": "JSON value",
-          "history": "change",
-          "builtin": false
-        },
-        {
-          "name": "resume",
-          "description": "resume every torrent and clear the marker",
-          "kind": "application",
-          "params": {
-            "limit": {
-              "type": "string",
-              "description": "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
-            },
-            "min-free": {
-              "type": "string",
-              "description": "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"
-            },
-            "mode": {
-              "type": "string",
-              "description": "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor",
-              "enum": [
-                "floor",
-                "allowance"
-              ]
-            },
-            "resume-above": {
-              "type": "string",
-              "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
-            }
-          },
-          "result": "JSON value",
-          "history": "change",
-          "builtin": false
-        },
-        {
-          "name": "status",
-          "description": "the launchd agent, the last guard.log line, the mode and its thresholds, free space (against the baseline in allowance mode), whether the guard paused",
-          "kind": "application",
-          "params": {
-            "limit": {
-              "type": "string",
-              "description": "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
-            },
-            "min-free": {
-              "type": "string",
-              "description": "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"
-            },
-            "mode": {
-              "type": "string",
-              "description": "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor",
-              "enum": [
-                "floor",
-                "allowance"
-              ]
-            },
-            "resume-above": {
-              "type": "string",
-              "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
-            }
-          },
-          "result": "JSON value",
-          "history": "fetch",
-          "builtin": false
-        },
-        {
-          "name": "uninstall",
-          "description": "bootout the agent and remove its plist; the baseline, marker and log stay",
-          "kind": "application",
-          "result": "JSON value",
-          "history": "change",
-          "builtin": false
-        }
-      ]
-    },
-    {
-      "name": "history",
+      "name": "app.history",
       "verbs": [
         {
           "name": "list",
@@ -822,7 +608,43 @@
       ]
     },
     {
-      "name": "input",
+      "name": "app",
+      "verbs": [
+        {
+          "name": "info",
+          "description": "the credentials test: log in once and read the version, Web API version, build, speeds and free disk; changes nothing",
+          "kind": "application",
+          "params": {
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            }
+          },
+          "result": "JSON value",
+          "history": "fetch",
+          "builtin": false
+        }
+      ]
+    },
+    {
+      "name": "app.input",
       "verbs": [
         {
           "name": "begin",
@@ -869,7 +691,9 @@
           "params": {
             "id": {
               "type": "string",
-              "required": true
+              "required": true,
+              "free": true,
+              "noun": "app.editor"
             }
           },
           "result": "context",
@@ -1060,7 +884,7 @@
       ]
     },
     {
-      "name": "instances",
+      "name": "app.instances",
       "verbs": [
         {
           "name": "query",
@@ -1079,7 +903,7 @@
       ]
     },
     {
-      "name": "jobs",
+      "name": "app.jobs",
       "verbs": [
         {
           "name": "list",
@@ -1092,7 +916,7 @@
       ]
     },
     {
-      "name": "key",
+      "name": "app.key",
       "verbs": [
         {
           "name": "dispatch",
@@ -1128,19 +952,89 @@
       ]
     },
     {
-      "name": "list",
+      "name": "app.list",
       "verbs": [
         {
           "name": "apply",
-          "description": "Run \u003crow noun\u003e.verb for every marked row the filter shows (the selected row when none is), skipping and reporting rows whose noun lacks the verb",
+          "description": "Run \u003crow noun\u003e.verb for every marked row the filter shows (the selected row when none is), skipping and reporting rows whose noun lacks the verb; a verb with a confirm asks once for all the rows; ends a visual selection (V)",
           "kind": "interaction",
           "params": {
+            "args": {
+              "type": "object",
+              "description": "Arguments every row's request carries"
+            },
+            "confirmed": {
+              "type": "boolean",
+              "description": "The rows' confirm was answered (the confirm modal sets it)"
+            },
             "id": {
               "type": "string"
             },
             "verb": {
               "type": "string",
               "required": true
+            }
+          },
+          "result": "list state",
+          "history": "action",
+          "builtin": true
+        },
+        {
+          "name": "choose-column",
+          "description": "Choose a table's current column from a chooser of its titles",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "description": "The list (default: the focused one)"
+            }
+          },
+          "result": "list state",
+          "history": "action",
+          "builtin": true
+        },
+        {
+          "name": "column",
+          "description": "Move a cell-mode table's current column: to the first or last, to the column numbered index (|), or delta columns; the view scrolls to show it",
+          "kind": "interaction",
+          "params": {
+            "delta": {
+              "type": "integer",
+              "description": "Columns to move, positive right (l), negative left (h)"
+            },
+            "id": {
+              "type": "string",
+              "description": "The list (default: the focused one)"
+            },
+            "index": {
+              "type": "integer",
+              "description": "The column number, 1 the first (a count: 3|)"
+            },
+            "steps": {
+              "type": "integer",
+              "description": "Repeat count (3l)"
+            },
+            "to": {
+              "type": "string",
+              "description": "The first or the last column",
+              "enum": [
+                "first",
+                "last"
+              ]
+            }
+          },
+          "result": "list state",
+          "history": "action",
+          "builtin": true
+        },
+        {
+          "name": "end-visual",
+          "description": "End the visual row selection (esc): the marks go back to the ones it found",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "description": "The list (default: the focused one)"
             }
           },
           "result": "list state",
@@ -1160,6 +1054,20 @@
               "type": "string",
               "required": true,
               "description": "The words every shown row holds; empty clears the filter"
+            }
+          },
+          "result": "list state",
+          "history": "action",
+          "builtin": true
+        },
+        {
+          "name": "filter-choose",
+          "description": "Choose the selected match: clear the filter keeping the selection on its row, and close the line (enter on a ClearFilterOnEnter list)",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "description": "The list (default: the focused one)"
             }
           },
           "result": "list state",
@@ -1247,7 +1155,9 @@
           "params": {
             "id": {
               "type": "string",
-              "required": true
+              "required": true,
+              "free": true,
+              "noun": "app.list"
             }
           },
           "result": "list state",
@@ -1319,6 +1229,43 @@
           },
           "result": "list state",
           "history": "action",
+          "builtin": true
+        },
+        {
+          "name": "reset-columns",
+          "description": "Lay every column of a table out automatically again (z =)",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "description": "The list (default: the focused one)"
+            }
+          },
+          "result": "list state",
+          "history": "change",
+          "builtin": true
+        },
+        {
+          "name": "resize-column",
+          "description": "Widen (delta 1) or narrow (-1) a table's current column by ColumnWidthStep cells; remembered per table",
+          "kind": "interaction",
+          "params": {
+            "delta": {
+              "type": "integer",
+              "required": true,
+              "description": "1 wider, -1 narrower"
+            },
+            "id": {
+              "type": "string",
+              "description": "The list (default: the focused one)"
+            },
+            "steps": {
+              "type": "integer",
+              "description": "Repeat count (3z\u003e)"
+            }
+          },
+          "result": "list state",
+          "history": "change",
           "builtin": true
         },
         {
@@ -1394,11 +1341,55 @@
           "result": "list state",
           "history": "action",
           "builtin": true
+        },
+        {
+          "name": "visual",
+          "description": "Start a visual row selection at the selected row (V), or end it (V again, esc): j/k extend it over the marks; a row's verb then runs for every selected row",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "description": "The list (default: the focused one)"
+            },
+            "on": {
+              "type": "boolean",
+              "description": "true starts, false ends; omit to toggle"
+            }
+          },
+          "result": "list state",
+          "history": "action",
+          "builtin": true
+        },
+        {
+          "name": "yank",
+          "description": "Copy the current cell's text (what: cell, a cell-mode table) or the row's cells joined by tabs (what: row, any table) into the registers",
+          "kind": "interaction",
+          "params": {
+            "id": {
+              "type": "string",
+              "description": "The list (default: the focused one)"
+            },
+            "register": {
+              "type": "string",
+              "description": "Register name; the active register, else the unnamed one"
+            },
+            "what": {
+              "type": "string",
+              "description": "The cell (default) or the whole row",
+              "enum": [
+                "cell",
+                "row"
+              ]
+            }
+          },
+          "result": "the yank",
+          "history": "change",
+          "builtin": true
         }
       ]
     },
     {
-      "name": "macro",
+      "name": "app.macro",
       "verbs": [
         {
           "name": "append",
@@ -1480,7 +1471,7 @@
       ]
     },
     {
-      "name": "modal",
+      "name": "app.modal",
       "verbs": [
         {
           "name": "pop",
@@ -1501,7 +1492,9 @@
             },
             "input": {
               "type": "string",
-              "required": true
+              "required": true,
+              "free": true,
+              "noun": "app.editor"
             }
           },
           "result": "context",
@@ -1511,7 +1504,7 @@
       ]
     },
     {
-      "name": "mode",
+      "name": "app.mode",
       "verbs": [
         {
           "name": "enter",
@@ -1523,7 +1516,9 @@
             },
             "mode": {
               "type": "string",
-              "required": true
+              "required": true,
+              "source": "app.modes.list",
+              "noun": "app.modes"
             },
             "op": {
               "type": "string"
@@ -1576,7 +1571,9 @@
           "params": {
             "mode": {
               "type": "string",
-              "required": true
+              "required": true,
+              "source": "app.modes.list",
+              "noun": "app.modes"
             }
           },
           "result": "mode",
@@ -1586,7 +1583,7 @@
       ]
     },
     {
-      "name": "modes",
+      "name": "app.modes",
       "verbs": [
         {
           "name": "list",
@@ -1599,7 +1596,45 @@
       ]
     },
     {
-      "name": "operations",
+      "name": "app.nouns",
+      "verbs": [
+        {
+          "name": "list",
+          "description": "List the defined nouns with their verbs and how many places each was seen in",
+          "kind": "interaction",
+          "result": "noun[]",
+          "history": "fetch",
+          "builtin": true
+        },
+        {
+          "name": "places",
+          "description": "List where a noun was seen (every noun without one): each distinct chain of ancestor nouns, outermost first, with its page or modal, how often and when last; kept across runs in noun-places.json",
+          "kind": "interaction",
+          "params": {
+            "noun": {
+              "type": "string",
+              "description": "The noun (default every noun)"
+            }
+          },
+          "result": "placement[]",
+          "positional": [
+            "noun"
+          ],
+          "history": "fetch",
+          "builtin": true
+        },
+        {
+          "name": "places-path",
+          "description": "Print the placements file: $XDG_STATE_HOME/\u003capp\u003e/noun-places.json, else ~/.local/state/\u003capp\u003e/noun-places.json",
+          "kind": "interaction",
+          "result": "path",
+          "history": "fetch",
+          "builtin": true
+        }
+      ]
+    },
+    {
+      "name": "app.operations",
       "verbs": [
         {
           "name": "list",
@@ -1612,7 +1647,7 @@
       ]
     },
     {
-      "name": "outline",
+      "name": "app.outline",
       "verbs": [
         {
           "name": "add",
@@ -1751,7 +1786,7 @@
       ]
     },
     {
-      "name": "page",
+      "name": "app.page",
       "verbs": [
         {
           "name": "next",
@@ -1768,7 +1803,9 @@
           "params": {
             "id": {
               "type": "string",
-              "required": true
+              "required": true,
+              "source": "app.pages.list",
+              "noun": "app.pages"
             }
           },
           "result": "context",
@@ -1794,7 +1831,7 @@
       ]
     },
     {
-      "name": "pages",
+      "name": "app.pages",
       "verbs": [
         {
           "name": "list",
@@ -1807,7 +1844,7 @@
       ]
     },
     {
-      "name": "pane",
+      "name": "app.pane",
       "verbs": [
         {
           "name": "grow",
@@ -1862,7 +1899,28 @@
       ]
     },
     {
-      "name": "register",
+      "name": "app",
+      "verbs": [
+        {
+          "name": "prefs",
+          "description": "selected preferences: save and temp paths, max active downloads/uploads/torrents, dl/up limits (bytes/s)",
+          "kind": "application",
+          "result": "JSON value",
+          "history": "fetch",
+          "builtin": false
+        },
+        {
+          "name": "quit",
+          "description": "Exit the application",
+          "kind": "interaction",
+          "result": "boolean",
+          "history": "action",
+          "builtin": true
+        }
+      ]
+    },
+    {
+      "name": "app.register",
       "verbs": [
         {
           "name": "get",
@@ -1918,7 +1976,7 @@
       ]
     },
     {
-      "name": "request",
+      "name": "app.request",
       "verbs": [
         {
           "name": "run",
@@ -1931,7 +1989,20 @@
       ]
     },
     {
-      "name": "setting-item",
+      "name": "app",
+      "verbs": [
+        {
+          "name": "rows",
+          "description": "every list's rows in one call, JSON Lines {noun, id, label} for torrent and category (the catalog's state)",
+          "kind": "application",
+          "result": "JSON value",
+          "history": "fetch",
+          "builtin": false
+        }
+      ]
+    },
+    {
+      "name": "app.setting-item",
       "verbs": [
         {
           "name": "add",
@@ -1968,7 +2039,7 @@
       ]
     },
     {
-      "name": "setting-value",
+      "name": "app.setting-value",
       "pin": "insert",
       "verbs": [
         {
@@ -1990,7 +2061,7 @@
       ]
     },
     {
-      "name": "setting",
+      "name": "app.setting",
       "verbs": [
         {
           "name": "add",
@@ -2033,7 +2104,7 @@
       ]
     },
     {
-      "name": "settings",
+      "name": "app.settings",
       "verbs": [
         {
           "name": "close",
@@ -2060,7 +2131,7 @@
               "type": "string",
               "required": true,
               "description": "Setting name",
-              "source": "settings.names"
+              "source": "app.settings.names"
             }
           },
           "result": "setting",
@@ -2108,7 +2179,7 @@
               "type": "string",
               "required": true,
               "description": "Setting name",
-              "source": "settings.names"
+              "source": "app.settings.names"
             }
           },
           "result": "setting",
@@ -2142,7 +2213,7 @@
               "type": "string",
               "required": true,
               "description": "Setting name",
-              "source": "settings.names"
+              "source": "app.settings.names"
             },
             "value": {
               "type": "string",
@@ -2165,7 +2236,7 @@
       ]
     },
     {
-      "name": "state",
+      "name": "app.state",
       "verbs": [
         {
           "name": "get",
@@ -2183,7 +2254,7 @@
       ]
     },
     {
-      "name": "terminal",
+      "name": "app.terminal",
       "pin": "terminal",
       "verbs": [
         {
@@ -2254,6 +2325,311 @@
           "result": "JSON value",
           "history": "change",
           "builtin": true
+        }
+      ]
+    },
+    {
+      "name": "app.yank-history",
+      "verbs": [
+        {
+          "name": "move",
+          "description": "Move the yank-history selection",
+          "kind": "interaction",
+          "params": {
+            "steps": {
+              "type": "integer",
+              "required": true
+            }
+          },
+          "result": "yank history state",
+          "history": "action",
+          "builtin": true
+        },
+        {
+          "name": "open",
+          "description": "Select a previous application yank without inserting it",
+          "kind": "interaction",
+          "result": "yank history state",
+          "history": "action",
+          "builtin": true
+        },
+        {
+          "name": "select",
+          "description": "Make a history entry the unnamed register and restore origin focus",
+          "kind": "interaction",
+          "params": {
+            "index": {
+              "type": "integer"
+            }
+          },
+          "result": "yank history state",
+          "history": "change",
+          "builtin": true
+        }
+      ]
+    },
+    {
+      "name": "category",
+      "verbs": [
+        {
+          "name": "list",
+          "description": "the category rows: {id: category/NAME, label: \"NAME  SAVE_PATH\", data: {name, savePath}}; --format, --columns (name, save_path), --out",
+          "kind": "application",
+          "params": {
+            "columns": {
+              "type": "string",
+              "description": "comma-separated columns, in order, for table, tsv, csv, md and toon"
+            },
+            "format": {
+              "type": "string",
+              "description": "table (the default on a terminal), json (otherwise), jsonl, tsv, csv, md or toon",
+              "enum": [
+                "table",
+                "json",
+                "jsonl",
+                "tsv",
+                "csv",
+                "md",
+                "toon"
+              ]
+            },
+            "out": {
+              "type": "string",
+              "description": "write to FILE instead of printing; its extension picks the format when --format is absent"
+            }
+          },
+          "result": "JSON value",
+          "rows": "category",
+          "history": "fetch",
+          "builtin": false
+        }
+      ]
+    },
+    {
+      "name": "config",
+      "verbs": [
+        {
+          "name": "init",
+          "description": "write the settings file (url, user admin, empty pass, volume, ssh), mode 600, unless it exists; prints its path",
+          "kind": "application",
+          "result": "JSON value",
+          "history": "change",
+          "builtin": false
+        },
+        {
+          "name": "path",
+          "description": "the settings file's path (whether or not it exists); o-qbt app config path prints the framework's directories",
+          "kind": "application",
+          "result": "JSON value",
+          "history": "fetch",
+          "builtin": false
+        },
+        {
+          "name": "set",
+          "description": "set KEY to VALUE; pass is never taken from the command line: it prompts with echo off, or reads one line with --stdin",
+          "kind": "application",
+          "params": {
+            "key": {
+              "type": "string",
+              "required": true,
+              "description": "the setting",
+              "enum": [
+                "url",
+                "user",
+                "pass",
+                "volume",
+                "ssh",
+                "guard.mode",
+                "guard.minFree",
+                "guard.resumeAbove"
+              ]
+            },
+            "stdin": {
+              "type": "boolean",
+              "description": "read the value from one line of stdin"
+            },
+            "value": {
+              "type": "string",
+              "description": "the new value (not for pass)"
+            }
+          },
+          "result": "JSON value",
+          "positional": [
+            "key",
+            "value"
+          ],
+          "history": "change",
+          "builtin": false
+        },
+        {
+          "name": "show",
+          "description": "the effective settings and the environment overrides; never the password, only whether one is set",
+          "kind": "application",
+          "result": "JSON value",
+          "history": "fetch",
+          "builtin": false
+        }
+      ]
+    },
+    {
+      "name": "guard",
+      "verbs": [
+        {
+          "name": "check",
+          "description": "the monitor step: df the volume over ssh; floor mode (default) pauses every torrent when free space is below --min-free (5GiB) and resumes them above --resume-above (20GiB) when the guard paused; allowance mode pauses once free space is more than --limit below the baseline; one line to guard.log",
+          "kind": "application",
+          "params": {
+            "limit": {
+              "type": "string",
+              "description": "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+            },
+            "min-free": {
+              "type": "string",
+              "description": "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"
+            },
+            "mode": {
+              "type": "string",
+              "description": "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor",
+              "enum": [
+                "floor",
+                "allowance"
+              ]
+            },
+            "resume-above": {
+              "type": "string",
+              "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
+            }
+          },
+          "result": "JSON value",
+          "history": "change",
+          "builtin": false
+        },
+        {
+          "name": "install",
+          "description": "write ~/Library/LaunchAgents/com.unixsuperhero.o-qbt-guard.plist (o-qbt guard check every 300 s and at load), lint it, bootstrap it in gui/UID; idempotent",
+          "kind": "application",
+          "result": "JSON value",
+          "history": "change",
+          "builtin": false
+        },
+        {
+          "name": "log",
+          "description": "the last --tail N lines of guard.log (default 20)",
+          "kind": "application",
+          "params": {
+            "tail": {
+              "type": "integer",
+              "description": "how many lines (default 20)"
+            }
+          },
+          "result": "JSON value",
+          "positional": [
+            "tail"
+          ],
+          "history": "fetch",
+          "builtin": false
+        },
+        {
+          "name": "rebase",
+          "description": "store the current free space as the baseline (or --bytes N) and clear the marker; only allowance mode reads the baseline",
+          "kind": "application",
+          "params": {
+            "bytes": {
+              "type": "integer",
+              "description": "the baseline in bytes instead of the current free space"
+            },
+            "limit": {
+              "type": "string",
+              "description": "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+            },
+            "min-free": {
+              "type": "string",
+              "description": "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"
+            },
+            "mode": {
+              "type": "string",
+              "description": "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor",
+              "enum": [
+                "floor",
+                "allowance"
+              ]
+            },
+            "resume-above": {
+              "type": "string",
+              "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
+            }
+          },
+          "result": "JSON value",
+          "history": "change",
+          "builtin": false
+        },
+        {
+          "name": "resume",
+          "description": "resume every torrent and clear the marker",
+          "kind": "application",
+          "params": {
+            "limit": {
+              "type": "string",
+              "description": "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+            },
+            "min-free": {
+              "type": "string",
+              "description": "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"
+            },
+            "mode": {
+              "type": "string",
+              "description": "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor",
+              "enum": [
+                "floor",
+                "allowance"
+              ]
+            },
+            "resume-above": {
+              "type": "string",
+              "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
+            }
+          },
+          "result": "JSON value",
+          "history": "change",
+          "builtin": false
+        },
+        {
+          "name": "status",
+          "description": "the launchd agent, the last guard.log line, the mode and its thresholds, free space (against the baseline in allowance mode), whether the guard paused",
+          "kind": "application",
+          "params": {
+            "limit": {
+              "type": "string",
+              "description": "allowance: how far free space may drop below the baseline: bytes, or a number with K, M, G or T (default 10G)"
+            },
+            "min-free": {
+              "type": "string",
+              "description": "floor: pause when free space is below this size (default config guard.minFree, else 5GiB)"
+            },
+            "mode": {
+              "type": "string",
+              "description": "the rule: floor (pause below --min-free, resume above --resume-above) or allowance (pause --limit below the baseline); default config guard.mode, else floor",
+              "enum": [
+                "floor",
+                "allowance"
+              ]
+            },
+            "resume-above": {
+              "type": "string",
+              "description": "floor: resume, when the guard paused, once free space is above this size (default config guard.resumeAbove, else 20GiB)"
+            }
+          },
+          "result": "JSON value",
+          "history": "fetch",
+          "builtin": false
+        },
+        {
+          "name": "uninstall",
+          "description": "bootout the agent and remove its plist; the baseline, marker and log stay",
+          "kind": "application",
+          "result": "JSON value",
+          "history": "change",
+          "builtin": false
         }
       ]
     },
@@ -3226,947 +3602,907 @@
           "builtin": false
         }
       ]
-    },
-    {
-      "name": "yank-history",
-      "verbs": [
-        {
-          "name": "move",
-          "description": "Move the yank-history selection",
-          "kind": "interaction",
-          "params": {
-            "steps": {
-              "type": "integer",
-              "required": true
-            }
-          },
-          "result": "yank history state",
-          "history": "action",
-          "builtin": true
-        },
-        {
-          "name": "open",
-          "description": "Select a previous application yank without inserting it",
-          "kind": "interaction",
-          "result": "yank history state",
-          "history": "action",
-          "builtin": true
-        },
-        {
-          "name": "select",
-          "description": "Make a history entry the unnamed register and restore origin focus",
-          "kind": "interaction",
-          "params": {
-            "index": {
-              "type": "integer"
-            }
-          },
-          "result": "yank history state",
-          "history": "change",
-          "builtin": true
-        }
-      ]
     }
   ],
   "bindings": [
     {
-      "noun": "chooser",
+      "noun": "app.chooser",
+      "request": {
+        "verb": "insert",
+        "noun": "app.input"
+      },
       "pattern": "printable",
-      "request": {
-        "verb": "insert",
-        "noun": "input"
-      },
       "from": {
         "text": "text"
       }
     },
     {
-      "noun": "chooser",
+      "noun": "app.chooser",
+      "request": {
+        "verb": "insert",
+        "noun": "app.input"
+      },
       "pattern": "paste",
-      "request": {
-        "verb": "insert",
-        "noun": "input"
-      },
       "from": {
         "text": "text"
       }
     },
     {
-      "noun": "chooser",
-      "keys": "ctrl+j",
+      "noun": "app.chooser",
       "request": {
         "verb": "move",
-        "noun": "chooser",
+        "noun": "app.chooser",
         "args": {
           "delta": 1
         }
-      }
+      },
+      "keys": "ctrl+j"
     },
     {
-      "noun": "chooser",
-      "keys": "ctrl+k",
+      "noun": "app.chooser",
       "request": {
         "verb": "move",
-        "noun": "chooser",
+        "noun": "app.chooser",
         "args": {
           "delta": -1
         }
-      }
+      },
+      "keys": "ctrl+k"
     },
     {
-      "noun": "chooser",
-      "keys": "ctrl+n",
+      "noun": "app.chooser",
       "request": {
         "verb": "move",
-        "noun": "chooser",
+        "noun": "app.chooser",
         "args": {
           "delta": 1
         }
-      }
+      },
+      "keys": "ctrl+n"
     },
     {
-      "noun": "chooser",
-      "keys": "ctrl+p",
+      "noun": "app.chooser",
       "request": {
         "verb": "move",
-        "noun": "chooser",
+        "noun": "app.chooser",
         "args": {
           "delta": -1
         }
-      }
+      },
+      "keys": "ctrl+p"
     },
     {
-      "noun": "chooser",
-      "keys": "down",
+      "noun": "app.chooser",
       "request": {
         "verb": "move",
-        "noun": "chooser",
+        "noun": "app.chooser",
         "args": {
           "delta": 1
         }
-      }
+      },
+      "keys": "down"
     },
     {
-      "noun": "chooser",
-      "keys": "enter",
+      "noun": "app.chooser",
       "request": {
         "verb": "pick",
-        "noun": "chooser"
-      }
+        "noun": "app.chooser"
+      },
+      "keys": "enter"
     },
     {
-      "noun": "chooser",
-      "keys": "esc",
+      "noun": "app.chooser",
       "request": {
         "verb": "cancel",
-        "noun": "chooser"
-      }
+        "noun": "app.chooser"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "chooser",
-      "keys": "up",
+      "noun": "app.chooser",
       "request": {
         "verb": "move",
-        "noun": "chooser",
+        "noun": "app.chooser",
         "args": {
           "delta": -1
         }
-      }
+      },
+      "keys": "up"
     },
     {
-      "noun": "confirm",
-      "pattern": "any",
+      "noun": "app.confirm",
       "request": {
         "verb": "ignore",
-        "noun": "key"
+        "noun": "app.key"
       },
+      "pattern": "any",
       "hidden": true
     },
     {
-      "noun": "confirm",
-      "keys": "enter",
+      "noun": "app.confirm",
       "request": {
         "verb": "accept",
-        "noun": "confirm"
-      }
+        "noun": "app.confirm"
+      },
+      "keys": "enter"
     },
     {
-      "noun": "confirm",
-      "keys": "esc",
+      "noun": "app.confirm",
       "request": {
         "verb": "pop",
-        "noun": "modal"
-      }
+        "noun": "app.modal"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "confirm",
-      "keys": "n",
+      "noun": "app.confirm",
       "request": {
         "verb": "pop",
-        "noun": "modal"
-      }
+        "noun": "app.modal"
+      },
+      "keys": "n"
     },
     {
-      "noun": "confirm",
-      "keys": "y",
+      "noun": "app.confirm",
       "request": {
         "verb": "accept",
-        "noun": "confirm"
-      }
+        "noun": "app.confirm"
+      },
+      "keys": "y"
     },
     {
-      "noun": "yank-history",
-      "keys": "down",
+      "noun": "app.yank-history",
       "request": {
         "verb": "move",
-        "noun": "yank-history",
+        "noun": "app.yank-history",
         "args": {
           "steps": 1
         }
-      }
+      },
+      "keys": "down"
     },
     {
-      "noun": "yank-history",
-      "keys": "enter",
+      "noun": "app.yank-history",
       "request": {
         "verb": "select",
-        "noun": "yank-history"
-      }
+        "noun": "app.yank-history"
+      },
+      "keys": "enter"
     },
     {
-      "noun": "yank-history",
-      "keys": "esc",
+      "noun": "app.yank-history",
       "request": {
         "verb": "pop",
-        "noun": "modal"
-      }
+        "noun": "app.modal"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "yank-history",
-      "keys": "j",
+      "noun": "app.yank-history",
       "request": {
         "verb": "move",
-        "noun": "yank-history",
+        "noun": "app.yank-history",
         "args": {
           "steps": 1
         }
-      }
+      },
+      "keys": "j"
     },
     {
-      "noun": "yank-history",
-      "keys": "k",
+      "noun": "app.yank-history",
       "request": {
         "verb": "move",
-        "noun": "yank-history",
+        "noun": "app.yank-history",
         "args": {
           "steps": -1
         }
-      }
+      },
+      "keys": "k"
     },
     {
-      "noun": "yank-history",
-      "keys": "up",
+      "noun": "app.yank-history",
       "request": {
         "verb": "move",
-        "noun": "yank-history",
+        "noun": "app.yank-history",
         "args": {
           "steps": -1
         }
-      }
+      },
+      "keys": "up"
     },
     {
-      "noun": "app",
       "mode": "count_pending",
-      "pattern": "digit",
+      "noun": "app",
       "request": {
         "verb": "append",
-        "noun": "count"
+        "noun": "app.count"
       },
+      "pattern": "digit",
       "from": {
         "digit": "digit"
       }
     },
     {
-      "noun": "app",
       "mode": "count_pending",
-      "pattern": "any",
+      "noun": "app",
       "request": {
         "verb": "leave",
-        "noun": "mode"
+        "noun": "app.mode"
       },
+      "pattern": "any",
       "when": "no-input",
       "replay": true
     },
     {
-      "noun": "app",
       "mode": "count_pending",
-      "keys": "0",
+      "noun": "app",
       "request": {
         "verb": "append",
-        "noun": "count",
+        "noun": "app.count",
         "args": {
           "digit": 0
         }
-      }
+      },
+      "keys": "0"
     },
     {
-      "noun": "editor",
       "mode": "count_pending",
-      "pattern": "any",
+      "noun": "app.editor",
       "request": {
         "verb": "leave",
-        "noun": "mode"
+        "noun": "app.mode"
       },
+      "pattern": "any",
       "replay": true
     },
     {
-      "noun": "editor",
       "mode": "count_pending",
-      "keys": "esc",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "editor",
       "mode": "g_pending",
-      "pattern": "any",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "pattern": "any"
     },
     {
-      "noun": "editor",
       "mode": "g_pending",
-      "keys": "g",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "first-line"
         }
       },
+      "keys": "g",
       "from": {
         "line": "count"
       },
       "when": "input"
     },
     {
-      "noun": "completion",
       "mode": "insert",
-      "keys": "ctrl+n",
+      "noun": "app.completion",
       "request": {
         "verb": "move",
-        "noun": "completion",
+        "noun": "app.completion",
         "args": {
           "delta": 1
         }
       },
+      "keys": "ctrl+n",
       "when": "completion-rows"
     },
     {
-      "noun": "completion",
       "mode": "insert",
-      "keys": "ctrl+p",
+      "noun": "app.completion",
       "request": {
         "verb": "move",
-        "noun": "completion",
+        "noun": "app.completion",
         "args": {
           "delta": -1
         }
       },
+      "keys": "ctrl+p",
       "when": "completion-rows"
     },
     {
-      "noun": "completion",
       "mode": "insert",
-      "keys": "down",
+      "noun": "app.completion",
       "request": {
         "verb": "move",
-        "noun": "completion",
+        "noun": "app.completion",
         "args": {
           "delta": 1
         }
       },
+      "keys": "down",
       "when": "completion-rows"
     },
     {
-      "noun": "completion",
       "mode": "insert",
-      "keys": "enter",
+      "noun": "app.completion",
       "request": {
         "verb": "accept",
-        "noun": "completion"
+        "noun": "app.completion"
       },
+      "keys": "enter",
       "when": "completion-highlighted"
     },
     {
-      "noun": "completion",
       "mode": "insert",
-      "keys": "esc",
+      "noun": "app.completion",
       "request": {
         "verb": "dismiss",
-        "noun": "completion"
-      }
+        "noun": "app.completion"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "completion",
       "mode": "insert",
-      "keys": "tab",
+      "noun": "app.completion",
       "request": {
         "verb": "accept",
-        "noun": "completion"
+        "noun": "app.completion"
       },
+      "keys": "tab",
       "when": "completion-rows"
     },
     {
-      "noun": "completion",
       "mode": "insert",
-      "keys": "up",
+      "noun": "app.completion",
       "request": {
         "verb": "move",
-        "noun": "completion",
+        "noun": "app.completion",
         "args": {
           "delta": -1
         }
       },
+      "keys": "up",
       "when": "completion-rows"
     },
     {
-      "noun": "editor",
       "mode": "insert",
+      "noun": "app.editor",
+      "request": {
+        "verb": "insert",
+        "noun": "app.input"
+      },
       "pattern": "printable",
-      "request": {
-        "verb": "insert",
-        "noun": "input"
-      },
       "from": {
         "text": "text"
       },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
+      "noun": "app.editor",
+      "request": {
+        "verb": "insert",
+        "noun": "app.input"
+      },
       "pattern": "paste",
-      "request": {
-        "verb": "insert",
-        "noun": "input"
-      },
       "from": {
         "text": "text"
       },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "alt+b",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "word-previous"
         }
       },
+      "keys": "alt+b",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "alt+f",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "word-next"
         }
       },
+      "keys": "alt+f",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "backspace",
+      "noun": "app.editor",
       "request": {
         "verb": "delete",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "direction": "backward"
         }
       },
+      "keys": "backspace",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "ctrl+a",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-start"
         }
       },
+      "keys": "ctrl+a",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "ctrl+b",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "left"
         }
       },
+      "keys": "ctrl+b",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "ctrl+d",
+      "noun": "app.editor",
       "request": {
         "verb": "delete",
-        "noun": "input"
+        "noun": "app.input"
       },
+      "keys": "ctrl+d",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "ctrl+e",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-end"
         }
       },
+      "keys": "ctrl+e",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "ctrl+f",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "right"
         }
       },
+      "keys": "ctrl+f",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "ctrl+h",
+      "noun": "app.editor",
       "request": {
         "verb": "delete",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "direction": "backward"
         }
       },
+      "keys": "ctrl+h",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "ctrl+k",
+      "noun": "app.editor",
       "request": {
         "verb": "kill",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-end"
         }
       },
+      "keys": "ctrl+k",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "ctrl+n",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "down"
         }
       },
+      "keys": "ctrl+n",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "ctrl+p",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "up"
         }
       },
+      "keys": "ctrl+p",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "ctrl+u",
+      "noun": "app.editor",
       "request": {
         "verb": "kill",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-start"
         }
       },
+      "keys": "ctrl+u",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "ctrl+w",
+      "noun": "app.editor",
       "request": {
         "verb": "kill",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "word-backward"
         }
       },
+      "keys": "ctrl+w",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "ctrl+y",
+      "noun": "app.editor",
       "request": {
         "verb": "paste",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "before": true,
           "literal": true
         }
       },
+      "keys": "ctrl+y",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "delete",
+      "noun": "app.editor",
       "request": {
         "verb": "delete",
-        "noun": "input"
+        "noun": "app.input"
       },
+      "keys": "delete",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "down",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "down"
         }
       },
+      "keys": "down",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "end",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-end"
         }
       },
+      "keys": "end",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "enter",
+      "noun": "app.editor",
       "request": {
         "verb": "insert",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "text": "\n"
         }
       },
+      "keys": "enter",
       "when": "multiline"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "esc",
+      "noun": "app.editor",
       "request": {
         "verb": "set",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "normal"
         }
-      }
+      },
+      "keys": "esc"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "home",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-start"
         }
       },
+      "keys": "home",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "left",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "left"
         }
       },
+      "keys": "left",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "right",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "right"
         }
       },
+      "keys": "right",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "space",
+      "noun": "app.editor",
       "request": {
         "verb": "insert",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "text": " "
         }
       },
+      "keys": "space",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "tab",
+      "noun": "app.editor",
       "request": {
         "verb": "open",
-        "noun": "completion"
-      }
+        "noun": "app.completion"
+      },
+      "keys": "tab"
     },
     {
-      "noun": "editor",
       "mode": "insert",
-      "keys": "up",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "up"
         }
       },
+      "keys": "up",
       "when": "input"
     },
     {
-      "noun": "form-field",
       "mode": "insert",
-      "keys": "enter",
+      "noun": "app.form-field",
       "request": {
         "verb": "next",
-        "noun": "form",
+        "noun": "app.form",
         "args": {
           "insert": true
         }
-      }
+      },
+      "keys": "enter"
     },
     {
-      "noun": "form-field",
       "mode": "insert",
-      "keys": "shift+tab",
+      "noun": "app.form-field",
       "request": {
         "verb": "previous",
-        "noun": "form",
+        "noun": "app.form",
         "args": {
           "insert": true
         }
-      }
+      },
+      "keys": "shift+tab"
     },
     {
-      "noun": "form-field",
       "mode": "insert",
-      "keys": "tab",
+      "noun": "app.form-field",
       "request": {
         "verb": "next",
-        "noun": "form",
+        "noun": "app.form",
         "args": {
           "insert": true
         }
-      }
+      },
+      "keys": "tab"
     },
     {
-      "noun": "form-suggest",
       "mode": "insert",
-      "keys": "ctrl+space",
+      "noun": "app.form-suggest",
       "request": {
         "verb": "suggest",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "ctrl+space"
     },
     {
-      "noun": "form-suggest",
       "mode": "insert",
-      "keys": "enter",
+      "noun": "app.form-suggest",
       "request": {
         "verb": "next",
-        "noun": "form",
+        "noun": "app.form",
         "args": {
           "insert": true
         }
-      }
+      },
+      "keys": "enter"
     },
     {
-      "noun": "form-suggest",
       "mode": "insert",
-      "keys": "shift+tab",
+      "noun": "app.form-suggest",
       "request": {
         "verb": "previous",
-        "noun": "form",
+        "noun": "app.form",
         "args": {
           "insert": true
         }
-      }
+      },
+      "keys": "shift+tab"
     },
     {
-      "noun": "form-suggest",
       "mode": "insert",
-      "keys": "tab",
+      "noun": "app.form-suggest",
       "request": {
         "verb": "next",
-        "noun": "form",
+        "noun": "app.form",
         "args": {
           "insert": true
         }
-      }
+      },
+      "keys": "tab"
     },
     {
-      "noun": "form-text",
       "mode": "insert",
-      "keys": "shift+tab",
+      "noun": "app.form-text",
       "request": {
         "verb": "previous",
-        "noun": "form",
+        "noun": "app.form",
         "args": {
           "insert": true
         }
-      }
+      },
+      "keys": "shift+tab"
     },
     {
-      "noun": "form-text",
       "mode": "insert",
-      "keys": "tab",
+      "noun": "app.form-text",
       "request": {
         "verb": "next",
-        "noun": "form",
+        "noun": "app.form",
         "args": {
           "insert": true
         }
-      }
+      },
+      "keys": "tab"
     },
     {
-      "noun": "outline-line",
       "mode": "insert",
-      "pattern": "paste",
+      "noun": "app.outline-line",
       "request": {
         "verb": "paste",
-        "noun": "outline"
+        "noun": "app.outline"
       },
+      "pattern": "paste",
       "from": {
         "text": "text"
       }
     },
     {
-      "noun": "outline-line",
       "mode": "insert",
-      "keys": "enter",
+      "noun": "app.outline-line",
       "request": {
         "verb": "next",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "enter"
     },
     {
-      "noun": "outline-line",
       "mode": "insert",
-      "keys": "esc",
+      "noun": "app.outline-line",
       "request": {
         "verb": "leave",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "outline-line",
       "mode": "insert",
-      "keys": "shift+tab",
+      "noun": "app.outline-line",
       "request": {
         "verb": "outdent",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "shift+tab"
     },
     {
-      "noun": "outline-line",
       "mode": "insert",
-      "keys": "tab",
+      "noun": "app.outline-line",
       "request": {
         "verb": "indent",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "tab"
     },
     {
-      "noun": "setting-value",
       "mode": "insert",
-      "keys": "enter",
+      "noun": "app.setting-value",
       "request": {
         "verb": "commit",
-        "noun": "setting-value"
-      }
+        "noun": "app.setting-value"
+      },
+      "keys": "enter"
     },
     {
-      "noun": "setting-value",
       "mode": "insert",
-      "keys": "esc",
+      "noun": "app.setting-value",
       "request": {
         "verb": "cancel",
-        "noun": "setting-value"
-      }
+        "noun": "app.setting-value"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "terminal",
       "mode": "leader_pending",
-      "pattern": "paste",
+      "noun": "app.terminal",
       "request": {
         "verb": "paste",
-        "noun": "terminal"
+        "noun": "app.terminal"
       },
+      "pattern": "paste",
       "from": {
         "keys": "prefix",
         "text": "text"
@@ -4174,272 +4510,282 @@
       "hidden": true
     },
     {
-      "noun": "terminal",
       "mode": "leader_pending",
-      "pattern": "any",
+      "noun": "app.terminal",
       "request": {
         "verb": "send",
-        "noun": "terminal"
+        "noun": "app.terminal"
       },
+      "pattern": "any",
       "from": {
         "keys": "prefix key"
       },
       "hidden": true
     },
     {
-      "noun": "terminal",
       "mode": "leader_pending",
-      "keys": "ctrl+a",
+      "noun": "app.terminal",
       "request": {
         "verb": "send",
-        "noun": "terminal",
+        "noun": "app.terminal",
         "args": {
           "keys": "ctrl+a"
         }
-      }
+      },
+      "keys": "ctrl+a"
     },
     {
-      "noun": "terminal",
       "mode": "leader_pending",
-      "keys": "d",
+      "noun": "app.terminal",
       "request": {
         "verb": "detach",
-        "noun": "terminal"
-      }
+        "noun": "app.terminal"
+      },
+      "keys": "d"
     },
     {
-      "noun": "list",
       "mode": "list_filter",
+      "noun": "app.list",
+      "request": {
+        "verb": "filter-type",
+        "noun": "app.list"
+      },
       "pattern": "printable",
-      "request": {
-        "verb": "filter-type",
-        "noun": "list"
-      },
       "from": {
         "text": "text"
       },
       "hidden": true
     },
     {
-      "noun": "list",
       "mode": "list_filter",
+      "noun": "app.list",
+      "request": {
+        "verb": "filter-type",
+        "noun": "app.list"
+      },
       "pattern": "paste",
-      "request": {
-        "verb": "filter-type",
-        "noun": "list"
-      },
       "from": {
         "text": "text"
       },
       "hidden": true
     },
     {
-      "noun": "list",
       "mode": "list_filter",
-      "keys": "backspace",
+      "noun": "app.list",
       "request": {
         "verb": "filter-erase",
-        "noun": "list"
+        "noun": "app.list"
       },
+      "keys": "backspace",
       "hidden": true
     },
     {
-      "noun": "list",
       "mode": "list_filter",
-      "keys": "backspace",
+      "noun": "app.list",
       "request": {
         "verb": "filter-keep",
-        "noun": "list"
+        "noun": "app.list"
       },
+      "keys": "backspace",
       "when": "list-unfiltered",
       "hidden": true
     },
     {
-      "noun": "list",
       "mode": "list_filter",
-      "keys": "ctrl+h",
+      "noun": "app.list",
       "request": {
         "verb": "filter-erase",
-        "noun": "list"
+        "noun": "app.list"
       },
+      "keys": "ctrl+h",
       "hidden": true
     },
     {
-      "noun": "list",
       "mode": "list_filter",
-      "keys": "ctrl+h",
+      "noun": "app.list",
       "request": {
         "verb": "filter-keep",
-        "noun": "list"
+        "noun": "app.list"
       },
+      "keys": "ctrl+h",
       "when": "list-unfiltered",
       "hidden": true
     },
     {
-      "noun": "list",
       "mode": "list_filter",
-      "keys": "ctrl+n",
+      "noun": "app.list",
       "request": {
         "verb": "move",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "clamp": true,
           "delta": 1
         }
-      }
+      },
+      "keys": "ctrl+n"
     },
     {
-      "noun": "list",
       "mode": "list_filter",
-      "keys": "ctrl+p",
+      "noun": "app.list",
       "request": {
         "verb": "move",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "clamp": true,
           "delta": -1
         }
-      }
+      },
+      "keys": "ctrl+p"
     },
     {
-      "noun": "list",
       "mode": "list_filter",
-      "keys": "ctrl+u",
+      "noun": "app.list",
       "request": {
         "verb": "filter",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "query": ""
         }
       },
+      "keys": "ctrl+u",
       "hidden": true
     },
     {
-      "noun": "list",
       "mode": "list_filter",
-      "keys": "down",
+      "noun": "app.list",
       "request": {
         "verb": "move",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "clamp": true,
           "delta": 1
         }
-      }
+      },
+      "keys": "down"
     },
     {
-      "noun": "list",
       "mode": "list_filter",
+      "noun": "app.list",
+      "request": {
+        "verb": "filter-choose",
+        "noun": "app.list"
+      },
       "keys": "enter",
+      "when": "list-chooses"
+    },
+    {
+      "mode": "list_filter",
+      "noun": "app.list",
       "request": {
         "verb": "filter-keep",
-        "noun": "list"
-      }
+        "noun": "app.list"
+      },
+      "keys": "enter"
     },
     {
-      "noun": "list",
       "mode": "list_filter",
-      "keys": "esc",
+      "noun": "app.list",
       "request": {
         "verb": "filter-clear",
-        "noun": "list"
-      }
+        "noun": "app.list"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "list",
       "mode": "list_filter",
-      "keys": "space",
+      "noun": "app.list",
       "request": {
         "verb": "filter-type",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "text": " "
         }
       },
+      "keys": "space",
       "hidden": true
     },
     {
-      "noun": "list",
       "mode": "list_filter",
-      "keys": "up",
+      "noun": "app.list",
       "request": {
         "verb": "move",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "clamp": true,
           "delta": -1
         }
-      }
+      },
+      "keys": "up"
     },
     {
-      "noun": "app",
       "mode": "macro_pending",
-      "pattern": "any",
+      "noun": "app",
       "request": {
         "verb": "start",
-        "noun": "macro"
+        "noun": "app.macro"
       },
+      "pattern": "any",
       "from": {
         "register": "key"
       }
     },
     {
-      "noun": "app",
       "mode": "macro_pending",
-      "keys": "esc",
+      "noun": "app",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "app",
       "mode": "macro_recording",
-      "pattern": "paste",
+      "noun": "app",
       "request": {
         "verb": "record",
-        "noun": "macro",
+        "noun": "app.macro",
         "args": {
           "paste": true
         }
       },
+      "pattern": "paste",
       "from": {
         "key": "key"
       }
     },
     {
-      "noun": "app",
       "mode": "macro_recording",
-      "pattern": "any",
+      "noun": "app",
       "request": {
         "verb": "record",
-        "noun": "macro"
+        "noun": "app.macro"
       },
+      "pattern": "any",
       "from": {
         "key": "key"
       }
     },
     {
-      "noun": "app",
       "mode": "macro_recording",
-      "keys": "q",
+      "noun": "app",
       "request": {
         "verb": "stop",
-        "noun": "macro"
+        "noun": "app.macro"
       },
+      "keys": "q",
       "when": "shadow-idle"
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "pattern": "digit-0",
+      "noun": "app",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "count_pending"
         }
       },
+      "pattern": "digit-0",
       "from": {
         "count": "digit"
       },
@@ -4447,70 +4793,70 @@
       "help": "Start a count for the next key (3j)"
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": "\"",
+      "noun": "app",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "register_pending"
         }
       },
+      "keys": "\"",
       "hidden": true,
       "help": "Pick the register the next yank, delete or paste uses (\"a)"
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": "(",
+      "noun": "app",
       "request": {
         "verb": "previous",
-        "noun": "focus",
+        "noun": "app.focus",
         "args": {
           "scope": "region"
         }
       },
+      "keys": "(",
       "from": {
         "steps": "count"
       }
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": ")",
+      "noun": "app",
       "request": {
         "verb": "next",
-        "noun": "focus",
+        "noun": "app.focus",
         "args": {
           "scope": "region"
         }
       },
+      "keys": ")",
       "from": {
         "steps": "count"
       }
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": ".",
+      "noun": "app",
       "request": {
         "verb": "repeat",
-        "noun": "history"
+        "noun": "app.history"
       },
+      "keys": ".",
       "from": {
         "steps": "line"
       },
       "hidden": true
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": "\u003c",
+      "noun": "app",
       "request": {
         "verb": "shrink",
-        "noun": "pane"
+        "noun": "app.pane"
       },
+      "keys": "\u003c",
       "from": {
         "steps": "count"
       },
@@ -4518,24 +4864,24 @@
       "hidden": true
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": "=",
+      "noun": "app",
       "request": {
         "verb": "reset",
-        "noun": "pane"
+        "noun": "app.pane"
       },
+      "keys": "=",
       "when": "pane-split",
       "hidden": true
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": "\u003e",
+      "noun": "app",
       "request": {
         "verb": "grow",
-        "noun": "pane"
+        "noun": "app.pane"
       },
+      "keys": "\u003e",
       "from": {
         "steps": "count"
       },
@@ -4543,16 +4889,16 @@
       "hint": "\u003e/\u003c resize"
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": "@",
+      "noun": "app",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "replay_pending"
         }
       },
+      "keys": "@",
       "from": {
         "count": "count"
       },
@@ -4560,16 +4906,16 @@
       "help": "Replay the macro in the register typed next (@a), count times"
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": "J",
+      "noun": "app",
       "request": {
         "verb": "scroll",
-        "noun": "detail",
+        "noun": "app.detail",
         "args": {
           "lines": 1
         }
       },
+      "keys": "J",
       "from": {
         "count": "count"
       },
@@ -4577,16 +4923,16 @@
       "hint": "J/K detail"
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": "K",
+      "noun": "app",
       "request": {
         "verb": "scroll",
-        "noun": "detail",
+        "noun": "app.detail",
         "args": {
           "lines": -1
         }
       },
+      "keys": "K",
       "from": {
         "count": "count"
       },
@@ -4594,78 +4940,118 @@
       "hidden": true
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": "q",
+      "noun": "app",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "macro_pending"
         }
       },
+      "keys": "q",
       "hidden": true,
       "help": "Record a macro into the register typed next (qa); q again stops"
     },
     {
-      "noun": "app",
       "mode": "normal",
+      "noun": "app",
+      "request": {
+        "verb": "previous",
+        "noun": "app.focus"
+      },
       "keys": "shift+tab",
-      "request": {
-        "verb": "previous",
-        "noun": "focus"
-      },
       "from": {
         "steps": "count"
       }
     },
     {
-      "noun": "app",
       "mode": "normal",
+      "noun": "app",
+      "request": {
+        "verb": "next",
+        "noun": "app.focus"
+      },
       "keys": "tab",
-      "request": {
-        "verb": "next",
-        "noun": "focus"
-      },
       "from": {
         "steps": "count"
       }
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": "{",
+      "noun": "app",
       "request": {
         "verb": "previous",
-        "noun": "focus"
+        "noun": "app.focus"
       },
+      "keys": "{",
       "from": {
         "steps": "count"
       }
     },
     {
-      "noun": "app",
       "mode": "normal",
-      "keys": "}",
+      "noun": "app",
       "request": {
         "verb": "next",
-        "noun": "focus"
+        "noun": "app.focus"
       },
+      "keys": "}",
       "from": {
         "steps": "count"
       }
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "$",
+      "noun": "app.bindings-help",
+      "request": {
+        "verb": "view",
+        "noun": "app.bindings-help"
+      },
+      "keys": "S",
+      "hint": "view"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.bindings-help",
+      "request": {
+        "verb": "mode",
+        "noun": "app.bindings-help"
+      },
+      "keys": "m",
+      "hint": "mode"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.bindings-help",
+      "request": {
+        "verb": "noun",
+        "noun": "app.bindings-help"
+      },
+      "keys": "n",
+      "hint": "noun"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.bindings-help",
+      "request": {
+        "verb": "place",
+        "noun": "app.bindings-help"
+      },
+      "keys": "p",
+      "hint": "place"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-end"
         }
       },
+      "keys": "$",
       "from": {
         "line": "line",
         "steps": "count"
@@ -4673,16 +5059,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "0",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-start"
         }
       },
+      "keys": "0",
       "from": {
         "line": "line",
         "steps": "count"
@@ -4690,29 +5076,29 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "A",
+      "noun": "app.editor",
       "request": {
         "verb": "begin",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "position": "end"
         }
       },
+      "keys": "A",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "G",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "last-line"
         }
       },
+      "keys": "G",
       "from": {
         "line": "line",
         "steps": "count"
@@ -4720,84 +5106,84 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "I",
+      "noun": "app.editor",
       "request": {
         "verb": "begin",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "position": "first"
         }
       },
+      "keys": "I",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "O",
+      "noun": "app.editor",
       "request": {
         "verb": "begin",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "position": "above"
         }
       },
+      "keys": "O",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "P",
+      "noun": "app.editor",
       "request": {
         "verb": "paste",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "before": true
         }
       },
+      "keys": "P",
       "from": {
         "steps": "count"
       },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "V",
+      "noun": "app.editor",
       "request": {
         "verb": "select",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "shape": "line"
         }
       },
+      "keys": "V",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "a",
+      "noun": "app.editor",
       "request": {
         "verb": "begin",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "position": "append"
         }
       },
+      "keys": "a",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "b",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "word-backward"
         }
       },
+      "keys": "b",
       "from": {
         "line": "line",
         "steps": "count"
@@ -4805,87 +5191,87 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "c",
+      "noun": "app.editor",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "operator_pending",
           "op": "c"
         }
       },
+      "keys": "c",
       "from": {
         "opcount": "count"
       }
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "ctrl+r",
+      "noun": "app.editor",
       "request": {
         "verb": "redo",
-        "noun": "input"
+        "noun": "app.input"
       },
+      "keys": "ctrl+r",
       "from": {
         "steps": "count"
       },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "ctrl+v",
+      "noun": "app.editor",
       "request": {
         "verb": "select",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "shape": "block"
         }
       },
+      "keys": "ctrl+v",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "d",
+      "noun": "app.editor",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "operator_pending",
           "op": "d"
         }
       },
+      "keys": "d",
       "from": {
         "opcount": "count"
       }
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "delete",
+      "noun": "app.editor",
       "request": {
         "verb": "delete",
-        "noun": "input"
+        "noun": "app.input"
       },
+      "keys": "delete",
       "from": {
         "steps": "count"
       },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "down",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "down"
         }
       },
+      "keys": "down",
       "from": {
         "line": "line",
         "steps": "count"
@@ -4893,16 +5279,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "e",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "word-end"
         }
       },
+      "keys": "e",
       "from": {
         "line": "line",
         "steps": "count"
@@ -4910,16 +5296,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "end",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-end"
         }
       },
+      "keys": "end",
       "from": {
         "line": "line",
         "steps": "count"
@@ -4927,31 +5313,31 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "g",
+      "noun": "app.editor",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "g_pending"
         }
       },
+      "keys": "g",
       "from": {
         "count": "count"
       }
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "h",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "left"
         }
       },
+      "keys": "h",
       "from": {
         "line": "line",
         "steps": "count"
@@ -4959,16 +5345,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "home",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-start"
         }
       },
+      "keys": "home",
       "from": {
         "line": "line",
         "steps": "count"
@@ -4976,29 +5362,29 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "i",
+      "noun": "app.editor",
       "request": {
         "verb": "begin",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "position": "insert"
         }
       },
+      "keys": "i",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "j",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "down"
         }
       },
+      "keys": "j",
       "from": {
         "line": "line",
         "steps": "count"
@@ -5006,16 +5392,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "k",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "up"
         }
       },
+      "keys": "k",
       "from": {
         "line": "line",
         "steps": "count"
@@ -5023,16 +5409,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "l",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "right"
         }
       },
+      "keys": "l",
       "from": {
         "line": "line",
         "steps": "count"
@@ -5040,16 +5426,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "left",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "left"
         }
       },
+      "keys": "left",
       "from": {
         "line": "line",
         "steps": "count"
@@ -5057,45 +5443,45 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "o",
+      "noun": "app.editor",
       "request": {
         "verb": "begin",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "position": "below"
         }
       },
+      "keys": "o",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "p",
+      "noun": "app.editor",
       "request": {
         "verb": "paste",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "before": false
         }
       },
+      "keys": "p",
       "from": {
         "steps": "count"
       },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "right",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "right"
         }
       },
+      "keys": "right",
       "from": {
         "line": "line",
         "steps": "count"
@@ -5103,29 +5489,29 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "u",
+      "noun": "app.editor",
       "request": {
         "verb": "undo",
-        "noun": "input"
+        "noun": "app.input"
       },
+      "keys": "u",
       "from": {
         "steps": "count"
       },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "up",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "up"
         }
       },
+      "keys": "up",
       "from": {
         "line": "line",
         "steps": "count"
@@ -5133,29 +5519,29 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "v",
+      "noun": "app.editor",
       "request": {
         "verb": "select",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "shape": "char"
         }
       },
+      "keys": "v",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "w",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "word-forward"
         }
       },
+      "keys": "w",
       "from": {
         "line": "line",
         "steps": "count"
@@ -5163,978 +5549,1218 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "x",
+      "noun": "app.editor",
       "request": {
         "verb": "delete",
-        "noun": "input"
+        "noun": "app.input"
       },
+      "keys": "x",
       "from": {
         "steps": "count"
       },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "normal",
-      "keys": "y",
+      "noun": "app.editor",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "operator_pending",
           "op": "y"
         }
       },
+      "keys": "y",
       "from": {
         "opcount": "count"
       }
     },
     {
-      "noun": "form",
       "mode": "normal",
-      "keys": "ctrl+r",
+      "noun": "app.form",
       "request": {
         "verb": "redo",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "ctrl+r"
     },
     {
-      "noun": "form",
       "mode": "normal",
-      "keys": "esc",
+      "noun": "app.form",
       "request": {
         "verb": "leave",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "form",
       "mode": "normal",
-      "keys": "q",
+      "noun": "app.form",
       "request": {
         "verb": "leave",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "q"
     },
     {
-      "noun": "form",
       "mode": "normal",
-      "keys": "u",
+      "noun": "app.form",
       "request": {
         "verb": "undo",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "u"
     },
     {
-      "noun": "form-choice",
       "mode": "normal",
-      "keys": "down",
+      "noun": "app.form-choice",
       "request": {
         "verb": "next",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "down"
     },
     {
-      "noun": "form-choice",
       "mode": "normal",
-      "keys": "enter",
+      "noun": "app.form-choice",
       "request": {
         "verb": "choose",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "enter"
     },
     {
-      "noun": "form-choice",
       "mode": "normal",
-      "keys": "i",
+      "noun": "app.form-choice",
       "request": {
         "verb": "choose",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "i"
     },
     {
-      "noun": "form-choice",
       "mode": "normal",
-      "keys": "j",
+      "noun": "app.form-choice",
       "request": {
         "verb": "next",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "j"
     },
     {
-      "noun": "form-choice",
       "mode": "normal",
-      "keys": "k",
+      "noun": "app.form-choice",
       "request": {
         "verb": "previous",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "k"
     },
     {
-      "noun": "form-choice",
       "mode": "normal",
-      "keys": "space",
+      "noun": "app.form-choice",
       "request": {
         "verb": "choose",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "space"
     },
     {
-      "noun": "form-choice",
       "mode": "normal",
-      "keys": "up",
+      "noun": "app.form-choice",
       "request": {
         "verb": "previous",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "up"
     },
     {
-      "noun": "form-field",
       "mode": "normal",
-      "keys": "down",
+      "noun": "app.form-field",
       "request": {
         "verb": "next",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "down"
     },
     {
-      "noun": "form-field",
       "mode": "normal",
-      "keys": "j",
+      "noun": "app.form-field",
       "request": {
         "verb": "next",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "j"
     },
     {
-      "noun": "form-field",
       "mode": "normal",
-      "keys": "k",
+      "noun": "app.form-field",
       "request": {
         "verb": "previous",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "k"
     },
     {
-      "noun": "form-field",
       "mode": "normal",
-      "keys": "up",
+      "noun": "app.form-field",
       "request": {
         "verb": "previous",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "up"
     },
     {
-      "noun": "form-option",
       "mode": "normal",
-      "keys": "enter",
+      "noun": "app.form-option",
       "request": {
         "verb": "pick",
-        "noun": "form-option"
-      }
+        "noun": "app.form-option"
+      },
+      "keys": "enter"
     },
     {
-      "noun": "form-option",
       "mode": "normal",
-      "keys": "q",
+      "noun": "app.form-option",
       "request": {
         "verb": "pop",
-        "noun": "modal"
-      }
+        "noun": "app.modal"
+      },
+      "keys": "q"
     },
     {
-      "noun": "form-option",
       "mode": "normal",
-      "keys": "space",
+      "noun": "app.form-option",
       "request": {
         "verb": "pick",
-        "noun": "form-option"
-      }
+        "noun": "app.form-option"
+      },
+      "keys": "space"
     },
     {
-      "noun": "form-suggest",
       "mode": "normal",
-      "keys": "ctrl+space",
+      "noun": "app.form-suggest",
       "request": {
         "verb": "suggest",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "ctrl+space"
     },
     {
-      "noun": "form-suggest",
       "mode": "normal",
-      "keys": "down",
+      "noun": "app.form-suggest",
       "request": {
         "verb": "next",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "down"
     },
     {
-      "noun": "form-suggest",
       "mode": "normal",
-      "keys": "enter",
+      "noun": "app.form-suggest",
       "request": {
         "verb": "suggest",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "enter"
     },
     {
-      "noun": "form-suggest",
       "mode": "normal",
-      "keys": "j",
+      "noun": "app.form-suggest",
       "request": {
         "verb": "next",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "j"
     },
     {
-      "noun": "form-suggest",
       "mode": "normal",
-      "keys": "k",
+      "noun": "app.form-suggest",
       "request": {
         "verb": "previous",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "k"
     },
     {
-      "noun": "form-suggest",
       "mode": "normal",
-      "keys": "up",
+      "noun": "app.form-suggest",
       "request": {
         "verb": "previous",
-        "noun": "form"
-      }
+        "noun": "app.form"
+      },
+      "keys": "up"
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "$",
+      "noun": "app.list",
       "request": {
-        "verb": "scroll-columns",
-        "noun": "list",
+        "verb": "column",
+        "noun": "app.list",
         "args": {
           "to": "last"
         }
-      }
+      },
+      "keys": "$",
+      "when": "table-cells"
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "0",
+      "noun": "app.list",
       "request": {
         "verb": "scroll-columns",
-        "noun": "list",
+        "noun": "app.list",
+        "args": {
+          "to": "last"
+        }
+      },
+      "keys": "$"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "column",
+        "noun": "app.list",
         "args": {
           "to": "first"
         }
       },
+      "keys": "0",
       "when": "no-count"
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "G",
+      "noun": "app.list",
+      "request": {
+        "verb": "scroll-columns",
+        "noun": "app.list",
+        "args": {
+          "to": "first"
+        }
+      },
+      "keys": "0",
+      "when": "row-table-no-count"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
       "request": {
         "verb": "goto",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "position": "last"
         }
       },
+      "keys": "G",
       "from": {
         "row": "line"
       }
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "^",
+      "noun": "app.list",
       "request": {
-        "verb": "scroll-columns",
-        "noun": "list",
+        "verb": "visual",
+        "noun": "app.list"
+      },
+      "keys": "V",
+      "hidden": true
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "yank",
+        "noun": "app.list",
+        "args": {
+          "what": "row"
+        }
+      },
+      "keys": "Y",
+      "hidden": true
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "column",
+        "noun": "app.list",
         "args": {
           "to": "first"
         }
-      }
+      },
+      "keys": "^",
+      "when": "table-cells"
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "ctrl+b",
+      "noun": "app.list",
+      "request": {
+        "verb": "scroll-columns",
+        "noun": "app.list",
+        "args": {
+          "to": "first"
+        }
+      },
+      "keys": "^"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
       "request": {
         "verb": "scroll",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "delta": -1
         }
       },
+      "keys": "ctrl+b",
       "from": {
         "steps": "line"
       }
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "ctrl+d",
+      "noun": "app.list",
       "request": {
         "verb": "scroll",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "delta": 1,
           "half": true
         }
       },
+      "keys": "ctrl+d",
       "from": {
         "steps": "line"
       }
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "ctrl+f",
+      "noun": "app.list",
       "request": {
         "verb": "scroll",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "delta": 1
         }
       },
+      "keys": "ctrl+f",
       "from": {
         "steps": "line"
       }
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "ctrl+u",
+      "noun": "app.list",
       "request": {
         "verb": "scroll",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "delta": -1,
           "half": true
         }
       },
+      "keys": "ctrl+u",
       "from": {
         "steps": "line"
       }
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "down",
+      "noun": "app.list",
       "request": {
         "verb": "move",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "delta": 1
         }
       },
+      "keys": "down",
       "from": {
         "steps": "count"
       }
     },
     {
-      "noun": "list",
       "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "column",
+        "noun": "app.list",
+        "args": {
+          "to": "last"
+        }
+      },
+      "keys": "end",
+      "when": "table-cells"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "end-visual",
+        "noun": "app.list"
+      },
       "keys": "esc",
+      "when": "list-visual"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
       "request": {
         "verb": "filter-clear",
-        "noun": "list"
-      }
+        "noun": "app.list"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "g esc",
+      "noun": "app.list",
+      "request": {
+        "verb": "choose-column",
+        "noun": "app.list"
+      },
+      "keys": "g c"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
       "request": {
         "verb": "leave",
-        "noun": "mode"
-      }
+        "noun": "app.mode"
+      },
+      "keys": "g esc"
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "g g",
+      "noun": "app.list",
       "request": {
         "verb": "goto",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "position": "first"
         }
       },
+      "keys": "g g",
       "from": {
         "row": "line"
       }
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "j",
+      "noun": "app.list",
       "request": {
-        "verb": "move",
-        "noun": "list",
-        "args": {
-          "delta": 1
-        }
-      },
-      "from": {
-        "steps": "count"
-      }
-    },
-    {
-      "noun": "list",
-      "mode": "normal",
-      "keys": "k",
-      "request": {
-        "verb": "move",
-        "noun": "list",
+        "verb": "column",
+        "noun": "app.list",
         "args": {
           "delta": -1
         }
       },
+      "keys": "h",
+      "from": {
+        "steps": "count"
+      },
+      "when": "table-cells"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "column",
+        "noun": "app.list",
+        "args": {
+          "to": "first"
+        }
+      },
+      "keys": "home",
+      "when": "table-cells"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "move",
+        "noun": "app.list",
+        "args": {
+          "delta": 1
+        }
+      },
+      "keys": "j",
       "from": {
         "steps": "count"
       }
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "space",
+      "noun": "app.list",
+      "request": {
+        "verb": "move",
+        "noun": "app.list",
+        "args": {
+          "delta": -1
+        }
+      },
+      "keys": "k",
+      "from": {
+        "steps": "count"
+      }
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "column",
+        "noun": "app.list",
+        "args": {
+          "delta": 1
+        }
+      },
+      "keys": "l",
+      "from": {
+        "steps": "count"
+      },
+      "when": "table-cells"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "column",
+        "noun": "app.list",
+        "args": {
+          "delta": -1
+        }
+      },
+      "keys": "left",
+      "from": {
+        "steps": "count"
+      },
+      "when": "table-cells"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "column",
+        "noun": "app.list",
+        "args": {
+          "delta": 1
+        }
+      },
+      "keys": "right",
+      "from": {
+        "steps": "count"
+      },
+      "when": "table-cells"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
       "request": {
         "verb": "mark",
-        "noun": "list"
-      }
+        "noun": "app.list"
+      },
+      "keys": "space"
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "up",
+      "noun": "app.list",
       "request": {
         "verb": "move",
-        "noun": "list",
+        "noun": "app.list",
         "args": {
           "delta": -1
         }
       },
+      "keys": "up",
       "from": {
         "steps": "count"
       }
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "z esc",
+      "noun": "app.list",
       "request": {
-        "verb": "leave",
-        "noun": "mode"
-      }
+        "verb": "yank",
+        "noun": "app.list",
+        "args": {
+          "what": "cell"
+        }
+      },
+      "keys": "y",
+      "when": "table-cells",
+      "hidden": true
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "z h",
+      "noun": "app.list",
       "request": {
-        "verb": "scroll-columns",
-        "noun": "list",
+        "verb": "resize-column",
+        "noun": "app.list",
         "args": {
           "delta": -1
         }
       },
+      "keys": "z \u003c",
       "from": {
         "steps": "count"
-      }
+      },
+      "hidden": true
     },
     {
-      "noun": "list",
       "mode": "normal",
-      "keys": "z l",
+      "noun": "app.list",
       "request": {
-        "verb": "scroll-columns",
-        "noun": "list",
+        "verb": "reset-columns",
+        "noun": "app.list"
+      },
+      "keys": "z =",
+      "hidden": true
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "resize-column",
+        "noun": "app.list",
         "args": {
           "delta": 1
         }
       },
+      "keys": "z \u003e",
+      "from": {
+        "steps": "count"
+      },
+      "hidden": true
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "leave",
+        "noun": "app.mode"
+      },
+      "keys": "z esc"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.list",
+      "request": {
+        "verb": "scroll-columns",
+        "noun": "app.list",
+        "args": {
+          "delta": -1
+        }
+      },
+      "keys": "z h",
       "from": {
         "steps": "count"
       }
     },
     {
-      "noun": "modal",
       "mode": "normal",
-      "keys": "esc",
+      "noun": "app.list",
       "request": {
-        "verb": "pop",
-        "noun": "modal"
+        "verb": "scroll-columns",
+        "noun": "app.list",
+        "args": {
+          "delta": 1
+        }
+      },
+      "keys": "z l",
+      "from": {
+        "steps": "count"
       }
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "pattern": "paste",
+      "noun": "app.list",
+      "request": {
+        "verb": "column",
+        "noun": "app.list"
+      },
+      "keys": "|",
+      "from": {
+        "index": "count"
+      },
+      "when": "table-cells"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.modal",
+      "request": {
+        "verb": "pop",
+        "noun": "app.modal"
+      },
+      "keys": "esc"
+    },
+    {
+      "mode": "normal",
+      "noun": "app.outline",
       "request": {
         "verb": "paste",
-        "noun": "outline"
+        "noun": "app.outline"
       },
+      "pattern": "paste",
       "from": {
         "text": "text"
       }
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "J",
+      "noun": "app.outline",
       "request": {
         "verb": "move",
-        "noun": "outline",
+        "noun": "app.outline",
         "args": {
           "delta": 1
         }
-      }
+      },
+      "keys": "J"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "K",
+      "noun": "app.outline",
       "request": {
         "verb": "move",
-        "noun": "outline",
+        "noun": "app.outline",
         "args": {
           "delta": -1
         }
-      }
+      },
+      "keys": "K"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "O",
+      "noun": "app.outline",
       "request": {
         "verb": "add",
-        "noun": "outline",
+        "noun": "app.outline",
         "args": {
           "where": "above"
         }
-      }
+      },
+      "keys": "O"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "a",
+      "noun": "app.outline",
       "request": {
         "verb": "add",
-        "noun": "outline",
+        "noun": "app.outline",
         "args": {
           "where": "child"
         }
-      }
+      },
+      "keys": "a"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "ctrl+r",
+      "noun": "app.outline",
       "request": {
         "verb": "redo",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "ctrl+r"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "d d",
+      "noun": "app.outline",
       "request": {
         "verb": "delete",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "d d"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "d esc",
+      "noun": "app.outline",
       "request": {
         "verb": "leave",
-        "noun": "mode"
-      }
+        "noun": "app.mode"
+      },
+      "keys": "d esc"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "h",
+      "noun": "app.outline",
       "request": {
         "verb": "collapse",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "h"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "i",
+      "noun": "app.outline",
       "request": {
         "verb": "edit",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "i"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "l",
+      "noun": "app.outline",
       "request": {
         "verb": "expand",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "l"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "left",
+      "noun": "app.outline",
       "request": {
         "verb": "collapse",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "left"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "o",
+      "noun": "app.outline",
       "request": {
         "verb": "add",
-        "noun": "outline",
+        "noun": "app.outline",
         "args": {
           "where": "below"
         }
-      }
+      },
+      "keys": "o"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "right",
+      "noun": "app.outline",
       "request": {
         "verb": "expand",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "right"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "shift+tab",
+      "noun": "app.outline",
       "request": {
         "verb": "outdent",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "shift+tab"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "tab",
+      "noun": "app.outline",
       "request": {
         "verb": "indent",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "tab"
     },
     {
-      "noun": "outline",
       "mode": "normal",
-      "keys": "u",
+      "noun": "app.outline",
       "request": {
         "verb": "undo",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "u"
     },
     {
-      "noun": "outline-row",
       "mode": "normal",
-      "keys": "enter",
+      "noun": "app.outline-row",
       "request": {
         "verb": "fold",
-        "noun": "outline"
-      }
+        "noun": "app.outline"
+      },
+      "keys": "enter"
     },
     {
-      "noun": "setting",
       "mode": "normal",
+      "noun": "app.setting",
+      "request": {
+        "verb": "reset",
+        "noun": "app.setting"
+      },
       "keys": "backspace",
-      "request": {
-        "verb": "reset",
-        "noun": "setting"
-      },
       "hidden": true
     },
     {
-      "noun": "setting",
       "mode": "normal",
+      "noun": "app.setting",
+      "request": {
+        "verb": "reset",
+        "noun": "app.setting"
+      },
       "keys": "delete",
-      "request": {
-        "verb": "reset",
-        "noun": "setting"
-      },
       "hidden": true
     },
     {
-      "noun": "setting",
       "mode": "normal",
-      "keys": "enter",
+      "noun": "app.setting",
       "request": {
         "verb": "edit",
-        "noun": "setting"
-      }
+        "noun": "app.setting"
+      },
+      "keys": "enter"
     },
     {
-      "noun": "setting",
       "mode": "normal",
-      "keys": "h",
+      "noun": "app.setting",
       "request": {
         "verb": "cycle",
-        "noun": "setting",
+        "noun": "app.setting",
         "args": {
           "step": -1
         }
       },
+      "keys": "h",
       "when": "setting-steps",
       "hint": "h/l setting.cycle"
     },
     {
-      "noun": "setting",
       "mode": "normal",
-      "keys": "l",
+      "noun": "app.setting",
       "request": {
         "verb": "cycle",
-        "noun": "setting",
+        "noun": "app.setting",
         "args": {
           "step": 1
         }
       },
+      "keys": "l",
       "when": "setting-steps",
       "hidden": true
     },
     {
-      "noun": "setting",
       "mode": "normal",
-      "keys": "left",
+      "noun": "app.setting",
       "request": {
         "verb": "cycle",
-        "noun": "setting",
+        "noun": "app.setting",
         "args": {
           "step": -1
         }
       },
+      "keys": "left",
       "when": "setting-steps",
       "hidden": true
     },
     {
-      "noun": "setting",
       "mode": "normal",
-      "keys": "n",
+      "noun": "app.setting",
       "request": {
         "verb": "add",
-        "noun": "setting"
+        "noun": "app.setting"
       },
+      "keys": "n",
       "when": "setting-list"
     },
     {
-      "noun": "setting",
       "mode": "normal",
-      "keys": "r",
+      "noun": "app.setting",
       "request": {
         "verb": "reset",
-        "noun": "setting"
-      }
+        "noun": "app.setting"
+      },
+      "keys": "r"
     },
     {
-      "noun": "setting",
       "mode": "normal",
+      "noun": "app.setting",
+      "request": {
+        "verb": "cycle",
+        "noun": "app.setting",
+        "args": {
+          "step": 1
+        }
+      },
       "keys": "right",
-      "request": {
-        "verb": "cycle",
-        "noun": "setting",
-        "args": {
-          "step": 1
-        }
-      },
       "when": "setting-steps",
       "hidden": true
     },
     {
-      "noun": "setting",
       "mode": "normal",
+      "noun": "app.setting",
+      "request": {
+        "verb": "cycle",
+        "noun": "app.setting",
+        "args": {
+          "step": 1
+        }
+      },
       "keys": "space",
-      "request": {
-        "verb": "cycle",
-        "noun": "setting",
-        "args": {
-          "step": 1
-        }
-      },
       "when": "setting-steps",
       "hidden": true
     },
     {
-      "noun": "setting-item",
       "mode": "normal",
-      "keys": "d d",
+      "noun": "app.setting-item",
       "request": {
         "verb": "delete",
-        "noun": "setting-item"
-      }
+        "noun": "app.setting-item"
+      },
+      "keys": "d d"
     },
     {
-      "noun": "setting-item",
       "mode": "normal",
-      "keys": "d esc",
+      "noun": "app.setting-item",
       "request": {
         "verb": "leave",
-        "noun": "mode"
-      }
+        "noun": "app.mode"
+      },
+      "keys": "d esc"
     },
     {
-      "noun": "setting-item",
       "mode": "normal",
-      "keys": "enter",
+      "noun": "app.setting-item",
       "request": {
         "verb": "edit",
-        "noun": "setting-item"
+        "noun": "app.setting-item"
       },
+      "keys": "enter",
       "hint": "enter/i setting-item.edit"
     },
     {
-      "noun": "setting-item",
       "mode": "normal",
-      "keys": "i",
+      "noun": "app.setting-item",
       "request": {
         "verb": "edit",
-        "noun": "setting-item"
+        "noun": "app.setting-item"
       },
+      "keys": "i",
       "hidden": true
     },
     {
-      "noun": "setting-item",
       "mode": "normal",
-      "keys": "n",
+      "noun": "app.setting-item",
       "request": {
         "verb": "add",
-        "noun": "setting-item"
-      }
+        "noun": "app.setting-item"
+      },
+      "keys": "n"
     },
     {
-      "noun": "setting-item",
       "mode": "normal",
-      "keys": "r",
+      "noun": "app.setting-item",
       "request": {
         "verb": "reset",
-        "noun": "setting-item"
-      }
+        "noun": "app.setting-item"
+      },
+      "keys": "r"
     },
     {
-      "noun": "settings-page",
       "mode": "normal",
-      "keys": "[",
+      "noun": "app.settings-page",
       "request": {
         "verb": "section",
-        "noun": "settings",
+        "noun": "app.settings",
         "args": {
           "step": -1
         }
       },
+      "keys": "[",
       "hidden": true
     },
     {
-      "noun": "settings-page",
       "mode": "normal",
-      "keys": "]",
+      "noun": "app.settings-page",
       "request": {
         "verb": "section",
-        "noun": "settings",
+        "noun": "app.settings",
         "args": {
           "step": 1
         }
       },
+      "keys": "]",
       "hidden": true
     },
     {
-      "noun": "settings-page",
       "mode": "normal",
-      "keys": "ctrl+z",
+      "noun": "app.settings-page",
       "request": {
         "verb": "undo",
-        "noun": "settings"
+        "noun": "app.settings"
       },
+      "keys": "ctrl+z",
       "when": "settings-undo",
       "hidden": true
     },
     {
-      "noun": "settings-page",
       "mode": "normal",
-      "keys": "esc",
+      "noun": "app.settings-page",
       "request": {
         "verb": "close",
-        "noun": "settings"
-      }
+        "noun": "app.settings"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "settings-page",
       "mode": "normal",
-      "keys": "q",
+      "noun": "app.settings-page",
       "request": {
         "verb": "close",
-        "noun": "settings"
-      }
+        "noun": "app.settings"
+      },
+      "keys": "q"
     },
     {
-      "noun": "settings-page",
       "mode": "normal",
-      "keys": "shift+tab",
+      "noun": "app.settings-page",
       "request": {
         "verb": "section",
-        "noun": "settings",
+        "noun": "app.settings",
         "args": {
           "step": -1
         }
       },
+      "keys": "shift+tab",
       "hidden": true
     },
     {
-      "noun": "settings-page",
       "mode": "normal",
-      "keys": "tab",
+      "noun": "app.settings-page",
       "request": {
         "verb": "section",
-        "noun": "settings",
+        "noun": "app.settings",
         "args": {
           "step": 1
         }
-      }
+      },
+      "keys": "tab"
     },
     {
-      "noun": "settings-page",
       "mode": "normal",
-      "keys": "u",
+      "noun": "app.settings-page",
       "request": {
         "verb": "undo",
-        "noun": "settings"
+        "noun": "app.settings"
       },
+      "keys": "u",
       "when": "settings-undo"
     },
     {
-      "noun": "editor",
       "mode": "operator_g_pending",
-      "pattern": "any",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "pattern": "any"
     },
     {
-      "noun": "editor",
       "mode": "operator_g_pending",
-      "keys": "g",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "first-line"
         }
       },
+      "keys": "g",
       "from": {
         "line": "steps",
         "operator": "op",
@@ -6143,37 +6769,37 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "pattern": "digit-0",
+      "noun": "app.editor",
       "request": {
         "verb": "append",
-        "noun": "count"
+        "noun": "app.count"
       },
+      "pattern": "digit-0",
       "from": {
         "digit": "digit"
       }
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "pattern": "any",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "pattern": "any"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "$",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-end"
         }
       },
+      "keys": "$",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6182,29 +6808,29 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "0",
+      "noun": "app.editor",
       "request": {
         "verb": "append",
-        "noun": "count",
+        "noun": "app.count",
         "args": {
           "digit": 0
         }
       },
+      "keys": "0",
       "when": "count"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "0",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-start"
         }
       },
+      "keys": "0",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6213,16 +6839,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "G",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "last-line"
         }
       },
+      "keys": "G",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6231,16 +6857,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "b",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "word-backward"
         }
       },
+      "keys": "b",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6249,50 +6875,50 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "c",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line",
           "operator": "c"
         }
       },
+      "keys": "c",
       "from": {
         "steps": "steps"
       },
       "when": "op:c"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "d",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line",
           "operator": "d"
         }
       },
+      "keys": "d",
       "from": {
         "steps": "steps"
       },
       "when": "op:d"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "down",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "down"
         }
       },
+      "keys": "down",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6301,16 +6927,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "e",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "word-end"
         }
       },
+      "keys": "e",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6319,16 +6945,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "end",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-end"
         }
       },
+      "keys": "end",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6337,25 +6963,25 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "esc",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "g",
+      "noun": "app.editor",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "operator_g_pending"
         }
       },
+      "keys": "g",
       "from": {
         "count": "count",
         "op": "op",
@@ -6363,16 +6989,16 @@
       }
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "h",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "left"
         }
       },
+      "keys": "h",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6381,16 +7007,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "home",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-start"
         }
       },
+      "keys": "home",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6399,16 +7025,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "j",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "down"
         }
       },
+      "keys": "j",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6417,16 +7043,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "k",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "up"
         }
       },
+      "keys": "k",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6435,16 +7061,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "l",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "right"
         }
       },
+      "keys": "l",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6453,16 +7079,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "left",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "left"
         }
       },
+      "keys": "left",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6471,16 +7097,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "right",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "right"
         }
       },
+      "keys": "right",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6489,16 +7115,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "up",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "up"
         }
       },
+      "keys": "up",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6507,16 +7133,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "w",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "word-forward"
         }
       },
+      "keys": "w",
       "from": {
         "line": "line",
         "operator": "op",
@@ -6525,137 +7151,137 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "operator_pending",
-      "keys": "y",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line",
           "operator": "y"
         }
       },
+      "keys": "y",
       "from": {
         "steps": "steps"
       },
       "when": "op:y"
     },
     {
-      "noun": "app",
       "mode": "register_pending",
-      "pattern": "any",
+      "noun": "app",
       "request": {
         "verb": "select",
-        "noun": "register"
+        "noun": "app.register"
       },
+      "pattern": "any",
       "from": {
         "name": "key"
       }
     },
     {
-      "noun": "app",
       "mode": "register_pending",
-      "keys": "esc",
+      "noun": "app",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "app",
       "mode": "replay_pending",
-      "pattern": "any",
+      "noun": "app",
       "request": {
         "verb": "replay",
-        "noun": "macro"
+        "noun": "app.macro"
       },
+      "pattern": "any",
       "from": {
         "register": "key",
         "steps": "count"
       }
     },
     {
-      "noun": "app",
       "mode": "replay_pending",
-      "keys": "esc",
+      "noun": "app",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "terminal",
       "mode": "terminal",
-      "pattern": "paste",
+      "noun": "app.terminal",
       "request": {
         "verb": "paste",
-        "noun": "terminal"
+        "noun": "app.terminal"
       },
+      "pattern": "paste",
       "from": {
         "text": "text"
       },
       "hidden": true
     },
     {
-      "noun": "terminal",
       "mode": "terminal",
-      "pattern": "any",
+      "noun": "app.terminal",
       "request": {
         "verb": "send",
-        "noun": "terminal"
+        "noun": "app.terminal"
       },
+      "pattern": "any",
       "from": {
         "keys": "key"
       },
       "hidden": true
     },
     {
-      "noun": "terminal",
       "mode": "terminal",
-      "keys": "ctrl+a",
+      "noun": "app.terminal",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "leader_pending",
           "prefix": "ctrl+a",
           "request": {
             "verb": "send",
-            "noun": "terminal",
+            "noun": "app.terminal",
             "args": {
               "keys": "ctrl+a"
             }
           }
         }
       },
+      "keys": "ctrl+a",
       "hint": "leader: d detaches, ctrl+a sends ctrl+a"
     },
     {
-      "noun": "app",
       "mode": "visual",
-      "keys": "\"",
+      "noun": "app",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "register_pending"
         }
       },
+      "keys": "\"",
       "hidden": true,
       "help": "Pick the register the next yank, delete or paste uses (\"a)"
     },
     {
-      "noun": "app",
       "mode": "visual",
-      "keys": "@",
+      "noun": "app",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "replay_pending"
         }
       },
+      "keys": "@",
       "from": {
         "count": "count"
       },
@@ -6663,45 +7289,45 @@
       "help": "Replay the macro in the register typed next (@a), count times"
     },
     {
-      "noun": "app",
       "mode": "visual",
-      "keys": "q",
+      "noun": "app",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "macro_pending"
         }
       },
+      "keys": "q",
       "hidden": true,
       "help": "Record a macro into the register typed next (qa); q again stops"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "pattern": "digit-0",
+      "noun": "app.editor",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "visual_count_pending"
         }
       },
+      "pattern": "digit-0",
       "from": {
         "count": "digit"
       }
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "$",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-end"
         }
       },
+      "keys": "$",
       "from": {
         "line": "line",
         "steps": "count"
@@ -6709,16 +7335,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "0",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-start"
         }
       },
+      "keys": "0",
       "from": {
         "line": "line",
         "steps": "count"
@@ -6726,25 +7352,25 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "A",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "A"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "G",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "last-line"
         }
       },
+      "keys": "G",
       "from": {
         "line": "line",
         "steps": "count"
@@ -6752,72 +7378,72 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "I",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "I"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "O",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "O"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "P",
+      "noun": "app.editor",
       "request": {
         "verb": "paste",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "before": true
         }
       },
+      "keys": "P",
       "from": {
         "steps": "count"
       },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "V",
+      "noun": "app.editor",
       "request": {
         "verb": "select",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "shape": "line"
         }
       },
+      "keys": "V",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "a",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "a"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "b",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "word-backward"
         }
       },
+      "keys": "b",
       "from": {
         "line": "line",
         "steps": "count"
@@ -6825,81 +7451,81 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "c",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "operator": "c"
         }
       },
+      "keys": "c",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "ctrl+r",
+      "noun": "app.editor",
       "request": {
         "verb": "redo",
-        "noun": "input"
+        "noun": "app.input"
       },
+      "keys": "ctrl+r",
       "from": {
         "steps": "count"
       },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "ctrl+v",
+      "noun": "app.editor",
       "request": {
         "verb": "select",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "shape": "block"
         }
       },
+      "keys": "ctrl+v",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
+      "noun": "app.editor",
+      "request": {
+        "verb": "operator",
+        "noun": "app.input",
+        "args": {
+          "operator": "d"
+        }
+      },
       "keys": "d",
+      "when": "input"
+    },
+    {
+      "mode": "visual",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "operator": "d"
         }
       },
-      "when": "input"
-    },
-    {
-      "noun": "editor",
-      "mode": "visual",
       "keys": "delete",
-      "request": {
-        "verb": "operator",
-        "noun": "input",
-        "args": {
-          "operator": "d"
-        }
-      },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "down",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "down"
         }
       },
+      "keys": "down",
       "from": {
         "line": "line",
         "steps": "count"
@@ -6907,16 +7533,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "e",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "word-end"
         }
       },
+      "keys": "e",
       "from": {
         "line": "line",
         "steps": "count"
@@ -6924,16 +7550,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "end",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-end"
         }
       },
+      "keys": "end",
       "from": {
         "line": "line",
         "steps": "count"
@@ -6941,40 +7567,40 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "esc",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "esc"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "g",
+      "noun": "app.editor",
       "request": {
         "verb": "enter",
-        "noun": "mode",
+        "noun": "app.mode",
         "args": {
           "mode": "g_pending"
         }
       },
+      "keys": "g",
       "from": {
         "count": "count"
       }
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "h",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "left"
         }
       },
+      "keys": "h",
       "from": {
         "line": "line",
         "steps": "count"
@@ -6982,16 +7608,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "home",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "line-start"
         }
       },
+      "keys": "home",
       "from": {
         "line": "line",
         "steps": "count"
@@ -6999,25 +7625,25 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "i",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "i"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "j",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "down"
         }
       },
+      "keys": "j",
       "from": {
         "line": "line",
         "steps": "count"
@@ -7025,16 +7651,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "k",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "up"
         }
       },
+      "keys": "k",
       "from": {
         "line": "line",
         "steps": "count"
@@ -7042,16 +7668,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "l",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "right"
         }
       },
+      "keys": "l",
       "from": {
         "line": "line",
         "steps": "count"
@@ -7059,16 +7685,16 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "left",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "left"
         }
       },
+      "keys": "left",
       "from": {
         "line": "line",
         "steps": "count"
@@ -7076,41 +7702,41 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "o",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "o"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "p",
+      "noun": "app.editor",
       "request": {
         "verb": "paste",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "before": false
         }
       },
+      "keys": "p",
       "from": {
         "steps": "count"
       },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "right",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "right"
         }
       },
+      "keys": "right",
       "from": {
         "line": "line",
         "steps": "count"
@@ -7118,29 +7744,29 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "u",
+      "noun": "app.editor",
       "request": {
         "verb": "undo",
-        "noun": "input"
+        "noun": "app.input"
       },
+      "keys": "u",
       "from": {
         "steps": "count"
       },
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "up",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "up"
         }
       },
+      "keys": "up",
       "from": {
         "line": "line",
         "steps": "count"
@@ -7148,29 +7774,29 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "v",
+      "noun": "app.editor",
       "request": {
         "verb": "select",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "shape": "char"
         }
       },
+      "keys": "v",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "w",
+      "noun": "app.editor",
       "request": {
         "verb": "move",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "motion": "word-forward"
         }
       },
+      "keys": "w",
       "from": {
         "line": "line",
         "steps": "count"
@@ -7178,73 +7804,73 @@
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "x",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "operator": "d"
         }
       },
+      "keys": "x",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual",
-      "keys": "y",
+      "noun": "app.editor",
       "request": {
         "verb": "operator",
-        "noun": "input",
+        "noun": "app.input",
         "args": {
           "operator": "y"
         }
       },
+      "keys": "y",
       "when": "input"
     },
     {
-      "noun": "editor",
       "mode": "visual_count_pending",
-      "pattern": "digit",
+      "noun": "app.editor",
       "request": {
         "verb": "append",
-        "noun": "count"
+        "noun": "app.count"
       },
+      "pattern": "digit",
       "from": {
         "digit": "digit"
       }
     },
     {
-      "noun": "editor",
       "mode": "visual_count_pending",
-      "pattern": "any",
+      "noun": "app.editor",
       "request": {
         "verb": "leave",
-        "noun": "mode"
+        "noun": "app.mode"
       },
+      "pattern": "any",
       "replay": true
     },
     {
-      "noun": "editor",
       "mode": "visual_count_pending",
-      "keys": "0",
+      "noun": "app.editor",
       "request": {
         "verb": "append",
-        "noun": "count",
+        "noun": "app.count",
         "args": {
           "digit": 0
         }
-      }
+      },
+      "keys": "0"
     },
     {
-      "noun": "editor",
       "mode": "visual_count_pending",
-      "keys": "esc",
+      "noun": "app.editor",
       "request": {
         "verb": "cancel",
-        "noun": "input"
-      }
+        "noun": "app.input"
+      },
+      "keys": "esc"
     }
   ],
   "pages": []

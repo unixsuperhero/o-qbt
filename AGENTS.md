@@ -5,7 +5,7 @@ The qBittorrent family tool (`o-qbt`, so `o qbt`). An oden app with an ochazuke 
 | Concern | File |
 |---|---|
 | `Tool`, `main`, the oden app, mount, the person/JSON output switch (`runShell`, `Texter`) | `main.go` |
-| The runtime: nouns, verbs, parameters, rows, `Reveal`, `app state` | `shell.go` |
+| The runtime: nouns, verbs, parameters, rows, `Reveal`, `app rows` | `shell.go` |
 | Settings file, env overrides, the password prompt | `config.go` |
 | The Web API session: one login per process, stop/pause fallback | `client.go` |
 | What each verb asks qBittorrent; records and tables | `qbt.go` |

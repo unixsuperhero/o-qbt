@@ -40,7 +40,7 @@ Bare noun groups such as `o qbt tracker` (or `o qbt tracker --help`) show their 
 
 `app info` changes nothing: it reads `app/version`, `app/webapiVersion`, `app/buildInfo`, `transfer/info` and `sync/maindata` and exits 0 only when the login worked. `torrent pause`/`resume` use v5's `torrents/stop`/`start` and fall back to v4's `pause`/`resume` on a 404. `torrent delete` asks `Delete torrent LABEL?` unless `--yes`. With a selection instead of `--target` (`--hashes`, or torrents/info's `--filter`/`--category`/`--tag` narrowed by `--state`, the exact qBittorrent state), it posts `torrents/delete` in batches of 200 hashes and prints `deleted N/TOTAL` on stderr when there is more than one batch.
 
-A torrent row is `{id: HASH, label: "state  progress%  name", data: {state, progress, size, dlspeed, eta, category, added_on, completed_on, save_path}}`; a category row is `{id: "category/NAME", label, data: {name, savePath}}`. `app state` prints both lists as JSON Lines `{noun, id, label}` (the catalog's state). List-like verbs print in `--format` (below). Other verbs a person reads (`guard *`, `config *`, `transfer limit`) print a short table; with `--json '{...}'` (how a host calls) every verb prints JSON.
+A torrent row is `{id: HASH, label: "state  progress%  name", data: {state, progress, size, dlspeed, eta, category, added_on, completed_on, save_path}}`; a category row is `{id: "category/NAME", label, data: {name, savePath}}`. `app rows` prints both lists as JSON Lines `{noun, id, label}` (the catalog's state). List-like verbs print in `--format` (below). Other verbs a person reads (`guard *`, `config *`, `transfer limit`) print a short table; with `--json '{...}'` (how a host calls) every verb prints JSON.
 
 ## Listing and exporting
 

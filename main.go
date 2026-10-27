@@ -4,7 +4,7 @@
 // every torrent before a download fills the volume. It is an oden app (so
 // o qbt ARGS runs it) with an ochazuke runtime behind ochazuke/cli
 // (shell.go): every noun's verbs are operations, lists declare their rows,
-// app state answers every list as JSON Lines, and catalog describes it all
+// app rows answers every list as JSON Lines, and catalog describes it all
 // for a host (nabe).
 //
 //	o-qbt config init|show|set KEY [VALUE] [--stdin]

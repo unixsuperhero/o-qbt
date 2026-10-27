@@ -16,7 +16,7 @@ import (
 
 // The command line is an ochazuke runtime behind ochazuke/cli. Lists are
 // torrent (row id = the hash, what --target takes) and category (row id
-// category/NAME); app state answers both as JSON Lines (the catalog's
+// category/NAME); app rows answers both as JSON Lines (the catalog's
 // state). A --target no list shows yet is revealed by loading the torrent
 // list, so a confirm prompt reads the torrent's label.
 
@@ -66,7 +66,7 @@ func (t *Tool) shell() *ocli.Shell {
 		}
 		lists[noun] = list
 	}
-	// tracker rows are one torrent's (tracker list); app state skips them,
+	// tracker rows are one torrent's (tracker list); app rows skips them,
 	// since all of them cost a request per torrent.
 	if lists["tracker"], err = r.AddList("list/tracker", nil); err != nil {
 		panic(err)
@@ -161,7 +161,7 @@ func (t *Tool) shell() *ocli.Shell {
 			}
 			return t.answer(Prefs(ctxOf(c), cl))
 		}, "selected preferences: save and temp paths, max active downloads/uploads/torrents, dl/up limits (bytes/s)").Fetch().
-		Verb("state", func(c ochazuke.Ctx) ochazuke.Result {
+		Verb("rows", func(c ochazuke.Ctx) ochazuke.Result {
 			var out ocli.Lines
 			for _, noun := range listNouns {
 				load := map[string]func(context.Context) ([]Row, error){"torrent": torrentRows, "category": categoryRows}[noun]
@@ -174,7 +174,7 @@ func (t *Tool) shell() *ocli.Shell {
 				}
 			}
 			return ochazuke.Done(out)
-		}, "every list's rows in one call, JSON Lines {noun, id, label} for torrent and category (the catalog's state)").State().Fetch()
+		}, "every list's rows in one call, JSON Lines {noun, id, label} for torrent and category (the catalog's state)").State().Fetch() // not "state": app.state is the framework's noun (ochazuke v0.16.0)
 
 	// listTorrents answers a torrent list-like verb: the rows (a host's
 	// --json), else the torrents in --format; preset fixes the filter.
@@ -544,17 +544,24 @@ func (t *Tool) shell() *ocli.Shell {
 			return t.present(c, rows, CategoryTable(cs), err)
 		}, "the category rows: {id: category/NAME, label: \"NAME  SAVE_PATH\", data: {name, savePath}}; --format, --columns (name, save_path), --out").Rows("category").Fetch()
 
-	r.Define("config").
+	// config is o-qbt's own noun (its settings file), not the framework's
+	// app.config (ochazuke v0.16.0): DefineOwn claims the short name, so
+	// `o-qbt config path` is qbt's file and `o-qbt app config path` the
+	// framework's directories.
+	r.DefineOwn("config").
 		Verb("init", func(ochazuke.Ctx) ochazuke.Result { return t.answer(t.ConfigInit()) },
 			"write the settings file (url, user admin, empty pass, volume, ssh), mode 600, unless it exists; prints its path").
 		Verb("show", func(ochazuke.Ctx) ochazuke.Result { return t.answer(t.ConfigShow()) },
 			"the effective settings and the environment overrides; never the password, only whether one is set").Fetch().
+		Verb("path", func(ochazuke.Ctx) ochazuke.Result { return ochazuke.Done(t.ConfigPath()) },
+			"the settings file's path (whether or not it exists); o-qbt app config path prints the framework's directories").Fetch().
 		Verb("set", func(c ochazuke.Ctx) ochazuke.Result {
 			stdin, _ := c.Args["stdin"].(bool)
 			return t.answer(t.ConfigSet(ochazuke.StringArg(c.Args, "key", ""), ochazuke.StringArg(c.Args, "value", ""), stdin))
 		}, "set KEY to VALUE; pass is never taken from the command line: it prompts with echo off, or reads one line with --stdin").Positional("key", "value")
 	setHistory(r, ochazuke.HistoryChange, "config.init", "config.set")
-	r.Operations["config.set"] = withParams(r.Operations["config.set"], params(
+	configSet := r.CanonicalKey("config.set") // o-qbt's own, not app.config's
+	r.Operations[configSet] = withParams(r.Operations[configSet], params(
 		"key", ochazuke.Parameter{Type: "string", Required: true, Enum: configKeys, Description: "the setting"},
 		"value", ochazuke.Parameter{Type: "string", Description: "the new value (not for pass)"},
 		"stdin", ochazuke.Parameter{Type: "boolean", Description: "read the value from one line of stdin"}))
@@ -748,6 +755,7 @@ func deleteSelects(c ochazuke.Ctx) bool {
 // An unknown key panics, so a renamed verb is renamed here too.
 func setHistory(r *ochazuke.Runtime, kind string, keys ...string) {
 	for _, key := range keys {
+		key = r.CanonicalKey(key)
 		op, ok := r.Operations[key]
 		if !ok {
 			panic("setHistory: no operation " + key)
