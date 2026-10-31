@@ -40,9 +40,9 @@ import (
 	"strings"
 	"time"
 
-	ocli "github.com/unixsuperhero/ochazuke/cli"
-	"github.com/unixsuperhero/oden"
 	"golang.org/x/term"
+	ocli "ofam.dev/ochazuke/cli"
+	"ofam.dev/oden"
 )
 
 // Tool is one invocation's world: streams, environment, home, and the
